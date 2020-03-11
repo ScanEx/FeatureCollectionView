@@ -1,0 +1,17 @@
+.scanex-feature-collection .scanex-feature-collection-icon {
+    cursor: pointer;
+    display: inline-block;
+    background-position: center;
+    background-repeat: no-repeat;
+    width: 18px;
+    height: 18px;
+}
+.scanex-feature-collection .scanex-feature-collection-header > * {
+    vertical-align: middle;
+}
+.scanex-feature-collection .scanex-feature-collection-hidden {
+    display: none;
+}
+.scanex-feature-collection .scanex-feature-collection-features {
+    margin-left: 21px;
+}
