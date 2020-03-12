@@ -46,7 +46,7 @@
         }
         else {
             expanded = true;
-            if (hasChildren && typeof expand === 'function') {
+            if ((!Array.isArray(features) || features.length === 0) && typeof expand === 'function') {
                 expand(properties).then (items => features = items);
             }
         }
