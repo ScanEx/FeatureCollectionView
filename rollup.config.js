@@ -29,7 +29,7 @@ export default [
         ],
     },
     {
-        input: 'index.js',
+        input: 'src/Tree.svelte',
         output: { 
             file: pkg.main,
             format: 'cjs',
@@ -44,7 +44,7 @@ export default [
             babel({                
                 extensions: ['.js', '.mjs', '.svelte'],
                 exclude: ['node_modules/@babel/**', 'node_modules/core-js/**'],
-                include: ['index.js','src/**','node_modules/svelte/**']
+                include: ['src/**','node_modules/svelte/**']
             }),
         ],
     },   

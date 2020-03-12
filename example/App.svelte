@@ -1,7 +1,7 @@
 <script>
     import Tree from '../src/Tree.svelte';
-    import {Result} from './moskva.json';
-    // import data from './a108.json';
+    // import {Result} from './moskva.json';
+    import {Result} from './ais.json';
     import {setContext} from 'svelte';
 
     console.log(Result);
