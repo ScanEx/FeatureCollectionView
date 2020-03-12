@@ -77,25 +77,25 @@
 
 <div class="scanex-layer-tree-node">
     <div class="scanex-layer-tree-header">
-        <i  class="scanex-layer-tree-icon"
+        <i  class="scanex-layer-tree-node-visibility scanex-layer-tree-icon"
             class:check-square="{state === 1}"
             class:square="{state === 0}"
             class:minus-square="{state === -1}"
             on:click|stopPropagation="{toggleVisibility}"></i>
         {#if type === 'group'}
-        <i  class="scanex-layer-tree-icon"
+        <i  class="scanex-layer-tree-node-folder scanex-layer-tree-icon"
             class:folder-filled="{!expanded}"
             class:folder-open-filled="{expanded}"
             on:click|stopPropagation="{toggleChildren}"></i>        
         {:else if properties.type === 'Vector'}
-        <i class="scanex-layer-tree-icon block"></i>
+        <i class="scanex-layer-tree-node-vector scanex-layer-tree-icon block"></i>
         {:else if properties.type === 'Raster'}
-        <i class="scanex-layer-tree-icon picture"></i>
+        <i class="scanex-layer-tree-node-raster scanex-layer-tree-icon picture"></i>
         {/if}
         <label class="scanex-layer-tree-title">{title}</label>
     </div>
     {#if Array.isArray(children) && children.length}
-    <div class="scanex-layer-tree-features" class:scanex-layer-tree-hidden="{!expanded}">
+    <div class="scanex-layer-tree-children" class:scanex-layer-tree-hidden="{!expanded}">
         {#each children as item, i}            
             <svelte:self
                 {...item}

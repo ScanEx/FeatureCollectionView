@@ -9,9 +9,20 @@
 .scanex-layer-tree-node .scanex-layer-tree-header > * {
     vertical-align: middle;
 }
+.scanex-layer-tree-node .scanex-layer-tree-header > .scanex-layer-tree-node-visibility,
+.scanex-layer-tree-node .scanex-layer-tree-header > .scanex-layer-tree-node-folder {
+    float: left;
+    margin-right: 6px;
+}
+.scanex-layer-tree-node .scanex-layer-tree-header > .scanex-layer-tree-title {
+    clear: left;
+    overflow-wrap: break-word;
+}
 .scanex-layer-tree-node .scanex-layer-tree-hidden {
     display: none;
 }
-.scanex-layer-tree-node .scanex-layer-tree-features {
+.scanex-layer-tree-node .scanex-layer-tree-children {
     margin-left: 21px;
+    margin-top: 6px;
+    margin-bottom: 6px;
 }

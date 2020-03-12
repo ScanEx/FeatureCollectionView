@@ -29,7 +29,7 @@ export default [
         ],
     },
     {
-        input: 'src/Tree.svelte',
+        input: 'src/Node.svelte',
         output: { 
             file: pkg.main,
             format: 'cjs',

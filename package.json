@@ -4,7 +4,7 @@
   "description": "GeoJSON FeatureCollection as TreeView",
   "main": "dist/scanex-feature-collection-view.js",
   "browser": "public/main.js",
-  "svelte": "src/Tree.svelte",
+  "svelte": "src/Node.svelte",
   "scripts": {
     "build": "npm run svg & rollup -c",
     "svg": "node build-svg.js",
