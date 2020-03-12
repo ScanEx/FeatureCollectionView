@@ -13,7 +13,7 @@ files.forEach(f => {
 	let s = fs.readFileSync(path.join(dir, f)).toString('utf8');
 	const u = svgToMiniDataURI(s);
 	ns.push (n);
-	bg.push (`.scanex-feature-collection .${n} {background-image: url("${u}");}`);
+	bg.push (`.scanex-layer-tree .${n} {background-image: url("${u}");}`);
 });
 
 const css = bg.join('\r\n');

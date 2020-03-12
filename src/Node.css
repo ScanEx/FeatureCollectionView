@@ -1,0 +1,17 @@
+.scanex-layer-tree-node .scanex-layer-tree-icon {
+    cursor: pointer;
+    display: inline-block;
+    background-position: center;
+    background-repeat: no-repeat;
+    width: 18px;
+    height: 18px;
+}
+.scanex-layer-tree-node .scanex-layer-tree-header > * {
+    vertical-align: middle;
+}
+.scanex-layer-tree-node .scanex-layer-tree-hidden {
+    display: none;
+}
+.scanex-layer-tree-node .scanex-layer-tree-features {
+    margin-left: 21px;
+}

@@ -1,3 +1,3 @@
-import FeatureCollection from './src/FeatureCollection.svelte';
+import Node from './src/Node.svelte';
 
-export default FeatureCollection;
+export default Node;
