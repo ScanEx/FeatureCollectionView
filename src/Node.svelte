@@ -84,8 +84,8 @@
             on:click|stopPropagation="{toggleVisibility}"></i>
         {#if type === 'group'}
         <i  class="scanex-layer-tree-icon"
-            class:folder="{!expanded}"
-            class:folder-open="{expanded}"
+            class:folder-filled="{!expanded}"
+            class:folder-open-filled="{expanded}"
             on:click|stopPropagation="{toggleChildren}"></i>        
         {:else if properties.type === 'Vector'}
         <i class="scanex-layer-tree-icon block"></i>

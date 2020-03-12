@@ -10589,10 +10589,10 @@ var Example = (function () {
       c: function c() {
         i = element("i");
         attr(i, "class", "scanex-layer-tree-icon");
-        toggle_class(i, "folder", !
+        toggle_class(i, "folder-filled", !
         /*expanded*/
         ctx[2]);
-        toggle_class(i, "folder-open",
+        toggle_class(i, "folder-open-filled",
         /*expanded*/
         ctx[2]);
       },
@@ -10606,7 +10606,7 @@ var Example = (function () {
         if (dirty &
         /*expanded*/
         4) {
-          toggle_class(i, "folder", !
+          toggle_class(i, "folder-filled", !
           /*expanded*/
           ctx[2]);
         }
@@ -10614,7 +10614,7 @@ var Example = (function () {
         if (dirty &
         /*expanded*/
         4) {
-          toggle_class(i, "folder-open",
+          toggle_class(i, "folder-open-filled",
           /*expanded*/
           ctx[2]);
         }
