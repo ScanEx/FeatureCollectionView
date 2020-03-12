@@ -19,8 +19,8 @@
     }
 
     function toFeatureCollection ({children, properties}) {
-        const features = children.map(toFeature);        
-        return {            
+        const features = children.map(toFeature);
+        return {
             type: 'FeatureCollection',
             features,
             properties,

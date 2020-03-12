@@ -10975,7 +10975,7 @@ var Example = (function () {
 	      $$invalidate(2, expanded = true);
 
 	      if (hasChildren && typeof expand === "function") {
-	        expand(properties.id).then(function (items) {
+	        expand(properties).then(function (items) {
 	          return $$invalidate(0, features = items);
 	        });
 	      }

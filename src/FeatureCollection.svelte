@@ -47,7 +47,7 @@
         else {
             expanded = true;
             if (hasChildren && typeof expand === 'function') {
-                expand (properties.id).then (items => features = items);
+                expand(properties).then (items => features = items);
             }
         }
     }
