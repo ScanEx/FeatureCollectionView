@@ -4272,21 +4272,6 @@ var Example = (function () {
 	  }
 	});
 
-	var $some = arrayIteration.some;
-
-
-
-	var STRICT_METHOD$4 = arrayMethodIsStrict('some');
-	var USES_TO_LENGTH$7 = arrayMethodUsesToLength('some');
-
-	// `Array.prototype.some` method
-	// https://tc39.github.io/ecma262/#sec-array.prototype.some
-	_export({ target: 'Array', proto: true, forced: !STRICT_METHOD$4 || !USES_TO_LENGTH$7 }, {
-	  some: function some(callbackfn /* , thisArg */) {
-	    return $some(this, callbackfn, arguments.length > 1 ? arguments[1] : undefined);
-	  }
-	});
-
 	var runtime_1 = createCommonjsModule(function (module) {
 	/**
 	 * Copyright (c) 2014-present, Facebook, Inc.
@@ -5451,14 +5436,14 @@ var Example = (function () {
 	var FIND = 'find';
 	var SKIPS_HOLES = true;
 
-	var USES_TO_LENGTH$8 = arrayMethodUsesToLength(FIND);
+	var USES_TO_LENGTH$7 = arrayMethodUsesToLength(FIND);
 
 	// Shouldn't skip holes
 	if (FIND in []) Array(1)[FIND](function () { SKIPS_HOLES = false; });
 
 	// `Array.prototype.find` method
 	// https://tc39.github.io/ecma262/#sec-array.prototype.find
-	_export({ target: 'Array', proto: true, forced: SKIPS_HOLES || !USES_TO_LENGTH$8 }, {
+	_export({ target: 'Array', proto: true, forced: SKIPS_HOLES || !USES_TO_LENGTH$7 }, {
 	  find: function find(callbackfn /* , that = undefined */) {
 	    return $find(this, callbackfn, arguments.length > 1 ? arguments[1] : undefined);
 	  }
@@ -5474,14 +5459,14 @@ var Example = (function () {
 	var FIND_INDEX = 'findIndex';
 	var SKIPS_HOLES$1 = true;
 
-	var USES_TO_LENGTH$9 = arrayMethodUsesToLength(FIND_INDEX);
+	var USES_TO_LENGTH$8 = arrayMethodUsesToLength(FIND_INDEX);
 
 	// Shouldn't skip holes
 	if (FIND_INDEX in []) Array(1)[FIND_INDEX](function () { SKIPS_HOLES$1 = false; });
 
 	// `Array.prototype.findIndex` method
 	// https://tc39.github.io/ecma262/#sec-array.prototype.findindex
-	_export({ target: 'Array', proto: true, forced: SKIPS_HOLES$1 || !USES_TO_LENGTH$9 }, {
+	_export({ target: 'Array', proto: true, forced: SKIPS_HOLES$1 || !USES_TO_LENGTH$8 }, {
 	  findIndex: function findIndex(callbackfn /* , that = undefined */) {
 	    return $findIndex(this, callbackfn, arguments.length > 1 ? arguments[1] : undefined);
 	  }
@@ -5549,11 +5534,11 @@ var Example = (function () {
 
 
 
-	var USES_TO_LENGTH$a = arrayMethodUsesToLength('indexOf', { ACCESSORS: true, 1: 0 });
+	var USES_TO_LENGTH$9 = arrayMethodUsesToLength('indexOf', { ACCESSORS: true, 1: 0 });
 
 	// `Array.prototype.includes` method
 	// https://tc39.github.io/ecma262/#sec-array.prototype.includes
-	_export({ target: 'Array', proto: true, forced: !USES_TO_LENGTH$a }, {
+	_export({ target: 'Array', proto: true, forced: !USES_TO_LENGTH$9 }, {
 	  includes: function includes(el /* , fromIndex = 0 */) {
 	    return $includes(this, el, arguments.length > 1 ? arguments[1] : undefined);
 	  }
@@ -5565,10 +5550,10 @@ var Example = (function () {
 	var min$6 = Math.min;
 	var nativeLastIndexOf = [].lastIndexOf;
 	var NEGATIVE_ZERO$1 = !!nativeLastIndexOf && 1 / [1].lastIndexOf(1, -0) < 0;
-	var STRICT_METHOD$5 = arrayMethodIsStrict('lastIndexOf');
+	var STRICT_METHOD$4 = arrayMethodIsStrict('lastIndexOf');
 	// For preventing possible almost infinite loop in non-standard implementations, test the forward version of the method
-	var USES_TO_LENGTH$b = arrayMethodUsesToLength('indexOf', { ACCESSORS: true, 1: 0 });
-	var FORCED$3 = NEGATIVE_ZERO$1 || !STRICT_METHOD$5 || !USES_TO_LENGTH$b;
+	var USES_TO_LENGTH$a = arrayMethodUsesToLength('indexOf', { ACCESSORS: true, 1: 0 });
+	var FORCED$3 = NEGATIVE_ZERO$1 || !STRICT_METHOD$4 || !USES_TO_LENGTH$a;
 
 	// `Array.prototype.lastIndexOf` method implementation
 	// https://tc39.github.io/ecma262/#sec-array.prototype.lastindexof
@@ -5630,12 +5615,12 @@ var Example = (function () {
 
 
 
-	var STRICT_METHOD$6 = arrayMethodIsStrict('reduce');
-	var USES_TO_LENGTH$c = arrayMethodUsesToLength('reduce', { 1: 0 });
+	var STRICT_METHOD$5 = arrayMethodIsStrict('reduce');
+	var USES_TO_LENGTH$b = arrayMethodUsesToLength('reduce', { 1: 0 });
 
 	// `Array.prototype.reduce` method
 	// https://tc39.github.io/ecma262/#sec-array.prototype.reduce
-	_export({ target: 'Array', proto: true, forced: !STRICT_METHOD$6 || !USES_TO_LENGTH$c }, {
+	_export({ target: 'Array', proto: true, forced: !STRICT_METHOD$5 || !USES_TO_LENGTH$b }, {
 	  reduce: function reduce(callbackfn /* , initialValue */) {
 	    return $reduce(this, callbackfn, arguments.length, arguments.length > 1 ? arguments[1] : undefined);
 	  }
@@ -5645,13 +5630,13 @@ var Example = (function () {
 
 
 
-	var STRICT_METHOD$7 = arrayMethodIsStrict('reduceRight');
+	var STRICT_METHOD$6 = arrayMethodIsStrict('reduceRight');
 	// For preventing possible almost infinite loop in non-standard implementations, test the forward version of the method
-	var USES_TO_LENGTH$d = arrayMethodUsesToLength('reduce', { 1: 0 });
+	var USES_TO_LENGTH$c = arrayMethodUsesToLength('reduce', { 1: 0 });
 
 	// `Array.prototype.reduceRight` method
 	// https://tc39.github.io/ecma262/#sec-array.prototype.reduceright
-	_export({ target: 'Array', proto: true, forced: !STRICT_METHOD$7 || !USES_TO_LENGTH$d }, {
+	_export({ target: 'Array', proto: true, forced: !STRICT_METHOD$6 || !USES_TO_LENGTH$c }, {
 	  reduceRight: function reduceRight(callbackfn /* , initialValue */) {
 	    return $reduceRight(this, callbackfn, arguments.length, arguments.length > 1 ? arguments[1] : undefined);
 	  }
@@ -5669,6 +5654,21 @@ var Example = (function () {
 	    // eslint-disable-next-line no-self-assign
 	    if (isArray(this)) this.length = this.length;
 	    return nativeReverse.call(this);
+	  }
+	});
+
+	var $some = arrayIteration.some;
+
+
+
+	var STRICT_METHOD$7 = arrayMethodIsStrict('some');
+	var USES_TO_LENGTH$d = arrayMethodUsesToLength('some');
+
+	// `Array.prototype.some` method
+	// https://tc39.github.io/ecma262/#sec-array.prototype.some
+	_export({ target: 'Array', proto: true, forced: !STRICT_METHOD$7 || !USES_TO_LENGTH$d }, {
+	  some: function some(callbackfn /* , thisArg */) {
+	    return $some(this, callbackfn, arguments.length > 1 ? arguments[1] : undefined);
 	  }
 	});
 
@@ -11094,9 +11094,7 @@ var Example = (function () {
 	    if ($$self.$$.dirty &
 	    /*features*/
 	    1) {
-	       $$invalidate(4, hasChildren = Array.isArray(features) && features.some(function (f) {
-	        return f.type === "FeatureCollection";
-	      }));
+	       $$invalidate(4, hasChildren = Array.isArray(features));
 	    }
 	  };
 

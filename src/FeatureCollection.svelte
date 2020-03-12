@@ -18,7 +18,7 @@
     $: visible = properties.visible;
     $: layerType = properties.type;
 
-    $: hasChildren = Array.isArray(features) && features.some(f => f.type === 'FeatureCollection');
+    $: hasChildren = Array.isArray(features);
 
     $: {        
         if (visible === true) {
