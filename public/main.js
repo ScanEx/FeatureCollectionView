@@ -757,6 +757,42 @@ var Example = (function () {
 	  return _typeof(obj);
 	}
 
+	function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) {
+	  try {
+	    var info = gen[key](arg);
+	    var value = info.value;
+	  } catch (error) {
+	    reject(error);
+	    return;
+	  }
+
+	  if (info.done) {
+	    resolve(value);
+	  } else {
+	    Promise.resolve(value).then(_next, _throw);
+	  }
+	}
+
+	function _asyncToGenerator(fn) {
+	  return function () {
+	    var self = this,
+	        args = arguments;
+	    return new Promise(function (resolve, reject) {
+	      var gen = fn.apply(self, args);
+
+	      function _next(value) {
+	        asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value);
+	      }
+
+	      function _throw(err) {
+	        asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err);
+	      }
+
+	      _next(undefined);
+	    });
+	  };
+	}
+
 	function _classCallCheck(instance, Constructor) {
 	  if (!(instance instanceof Constructor)) {
 	    throw new TypeError("Cannot call a class as a function");
@@ -10507,7 +10543,7 @@ var Example = (function () {
 	  child_ctx[17] = list[i];
 	  child_ctx[19] = i;
 	  return child_ctx;
-	} // (91:8) {:else}
+	} // (92:8) {:else}
 
 
 	function create_else_block(ctx) {
@@ -10525,7 +10561,7 @@ var Example = (function () {
 	      if (detaching) detach(i);
 	    }
 	  };
-	} // (86:8) {#if hasChildren}
+	} // (87:8) {#if hasChildren}
 
 
 	function create_if_block_2(ctx) {
@@ -10570,7 +10606,7 @@ var Example = (function () {
 	      dispose();
 	    }
 	  };
-	} // (96:4) {#if hasChildren}
+	} // (97:4) {#if hasChildren}
 
 
 	function create_if_block(ctx) {
@@ -10681,7 +10717,7 @@ var Example = (function () {
 	      destroy_each(each_blocks, detaching);
 	    }
 	  };
-	} // (99:12) {#if f.type === 'FeatureCollection'}
+	} // (100:12) {#if f.type === 'FeatureCollection'}
 
 
 	function create_if_block_1(ctx) {
@@ -10751,7 +10787,7 @@ var Example = (function () {
 	      destroy_component(featurecollection, detaching);
 	    }
 	  };
-	} // (98:8) {#each features as f, i}
+	} // (99:8) {#each features as f, i}
 
 
 	function create_each_block(ctx) {
@@ -10969,17 +11005,48 @@ var Example = (function () {
 	  var expand = getContext("expand");
 
 	  function toggleChildren() {
-	    if (expanded) {
-	      $$invalidate(2, expanded = false);
-	    } else {
-	      $$invalidate(2, expanded = true);
+	    return _toggleChildren.apply(this, arguments);
+	  }
 
-	      if ((!Array.isArray(features) || features.length === 0) && typeof expand === "function") {
-	        expand(properties).then(function (items) {
-	          return $$invalidate(0, features = items);
-	        });
-	      }
-	    }
+	  function _toggleChildren() {
+	    _toggleChildren = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee() {
+	      var items;
+	      return regeneratorRuntime.wrap(function _callee$(_context) {
+	        while (1) {
+	          switch (_context.prev = _context.next) {
+	            case 0:
+	              if (!expanded) {
+	                _context.next = 4;
+	                break;
+	              }
+
+	              $$invalidate(2, expanded = false);
+	              _context.next = 10;
+	              break;
+
+	            case 4:
+	              $$invalidate(2, expanded = true);
+
+	              if (!((!Array.isArray(features) || features.length === 0) && typeof expand === "function")) {
+	                _context.next = 10;
+	                break;
+	              }
+
+	              _context.next = 8;
+	              return expand(properties);
+
+	            case 8:
+	              items = _context.sent;
+	              $$invalidate(0, features = items);
+
+	            case 10:
+	            case "end":
+	              return _context.stop();
+	          }
+	        }
+	      }, _callee);
+	    }));
+	    return _toggleChildren.apply(this, arguments);
 	  }
 
 	  function toggleVisibility() {

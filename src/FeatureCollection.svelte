@@ -40,14 +40,15 @@
 
     const expand = getContext('expand');
 
-    function toggleChildren () {
+    async function toggleChildren () {
         if (expanded) {
             expanded = false;      
         }
         else {
             expanded = true;
             if ((!Array.isArray(features) || features.length === 0) && typeof expand === 'function') {
-                expand(properties).then (items => features = items);
+                const items = await expand(properties);
+                features = items;
             }
         }
     }
