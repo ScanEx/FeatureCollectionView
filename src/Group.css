@@ -1,0 +1,25 @@
+.scanex-layer-tree-group .scanex-layer-tree-icon {
+    cursor: pointer;
+    display: inline-block;
+    background-position: center;
+    background-repeat: no-repeat;
+    width: 18px;
+    height: 18px;
+}
+.scanex-layer-tree-group .scanex-layer-tree-header > * {
+    vertical-align: top;
+}
+.scanex-layer-tree-group .scanex-layer-tree-header > i {
+    float: left;
+    margin-right: 5px;
+}
+.scanex-layer-tree-group .scanex-layer-tree-header > .scanex-layer-tree-title {
+    clear: left;
+    overflow-wrap: break-word;
+}
+.scanex-layer-tree-group .scanex-layer-tree-hidden {
+    display: none;
+}
+.scanex-layer-tree-group .scanex-layer-tree-children {
+    margin-left: 22px;
+}

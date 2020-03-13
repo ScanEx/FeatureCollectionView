@@ -1,5 +1,5 @@
 <script>
-    import Node from '../src/Node.svelte';
+    import Group from '../src/Group.svelte';
     import {Result} from './moskva.json';
     // import {Result} from './ais.json';
     import {setContext} from 'svelte';
@@ -12,10 +12,9 @@
 
 </script>
 
-<Node 
-    type="group"
-    children="{Result.children}"
-    properties="{Result.properties}"
+<Group
     title="{Result.properties.title}"
     visible="{Result.properties.visible}"
+    properties="{Result.properties}"
+    children="{Result.children}"
     on:change:visible="{onChangeVisible}" />

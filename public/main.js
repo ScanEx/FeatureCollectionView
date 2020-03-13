@@ -3898,6 +3898,10 @@ var Example = (function () {
     return text(' ');
   }
 
+  function empty() {
+    return text('');
+  }
+
   function listen(node, event, handler, options) {
     node.addEventListener(event, handler, options);
     return function () {
@@ -3966,19 +3970,6 @@ var Example = (function () {
   function getContext(key) {
     return get_current_component().$$.context.get(key);
   } // TODO figure out if we still want to support
-  // shorthand events, or if we want to implement
-  // a real bubbling mechanism
-
-
-  function bubble(component, event) {
-    var callbacks = component.$$.callbacks[event.type];
-
-    if (callbacks) {
-      callbacks.slice().forEach(function (fn) {
-        return fn(event);
-      });
-    }
-  }
 
   var dirty_components = [];
   var binding_callbacks = [];
@@ -3996,6 +3987,10 @@ var Example = (function () {
 
   function add_render_callback(fn) {
     render_callbacks.push(fn);
+  }
+
+  function add_flush_callback(fn) {
+    flush_callbacks.push(fn);
   }
 
   var flushing = false;
@@ -4096,6 +4091,15 @@ var Example = (function () {
         }
       });
       block.o(local);
+    }
+  }
+
+  function bind$1(component, name, callback) {
+    var index = component.$$.props[name];
+
+    if (index !== undefined) {
+      component.$$.bound[index] = callback;
+      callback(component.$$.ctx[index]);
     }
   }
 
@@ -4979,6 +4983,192 @@ var Example = (function () {
     Function("r", "regeneratorRuntime = r")(runtime);
   }
   });
+
+  function create_if_block_1(ctx) {
+    var i;
+    return {
+      c: function c() {
+        i = element("i");
+        attr(i, "class", "scanex-layer-tree-node-raster scanex-layer-tree-icon picture");
+      },
+      m: function m(target, anchor) {
+        insert(target, i, anchor);
+      },
+      d: function d(detaching) {
+        if (detaching) detach(i);
+      }
+    };
+  } // (24:8) {#if properties.type === 'Vector'}
+
+
+  function create_if_block(ctx) {
+    var i;
+    return {
+      c: function c() {
+        i = element("i");
+        attr(i, "class", "scanex-layer-tree-node-vector scanex-layer-tree-icon block");
+      },
+      m: function m(target, anchor) {
+        insert(target, i, anchor);
+      },
+      d: function d(detaching) {
+        if (detaching) detach(i);
+      }
+    };
+  }
+
+  function create_fragment(ctx) {
+    var div1;
+    var div0;
+    var i;
+    var t0;
+    var t1;
+    var label;
+    var t2;
+    var dispose;
+
+    function select_block_type(ctx, dirty) {
+      if (
+      /*properties*/
+      ctx[2].type === "Vector") return create_if_block;
+      if (
+      /*properties*/
+      ctx[2].type === "Raster") return create_if_block_1;
+    }
+
+    var current_block_type = select_block_type(ctx);
+    var if_block = current_block_type && current_block_type(ctx);
+    return {
+      c: function c() {
+        div1 = element("div");
+        div0 = element("div");
+        i = element("i");
+        t0 = space();
+        if (if_block) if_block.c();
+        t1 = space();
+        label = element("label");
+        t2 = text(
+        /*title*/
+        ctx[1]);
+        attr(i, "class", "scanex-layer-tree-node-visibility scanex-layer-tree-icon");
+        toggle_class(i, "check-square",
+        /*visible*/
+        ctx[0]);
+        toggle_class(i, "square", !
+        /*visible*/
+        ctx[0]);
+        attr(label, "class", "scanex-layer-tree-title");
+        attr(div0, "class", "scanex-layer-tree-header");
+        attr(div1, "class", "scanex-layer-tree-layer");
+      },
+      m: function m(target, anchor) {
+        insert(target, div1, anchor);
+        append(div1, div0);
+        append(div0, i);
+        append(div0, t0);
+        if (if_block) if_block.m(div0, null);
+        append(div0, t1);
+        append(div0, label);
+        append(label, t2);
+        dispose = listen(i, "click", stop_propagation(
+        /*toggleVisibility*/
+        ctx[3]));
+      },
+      p: function p(ctx, _ref) {
+        var _ref2 = _slicedToArray(_ref, 1),
+            dirty = _ref2[0];
+
+        if (dirty &
+        /*visible*/
+        1) {
+          toggle_class(i, "check-square",
+          /*visible*/
+          ctx[0]);
+        }
+
+        if (dirty &
+        /*visible*/
+        1) {
+          toggle_class(i, "square", !
+          /*visible*/
+          ctx[0]);
+        }
+
+        if (current_block_type !== (current_block_type = select_block_type(ctx))) {
+          if (if_block) if_block.d(1);
+          if_block = current_block_type && current_block_type(ctx);
+
+          if (if_block) {
+            if_block.c();
+            if_block.m(div0, t1);
+          }
+        }
+
+        if (dirty &
+        /*title*/
+        2) set_data(t2,
+        /*title*/
+        ctx[1]);
+      },
+      i: noop,
+      o: noop,
+      d: function d(detaching) {
+        if (detaching) detach(div1);
+
+        if (if_block) {
+          if_block.d();
+        }
+
+        dispose();
+      }
+    };
+  }
+
+  function instance($$self, $$props, $$invalidate) {
+    var dispatch = createEventDispatcher();
+    var title = $$props.title;
+    var properties = $$props.properties;
+    var _$$props$visible = $$props.visible,
+        visible = _$$props$visible === void 0 ? false : _$$props$visible;
+
+    function toggleVisibility() {
+      $$invalidate(0, visible = !visible); // properties.visible = visible;
+
+      dispatch("change:visible", {
+        properties: properties,
+        type: "layer",
+        visible: visible
+      });
+    }
+
+    $$self.$set = function ($$props) {
+      if ("title" in $$props) $$invalidate(1, title = $$props.title);
+      if ("properties" in $$props) $$invalidate(2, properties = $$props.properties);
+      if ("visible" in $$props) $$invalidate(0, visible = $$props.visible);
+    };
+
+    return [visible, title, properties, toggleVisibility];
+  }
+
+  var Layer = /*#__PURE__*/function (_SvelteComponent) {
+    _inherits(Layer, _SvelteComponent);
+
+    function Layer(options) {
+      var _this;
+
+      _classCallCheck(this, Layer);
+
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(Layer).call(this));
+      init(_assertThisInitialized(_this), options, instance, create_fragment, safe_not_equal, {
+        title: 1,
+        properties: 2,
+        visible: 0
+      });
+      return _this;
+    }
+
+    return Layer;
+  }(SvelteComponent);
 
   // `Symbol.asyncIterator` well-known symbol
   // https://tc39.github.io/ecma262/#sec-symbol.asynciterator
@@ -10484,96 +10674,299 @@ var Example = (function () {
 
   function get_each_context(ctx, list, i) {
     var child_ctx = ctx.slice();
-    child_ctx[15] = list[i];
-    child_ctx[17] = i;
+    child_ctx[16] = list[i];
+    child_ctx[18] = i;
     return child_ctx;
-  } // (90:47) 
+  } // (90:12) {:else}
 
 
-  function create_if_block_3(ctx) {
-    var i;
+  function create_else_block(ctx) {
+    var updating_visible;
+    var current;
+
+    function layer_visible_binding(value) {
+      /*layer_visible_binding*/
+      ctx[14].call(null, value);
+    }
+
+    function change_visible_handler_1() {
+      var _ctx;
+
+      for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
+        args[_key] = arguments[_key];
+      }
+
+      return (
+        /*change_visible_handler_1*/
+        (_ctx = ctx)[15].apply(_ctx, [
+        /*i*/
+        ctx[18]].concat(args))
+      );
+    }
+
+    var layer_props = {
+      properties:
+      /*item*/
+      ctx[16].content.properties,
+      title:
+      /*item*/
+      ctx[16].content.properties.title
+    };
+
+    if (
+    /*checked*/
+    ctx[4] !== void 0) {
+      layer_props.visible =
+      /*checked*/
+      ctx[4];
+    }
+
+    var layer = new Layer({
+      props: layer_props
+    });
+    binding_callbacks.push(function () {
+      return bind$1(layer, "visible", layer_visible_binding);
+    });
+    layer.$on("change:visible", change_visible_handler_1);
     return {
       c: function c() {
-        i = element("i");
-        attr(i, "class", "scanex-layer-tree-node-raster scanex-layer-tree-icon picture");
+        create_component(layer.$$.fragment);
       },
       m: function m(target, anchor) {
-        insert(target, i, anchor);
+        mount_component(layer, target, anchor);
+        current = true;
       },
-      p: noop,
+      p: function p(new_ctx, dirty) {
+        ctx = new_ctx;
+        var layer_changes = {};
+        if (dirty &
+        /*children*/
+        1) layer_changes.properties =
+        /*item*/
+        ctx[16].content.properties;
+        if (dirty &
+        /*children*/
+        1) layer_changes.title =
+        /*item*/
+        ctx[16].content.properties.title;
+
+        if (!updating_visible && dirty &
+        /*checked*/
+        16) {
+          updating_visible = true;
+          layer_changes.visible =
+          /*checked*/
+          ctx[4];
+          add_flush_callback(function () {
+            return updating_visible = false;
+          });
+        }
+
+        layer.$set(layer_changes);
+      },
+      i: function i(local) {
+        if (current) return;
+        transition_in(layer.$$.fragment, local);
+        current = true;
+      },
+      o: function o(local) {
+        transition_out(layer.$$.fragment, local);
+        current = false;
+      },
       d: function d(detaching) {
-        if (detaching) detach(i);
+        destroy_component(layer, detaching);
       }
     };
-  } // (88:47) 
+  } // (83:12) {#if item.type === 'group'}
 
 
-  function create_if_block_2(ctx) {
-    var i;
+  function create_if_block$1(ctx) {
+    var updating_visible;
+    var current;
+
+    function group_visible_binding(value) {
+      /*group_visible_binding*/
+      ctx[12].call(null, value);
+    }
+
+    function change_visible_handler() {
+      var _ctx2;
+
+      for (var _len2 = arguments.length, args = new Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
+        args[_key2] = arguments[_key2];
+      }
+
+      return (
+        /*change_visible_handler*/
+        (_ctx2 = ctx)[13].apply(_ctx2, [
+        /*i*/
+        ctx[18]].concat(args))
+      );
+    }
+
+    var group_props = {
+      properties:
+      /*item*/
+      ctx[16].content.properties,
+      title:
+      /*item*/
+      ctx[16].content.properties.title,
+      children:
+      /*item*/
+      ctx[16].content.children
+    };
+
+    if (
+    /*checked*/
+    ctx[4] !== void 0) {
+      group_props.visible =
+      /*checked*/
+      ctx[4];
+    }
+
+    var group = new Group({
+      props: group_props
+    });
+    binding_callbacks.push(function () {
+      return bind$1(group, "visible", group_visible_binding);
+    });
+    group.$on("change:visible", change_visible_handler);
     return {
       c: function c() {
-        i = element("i");
-        attr(i, "class", "scanex-layer-tree-node-vector scanex-layer-tree-icon block");
+        create_component(group.$$.fragment);
       },
       m: function m(target, anchor) {
-        insert(target, i, anchor);
+        mount_component(group, target, anchor);
+        current = true;
       },
-      p: noop,
+      p: function p(new_ctx, dirty) {
+        ctx = new_ctx;
+        var group_changes = {};
+        if (dirty &
+        /*children*/
+        1) group_changes.properties =
+        /*item*/
+        ctx[16].content.properties;
+        if (dirty &
+        /*children*/
+        1) group_changes.title =
+        /*item*/
+        ctx[16].content.properties.title;
+        if (dirty &
+        /*children*/
+        1) group_changes.children =
+        /*item*/
+        ctx[16].content.children;
+
+        if (!updating_visible && dirty &
+        /*checked*/
+        16) {
+          updating_visible = true;
+          group_changes.visible =
+          /*checked*/
+          ctx[4];
+          add_flush_callback(function () {
+            return updating_visible = false;
+          });
+        }
+
+        group.$set(group_changes);
+      },
+      i: function i(local) {
+        if (current) return;
+        transition_in(group.$$.fragment, local);
+        current = true;
+      },
+      o: function o(local) {
+        transition_out(group.$$.fragment, local);
+        current = false;
+      },
       d: function d(detaching) {
-        if (detaching) detach(i);
+        destroy_component(group, detaching);
       }
     };
-  } // (83:8) {#if type === 'group'}
+  } // (82:8) {#each children as item, i}
 
 
-  function create_if_block_1(ctx) {
-    var i;
-    var dispose;
+  function create_each_block(ctx) {
+    var current_block_type_index;
+    var if_block;
+    var if_block_anchor;
+    var current;
+    var if_block_creators = [create_if_block$1, create_else_block];
+    var if_blocks = [];
+
+    function select_block_type(ctx, dirty) {
+      if (
+      /*item*/
+      ctx[16].type === "group") return 0;
+      return 1;
+    }
+
+    current_block_type_index = select_block_type(ctx);
+    if_block = if_blocks[current_block_type_index] = if_block_creators[current_block_type_index](ctx);
     return {
       c: function c() {
-        i = element("i");
-        attr(i, "class", "scanex-layer-tree-node-folder scanex-layer-tree-icon");
-        toggle_class(i, "folder-filled", !
-        /*expanded*/
-        ctx[5]);
-        toggle_class(i, "folder-open-filled",
-        /*expanded*/
-        ctx[5]);
+        if_block.c();
+        if_block_anchor = empty();
       },
       m: function m(target, anchor) {
-        insert(target, i, anchor);
-        dispose = listen(i, "click", stop_propagation(
-        /*toggleChildren*/
-        ctx[6]));
+        if_blocks[current_block_type_index].m(target, anchor);
+        insert(target, if_block_anchor, anchor);
+        current = true;
       },
       p: function p(ctx, dirty) {
-        if (dirty &
-        /*expanded*/
-        32) {
-          toggle_class(i, "folder-filled", !
-          /*expanded*/
-          ctx[5]);
-        }
+        var previous_block_index = current_block_type_index;
+        current_block_type_index = select_block_type(ctx);
 
-        if (dirty &
-        /*expanded*/
-        32) {
-          toggle_class(i, "folder-open-filled",
-          /*expanded*/
-          ctx[5]);
+        if (current_block_type_index === previous_block_index) {
+          if_blocks[current_block_type_index].p(ctx, dirty);
+        } else {
+          group_outros();
+          transition_out(if_blocks[previous_block_index], 1, 1, function () {
+            if_blocks[previous_block_index] = null;
+          });
+          check_outros();
+          if_block = if_blocks[current_block_type_index];
+
+          if (!if_block) {
+            if_block = if_blocks[current_block_type_index] = if_block_creators[current_block_type_index](ctx);
+            if_block.c();
+          }
+
+          transition_in(if_block, 1);
+          if_block.m(if_block_anchor.parentNode, if_block_anchor);
         }
       },
+      i: function i(local) {
+        if (current) return;
+        transition_in(if_block);
+        current = true;
+      },
+      o: function o(local) {
+        transition_out(if_block);
+        current = false;
+      },
       d: function d(detaching) {
-        if (detaching) detach(i);
-        dispose();
+        if_blocks[current_block_type_index].d(detaching);
+        if (detaching) detach(if_block_anchor);
       }
     };
-  } // (95:4) {#if Array.isArray(children) && children.length}
+  }
 
-
-  function create_if_block(ctx) {
-    var div;
+  function create_fragment$1(ctx) {
+    var div2;
+    var div0;
+    var i0;
+    var t0;
+    var i1;
+    var t1;
+    var label;
+    var t2;
+    var t3;
+    var div1;
     var current;
+    var dispose;
     var each_value =
     /*children*/
     ctx[0];
@@ -10591,30 +10984,124 @@ var Example = (function () {
 
     return {
       c: function c() {
-        div = element("div");
+        div2 = element("div");
+        div0 = element("div");
+        i0 = element("i");
+        t0 = space();
+        i1 = element("i");
+        t1 = space();
+        label = element("label");
+        t2 = text(
+        /*title*/
+        ctx[1]);
+        t3 = space();
+        div1 = element("div");
 
         for (var _i = 0; _i < each_blocks.length; _i += 1) {
           each_blocks[_i].c();
         }
 
-        attr(div, "class", "scanex-layer-tree-children");
-        toggle_class(div, "scanex-layer-tree-hidden", !
+        attr(i0, "class", "scanex-layer-tree-visibility scanex-layer-tree-icon");
+        toggle_class(i0, "check-square",
+        /*state*/
+        ctx[3] === 1);
+        toggle_class(i0, "square",
+        /*state*/
+        ctx[3] === 0);
+        toggle_class(i0, "minus-square",
+        /*state*/
+        ctx[3] === -1);
+        attr(i1, "class", "scanex-layer-tree-folder scanex-layer-tree-icon");
+        toggle_class(i1, "folder-filled", !
         /*expanded*/
-        ctx[5]);
+        ctx[2]);
+        toggle_class(i1, "folder-open-filled",
+        /*expanded*/
+        ctx[2]);
+        attr(label, "class", "scanex-layer-tree-title");
+        attr(div0, "class", "scanex-layer-tree-header");
+        attr(div1, "class", "scanex-layer-tree-children");
+        toggle_class(div1, "scanex-layer-tree-hidden", !
+        /*expanded*/
+        ctx[2]);
+        attr(div2, "class", "scanex-layer-tree-group");
       },
       m: function m(target, anchor) {
-        insert(target, div, anchor);
+        insert(target, div2, anchor);
+        append(div2, div0);
+        append(div0, i0);
+        append(div0, t0);
+        append(div0, i1);
+        append(div0, t1);
+        append(div0, label);
+        append(label, t2);
+        append(div2, t3);
+        append(div2, div1);
 
         for (var _i2 = 0; _i2 < each_blocks.length; _i2 += 1) {
-          each_blocks[_i2].m(div, null);
+          each_blocks[_i2].m(div1, null);
         }
 
         current = true;
+        dispose = [listen(i0, "click", stop_propagation(
+        /*toggleVisibility*/
+        ctx[6])), listen(i1, "click", stop_propagation(
+        /*toggleChildren*/
+        ctx[5]))];
       },
-      p: function p(ctx, dirty) {
+      p: function p(ctx, _ref) {
+        var _ref2 = _slicedToArray(_ref, 1),
+            dirty = _ref2[0];
+
         if (dirty &
-        /*children, onChangeState*/
-        257) {
+        /*state*/
+        8) {
+          toggle_class(i0, "check-square",
+          /*state*/
+          ctx[3] === 1);
+        }
+
+        if (dirty &
+        /*state*/
+        8) {
+          toggle_class(i0, "square",
+          /*state*/
+          ctx[3] === 0);
+        }
+
+        if (dirty &
+        /*state*/
+        8) {
+          toggle_class(i0, "minus-square",
+          /*state*/
+          ctx[3] === -1);
+        }
+
+        if (dirty &
+        /*expanded*/
+        4) {
+          toggle_class(i1, "folder-filled", !
+          /*expanded*/
+          ctx[2]);
+        }
+
+        if (dirty &
+        /*expanded*/
+        4) {
+          toggle_class(i1, "folder-open-filled",
+          /*expanded*/
+          ctx[2]);
+        }
+
+        if (!current || dirty &
+        /*title*/
+        2) set_data(t2,
+        /*title*/
+        ctx[1]);
+
+        if (dirty &
+        /*children, checked, onChangeVisible*/
+        145) {
           each_value =
           /*children*/
           ctx[0];
@@ -10635,7 +11122,7 @@ var Example = (function () {
 
               transition_in(each_blocks[_i3], 1);
 
-              each_blocks[_i3].m(div, null);
+              each_blocks[_i3].m(div1, null);
             }
           }
 
@@ -10650,10 +11137,10 @@ var Example = (function () {
 
         if (dirty &
         /*expanded*/
-        32) {
-          toggle_class(div, "scanex-layer-tree-hidden", !
+        4) {
+          toggle_class(div1, "scanex-layer-tree-hidden", !
           /*expanded*/
-          ctx[5]);
+          ctx[2]);
         }
       },
       i: function i(local) {
@@ -10675,288 +11162,23 @@ var Example = (function () {
         current = false;
       },
       d: function d(detaching) {
-        if (detaching) detach(div);
+        if (detaching) detach(div2);
         destroy_each(each_blocks, detaching);
-      }
-    };
-  } // (97:8) {#each children as item, i}
-
-
-  function create_each_block(ctx) {
-    var current;
-
-    function change_state_handler() {
-      var _ctx;
-
-      for (var _len = arguments.length, args = new Array(_len), _key = 0; _key < _len; _key++) {
-        args[_key] = arguments[_key];
-      }
-
-      return (
-        /*change_state_handler*/
-        (_ctx = ctx)[14].apply(_ctx, [
-        /*i*/
-        ctx[17]].concat(args))
-      );
-    }
-
-    var node = new Node({
-      props: {
-        type:
-        /*item*/
-        ctx[15].type,
-        children:
-        /*item*/
-        ctx[15].content.children,
-        properties:
-        /*item*/
-        ctx[15].content.properties,
-        title:
-        /*item*/
-        ctx[15].content.properties.title,
-        visible:
-        /*item*/
-        ctx[15].content.properties.visible
-      }
-    });
-    node.$on("change:visible",
-    /*change_visible_handler*/
-    ctx[12]);
-    node.$on("change:style",
-    /*change_style_handler*/
-    ctx[13]);
-    node.$on("change:state", change_state_handler);
-    return {
-      c: function c() {
-        create_component(node.$$.fragment);
-      },
-      m: function m(target, anchor) {
-        mount_component(node, target, anchor);
-        current = true;
-      },
-      p: function p(new_ctx, dirty) {
-        ctx = new_ctx;
-        var node_changes = {};
-        if (dirty &
-        /*children*/
-        1) node_changes.type =
-        /*item*/
-        ctx[15].type;
-        if (dirty &
-        /*children*/
-        1) node_changes.children =
-        /*item*/
-        ctx[15].content.children;
-        if (dirty &
-        /*children*/
-        1) node_changes.properties =
-        /*item*/
-        ctx[15].content.properties;
-        if (dirty &
-        /*children*/
-        1) node_changes.title =
-        /*item*/
-        ctx[15].content.properties.title;
-        if (dirty &
-        /*children*/
-        1) node_changes.visible =
-        /*item*/
-        ctx[15].content.properties.visible;
-        node.$set(node_changes);
-      },
-      i: function i(local) {
-        if (current) return;
-        transition_in(node.$$.fragment, local);
-        current = true;
-      },
-      o: function o(local) {
-        transition_out(node.$$.fragment, local);
-        current = false;
-      },
-      d: function d(detaching) {
-        destroy_component(node, detaching);
+        run_all(dispose);
       }
     };
   }
 
-  function create_fragment(ctx) {
-    var div1;
-    var div0;
-    var i;
-    var t0;
-    var t1;
-    var label;
-    var t2;
-    var t3;
-    var show_if = Array.isArray(
-    /*children*/
-    ctx[0]) &&
-    /*children*/
-    ctx[0].length;
-    var current;
-    var dispose;
-
-    function select_block_type(ctx, dirty) {
-      if (
-      /*type*/
-      ctx[2] === "group") return create_if_block_1;
-      if (
-      /*properties*/
-      ctx[3].type === "Vector") return create_if_block_2;
-      if (
-      /*properties*/
-      ctx[3].type === "Raster") return create_if_block_3;
-    }
-
-    var current_block_type = select_block_type(ctx);
-    var if_block0 = current_block_type && current_block_type(ctx);
-    var if_block1 = show_if && create_if_block(ctx);
-    return {
-      c: function c() {
-        div1 = element("div");
-        div0 = element("div");
-        i = element("i");
-        t0 = space();
-        if (if_block0) if_block0.c();
-        t1 = space();
-        label = element("label");
-        t2 = text(
-        /*title*/
-        ctx[1]);
-        t3 = space();
-        if (if_block1) if_block1.c();
-        attr(i, "class", "scanex-layer-tree-node-visibility scanex-layer-tree-icon");
-        toggle_class(i, "check-square",
-        /*state*/
-        ctx[4] === 1);
-        toggle_class(i, "square",
-        /*state*/
-        ctx[4] === 0);
-        toggle_class(i, "minus-square",
-        /*state*/
-        ctx[4] === -1);
-        attr(label, "class", "scanex-layer-tree-title");
-        attr(div0, "class", "scanex-layer-tree-header");
-        attr(div1, "class", "scanex-layer-tree-node");
-      },
-      m: function m(target, anchor) {
-        insert(target, div1, anchor);
-        append(div1, div0);
-        append(div0, i);
-        append(div0, t0);
-        if (if_block0) if_block0.m(div0, null);
-        append(div0, t1);
-        append(div0, label);
-        append(label, t2);
-        append(div1, t3);
-        if (if_block1) if_block1.m(div1, null);
-        current = true;
-        dispose = listen(i, "click", stop_propagation(
-        /*toggleVisibility*/
-        ctx[7]));
-      },
-      p: function p(ctx, _ref) {
-        var _ref2 = _slicedToArray(_ref, 1),
-            dirty = _ref2[0];
-
-        if (dirty &
-        /*state*/
-        16) {
-          toggle_class(i, "check-square",
-          /*state*/
-          ctx[4] === 1);
-        }
-
-        if (dirty &
-        /*state*/
-        16) {
-          toggle_class(i, "square",
-          /*state*/
-          ctx[4] === 0);
-        }
-
-        if (dirty &
-        /*state*/
-        16) {
-          toggle_class(i, "minus-square",
-          /*state*/
-          ctx[4] === -1);
-        }
-
-        if (current_block_type === (current_block_type = select_block_type(ctx)) && if_block0) {
-          if_block0.p(ctx, dirty);
-        } else {
-          if (if_block0) if_block0.d(1);
-          if_block0 = current_block_type && current_block_type(ctx);
-
-          if (if_block0) {
-            if_block0.c();
-            if_block0.m(div0, t1);
-          }
-        }
-
-        if (!current || dirty &
-        /*title*/
-        2) set_data(t2,
-        /*title*/
-        ctx[1]);
-        if (dirty &
-        /*children*/
-        1) show_if = Array.isArray(
-        /*children*/
-        ctx[0]) &&
-        /*children*/
-        ctx[0].length;
-
-        if (show_if) {
-          if (if_block1) {
-            if_block1.p(ctx, dirty);
-            transition_in(if_block1, 1);
-          } else {
-            if_block1 = create_if_block(ctx);
-            if_block1.c();
-            transition_in(if_block1, 1);
-            if_block1.m(div1, null);
-          }
-        } else if (if_block1) {
-          group_outros();
-          transition_out(if_block1, 1, 1, function () {
-            if_block1 = null;
-          });
-          check_outros();
-        }
-      },
-      i: function i(local) {
-        if (current) return;
-        transition_in(if_block1);
-        current = true;
-      },
-      o: function o(local) {
-        transition_out(if_block1);
-        current = false;
-      },
-      d: function d(detaching) {
-        if (detaching) detach(div1);
-
-        if (if_block0) {
-          if_block0.d();
-        }
-
-        if (if_block1) if_block1.d();
-        dispose();
-      }
-    };
-  }
-
-  function instance($$self, $$props, $$invalidate) {
+  function instance$1($$self, $$props, $$invalidate) {
     var dispatch = createEventDispatcher();
     var title = $$props.title;
-    var type = $$props.type;
-    var children = $$props.children;
+    var _$$props$visible = $$props.visible,
+        visible = _$$props$visible === void 0 ? false : _$$props$visible;
     var properties = $$props.properties;
-    var visible = $$props.visible;
-    var state = 0;
+    var children = $$props.children;
     var expanded = false;
+    var state = 0;
+    var checked = false;
     var expand = getContext("expand");
 
     function toggleChildren() {
@@ -10975,12 +11197,12 @@ var Example = (function () {
                   break;
                 }
 
-                $$invalidate(5, expanded = false);
+                $$invalidate(2, expanded = false);
                 _context.next = 10;
                 break;
 
               case 4:
-                $$invalidate(5, expanded = true);
+                $$invalidate(2, expanded = true);
 
                 if (!((!Array.isArray(children) || children.length === 0) && typeof expand === "function")) {
                   _context.next = 10;
@@ -11005,116 +11227,98 @@ var Example = (function () {
     }
 
     function toggleVisibility() {
-      $$invalidate(9, visible = !visible);
+      $$invalidate(8, visible = !visible);
+      $$invalidate(4, checked = visible);
+      $$invalidate(3, state = visible ? 1 : 0); // properties.visible = visible;
+      // for (let i = 0; i < children.length; ++i) {
+      //     children[i].content.properties.visible = checked;
+      // }
+
       dispatch("change:visible", {
         properties: properties,
-        type: type,
+        type: "group",
         visible: visible
       });
-      dispatch("change:state", {
+    }
+
+    function onChangeVisible(detail, i) {
+      // children[i].content.properties.visible = detail.visible;
+      if (children.every(function (_ref3) {
+        var visible = _ref3.content.properties.visible;
+        return typeof visible === "boolean" && visible;
+      })) {
+        $$invalidate(8, visible = true);
+        $$invalidate(3, state = 1);
+        $$invalidate(4, checked = true);
+      } else if (children.every(function (_ref4) {
+        var visible = _ref4.content.properties.visible;
+        return typeof visible === "boolean" && !visible;
+      })) {
+        $$invalidate(8, visible = false);
+        $$invalidate(3, state = 0);
+        $$invalidate(4, checked = false);
+      } else {
+        $$invalidate(8, visible = undefined);
+        $$invalidate(3, state = -1);
+      } // properties.visible = visible;
+
+
+      dispatch("change:visible", {
         properties: properties,
-        type: type,
+        type: "group",
         visible: visible
       });
     }
 
-    function onChangeState(detail, i) {
-      if (Array.isArray(children) && children.length) {
-        $$invalidate(0, children[i].content.properties.visible = detail.visible, children);
-
-        if (children.every(function (_ref3) {
-          var visible = _ref3.content.properties.visible;
-          return visible === true;
-        })) {
-          $$invalidate(9, visible = true);
-        } else if (children.every(function (_ref4) {
-          var visible = _ref4.content.properties.visible;
-          return visible === false;
-        })) {
-          $$invalidate(9, visible = false);
-        } else {
-          $$invalidate(9, visible = undefined);
-        }
-
-        dispatch("change:state", {
-          properties: properties,
-          type: type,
-          visible: visible
-        });
-      }
+    function group_visible_binding(value) {
+      checked = value;
+      $$invalidate(4, checked);
     }
 
-    function change_visible_handler(event) {
-      bubble($$self, event);
-    }
-
-    function change_style_handler(event) {
-      bubble($$self, event);
-    }
-
-    var change_state_handler = function change_state_handler(i, _ref5) {
+    var change_visible_handler = function change_visible_handler(i, _ref5) {
       var detail = _ref5.detail;
-      return onChangeState(detail, i);
+      return onChangeVisible();
+    };
+
+    function layer_visible_binding(value) {
+      checked = value;
+      $$invalidate(4, checked);
+    }
+
+    var change_visible_handler_1 = function change_visible_handler_1(i, _ref6) {
+      var detail = _ref6.detail;
+      return onChangeVisible();
     };
 
     $$self.$set = function ($$props) {
       if ("title" in $$props) $$invalidate(1, title = $$props.title);
-      if ("type" in $$props) $$invalidate(2, type = $$props.type);
+      if ("visible" in $$props) $$invalidate(8, visible = $$props.visible);
+      if ("properties" in $$props) $$invalidate(9, properties = $$props.properties);
       if ("children" in $$props) $$invalidate(0, children = $$props.children);
-      if ("properties" in $$props) $$invalidate(3, properties = $$props.properties);
-      if ("visible" in $$props) $$invalidate(9, visible = $$props.visible);
     };
 
-    $$self.$$.update = function () {
-      if ($$self.$$.dirty &
-      /*visible, children, type*/
-      517) {
-         {
-          if (visible === true) {
-            $$invalidate(4, state = 1);
-          } else if (visible === false) {
-            $$invalidate(4, state = 0);
-          } else {
-            $$invalidate(4, state = -1);
-          }
-
-          if (Array.isArray(children) && typeof visible !== "undefined") {
-            for (var i = 0; i < children.length; i++) {
-              $$invalidate(0, children[i].content.properties.visible = visible, children);
-              dispatch("change:visible", {
-                properties: children[i].content.properties,
-                type: type,
-                visible: visible
-              });
-            }
-          }
-        }
-      }
-    };
-
-    return [children, title, type, properties, state, expanded, toggleChildren, toggleVisibility, onChangeState, visible, dispatch, expand, change_visible_handler, change_style_handler, change_state_handler];
+    return [children, title, expanded, state, checked, toggleChildren, toggleVisibility, onChangeVisible, visible, properties, dispatch, expand, group_visible_binding, change_visible_handler, layer_visible_binding, change_visible_handler_1];
   }
 
-  var Node = /*#__PURE__*/function (_SvelteComponent) {
-    _inherits(Node, _SvelteComponent);
+  var Group = /*#__PURE__*/function (_SvelteComponent) {
+    _inherits(Group, _SvelteComponent);
 
-    function Node(options) {
+    function Group(options) {
       var _this;
 
-      _classCallCheck(this, Node);
+      _classCallCheck(this, Group);
 
-      _this = _possibleConstructorReturn(this, _getPrototypeOf(Node).call(this));
-      init(_assertThisInitialized(_this), options, instance, create_fragment, safe_not_equal, {
+      _this = _possibleConstructorReturn(this, _getPrototypeOf(Group).call(this));
+      init(_assertThisInitialized(_this), options, instance$1, create_fragment$1, safe_not_equal, {
         title: 1,
-        type: 2,
-        children: 0,
-        properties: 3,
-        visible: 9
+        visible: 8,
+        properties: 9,
+        children: 0
       });
       return _this;
     }
 
-    return Node;
+    return Group;
   }(SvelteComponent);
 
   var Result = {
@@ -129938,38 +130142,37 @@ var Example = (function () {
   	}
   };
 
-  function create_fragment$1(ctx) {
+  function create_fragment$2(ctx) {
     var current;
-    var node = new Node({
+    var group = new Group({
       props: {
-        type: "group",
-        children: Result.children,
-        properties: Result.properties,
         title: Result.properties.title,
-        visible: Result.properties.visible
+        visible: Result.properties.visible,
+        properties: Result.properties,
+        children: Result.children
       }
     });
-    node.$on("change:visible", onChangeVisible);
+    group.$on("change:visible", onChangeVisible);
     return {
       c: function c() {
-        create_component(node.$$.fragment);
+        create_component(group.$$.fragment);
       },
       m: function m(target, anchor) {
-        mount_component(node, target, anchor);
+        mount_component(group, target, anchor);
         current = true;
       },
       p: noop,
       i: function i(local) {
         if (current) return;
-        transition_in(node.$$.fragment, local);
+        transition_in(group.$$.fragment, local);
         current = true;
       },
       o: function o(local) {
-        transition_out(node.$$.fragment, local);
+        transition_out(group.$$.fragment, local);
         current = false;
       },
       d: function d(detaching) {
-        destroy_component(node, detaching);
+        destroy_component(group, detaching);
       }
     };
   }
@@ -129978,7 +130181,7 @@ var Example = (function () {
     console.log(e);
   }
 
-  function instance$1($$self) {
+  function instance$2($$self) {
     console.log(Result);
     return [];
   }
@@ -129992,7 +130195,7 @@ var Example = (function () {
       _classCallCheck(this, App);
 
       _this = _possibleConstructorReturn(this, _getPrototypeOf(App).call(this));
-      init(_assertThisInitialized(_this), options, instance$1, create_fragment$1, safe_not_equal, {});
+      init(_assertThisInitialized(_this), options, instance$2, create_fragment$2, safe_not_equal, {});
       return _this;
     }
 
