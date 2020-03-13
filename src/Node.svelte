@@ -12,6 +12,7 @@
 
     let state = 0;
     let expanded = false;
+    let loaded = false;
     
     $: children = content.children;
     $: properties = content.properties;
@@ -44,9 +45,10 @@
         }
         else {
             expanded = true;
-            if ((!Array.isArray(children) || children.length === 0) && typeof expand === 'function') {
+            if (!loaded && typeof expand === 'function') {
                 const items = await expand(properties);
                 children = items;
+                loaded = true;
             }
         }
     }
