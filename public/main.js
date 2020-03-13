@@ -10536,10 +10536,10 @@ var Example = (function () {
 
   function get_each_context(ctx, list, i) {
     var child_ctx = ctx.slice();
-    child_ctx[17] = list[i];
-    child_ctx[19] = i;
+    child_ctx[16] = list[i];
+    child_ctx[18] = i;
     return child_ctx;
-  } // (94:47) 
+  } // (93:47) 
 
 
   function create_if_block_3(ctx) {
@@ -10557,7 +10557,7 @@ var Example = (function () {
         if (detaching) detach(i);
       }
     };
-  } // (92:47) 
+  } // (91:47) 
 
 
   function create_if_block_2(ctx) {
@@ -10575,7 +10575,7 @@ var Example = (function () {
         if (detaching) detach(i);
       }
     };
-  } // (87:8) {#if type === 'group'}
+  } // (86:8) {#if type === 'group'}
 
 
   function create_if_block_1(ctx) {
@@ -10620,7 +10620,7 @@ var Example = (function () {
         dispose();
       }
     };
-  } // (99:4) {#if Array.isArray(children) && children.length}
+  } // (98:4) {#if Array.isArray(children) && children.length}
 
 
   function create_if_block(ctx) {
@@ -10731,14 +10731,14 @@ var Example = (function () {
         destroy_each(each_blocks, detaching);
       }
     };
-  } // (101:8) {#each children as item, i}
+  } // (100:8) {#each children as item, i}
 
 
   function create_each_block(ctx) {
     var current;
     var node_spread_levels = [
     /*item*/
-    ctx[17]];
+    ctx[16]];
 
     function change_state_handler() {
       var _ctx;
@@ -10749,9 +10749,9 @@ var Example = (function () {
 
       return (
         /*change_state_handler*/
-        (_ctx = ctx)[16].apply(_ctx, [
+        (_ctx = ctx)[15].apply(_ctx, [
         /*i*/
-        ctx[19]].concat(args))
+        ctx[18]].concat(args))
       );
     }
 
@@ -10766,10 +10766,10 @@ var Example = (function () {
     });
     node.$on("change:visible",
     /*change_visible_handler*/
-    ctx[14]);
+    ctx[13]);
     node.$on("change:style",
     /*change_style_handler*/
-    ctx[15]);
+    ctx[14]);
     node.$on("change:state", change_state_handler);
     return {
       c: function c() {
@@ -10785,7 +10785,7 @@ var Example = (function () {
         /*children*/
         8 ? get_spread_update(node_spread_levels, [get_spread_object(
         /*item*/
-        ctx[17])]) : {};
+        ctx[16])]) : {};
         node.$set(node_changes);
       },
       i: function i(local) {
@@ -10978,7 +10978,6 @@ var Example = (function () {
     var type = $$props.type;
     var state = 0;
     var expanded = false;
-    var loaded = false;
     var expand = getContext("expand");
 
     function toggleChildren() {
@@ -11004,7 +11003,7 @@ var Example = (function () {
               case 4:
                 $$invalidate(2, expanded = true);
 
-                if (!(!loaded && typeof expand === "function")) {
+                if (!((!Array.isArray(children) || children.length === 0) && typeof expand === "function")) {
                   _context.next = 11;
                   break;
                 }
@@ -11028,7 +11027,7 @@ var Example = (function () {
     }
 
     function toggleVisibility() {
-      $$invalidate(11, visible = !visible);
+      $$invalidate(10, visible = !visible);
       dispatch("change:visible", {
         properties: properties,
         type: type,
@@ -11049,14 +11048,14 @@ var Example = (function () {
           var visible = _ref3.content.properties.visible;
           return visible === true;
         })) {
-          $$invalidate(11, visible = true);
+          $$invalidate(10, visible = true);
         } else if (children.every(function (_ref4) {
           var visible = _ref4.content.properties.visible;
           return visible === false;
         })) {
-          $$invalidate(11, visible = false);
+          $$invalidate(10, visible = false);
         } else {
-          $$invalidate(11, visible = undefined);
+          $$invalidate(10, visible = undefined);
         }
 
         dispatch("change:state", {
@@ -11112,12 +11111,12 @@ var Example = (function () {
       if ($$self.$$.dirty &
       /*properties*/
       16) {
-         $$invalidate(11, visible = properties.visible);
+         $$invalidate(10, visible = properties.visible);
       }
 
       if ($$self.$$.dirty &
       /*visible, children, type*/
-      2057) {
+      1033) {
          {
           if (visible === true) {
             $$invalidate(1, state = 1);
@@ -11141,7 +11140,7 @@ var Example = (function () {
       }
     };
 
-    return [type, state, expanded, children, properties, title, toggleChildren, toggleVisibility, onChangeState, content, loaded, visible, dispatch, expand, change_visible_handler, change_style_handler, change_state_handler];
+    return [type, state, expanded, children, properties, title, toggleChildren, toggleVisibility, onChangeState, content, visible, dispatch, expand, change_visible_handler, change_style_handler, change_state_handler];
   }
 
   var Node = /*#__PURE__*/function (_SvelteComponent) {

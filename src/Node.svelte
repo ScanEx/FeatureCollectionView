@@ -11,8 +11,7 @@
     export let type;
 
     let state = 0;
-    let expanded = false;
-    let loaded = false;
+    let expanded = false;    
     
     $: children = content.children;
     $: properties = content.properties;
@@ -45,7 +44,7 @@
         }
         else {
             expanded = true;
-            if (!loaded && typeof expand === 'function') {
+            if ((!Array.isArray(children) || children.length === 0) && typeof expand === 'function') {
                 const items = await expand(properties);
                 children = items;
                 loaded = true;
