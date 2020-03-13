@@ -3848,15 +3848,6 @@ var Example = (function () {
 
   function noop() {}
 
-  function assign(tar, src) {
-    // @ts-ignore
-    for (var k in src) {
-      tar[k] = src[k];
-    }
-
-    return tar;
-  }
-
   function run$1(fn) {
     return fn();
   }
@@ -4107,49 +4098,6 @@ var Example = (function () {
       block.o(local);
     }
   }
-
-  function get_spread_update(levels, updates) {
-    var update = {};
-    var to_null_out = {};
-    var accounted_for = {
-      $$scope: 1
-    };
-    var i = levels.length;
-
-    while (i--) {
-      var o = levels[i];
-      var n = updates[i];
-
-      if (n) {
-        for (var key in o) {
-          if (!(key in n)) to_null_out[key] = 1;
-        }
-
-        for (var _key3 in n) {
-          if (!accounted_for[_key3]) {
-            update[_key3] = n[_key3];
-            accounted_for[_key3] = 1;
-          }
-        }
-
-        levels[i] = n;
-      } else {
-        for (var _key4 in o) {
-          accounted_for[_key4] = 1;
-        }
-      }
-    }
-
-    for (var _key5 in to_null_out) {
-      if (!(_key5 in update)) update[_key5] = undefined;
-    }
-
-    return update;
-  }
-
-  function get_spread_object(spread_props) {
-    return _typeof(spread_props) === 'object' && spread_props !== null ? spread_props : {};
-  } // source: https://html.spec.whatwg.org/multipage/indices.html
 
   function create_component(block) {
     block && block.c();
@@ -10536,10 +10484,10 @@ var Example = (function () {
 
   function get_each_context(ctx, list, i) {
     var child_ctx = ctx.slice();
-    child_ctx[16] = list[i];
-    child_ctx[18] = i;
+    child_ctx[15] = list[i];
+    child_ctx[17] = i;
     return child_ctx;
-  } // (92:47) 
+  } // (90:47) 
 
 
   function create_if_block_3(ctx) {
@@ -10557,7 +10505,7 @@ var Example = (function () {
         if (detaching) detach(i);
       }
     };
-  } // (90:47) 
+  } // (88:47) 
 
 
   function create_if_block_2(ctx) {
@@ -10575,7 +10523,7 @@ var Example = (function () {
         if (detaching) detach(i);
       }
     };
-  } // (85:8) {#if type === 'group'}
+  } // (83:8) {#if type === 'group'}
 
 
   function create_if_block_1(ctx) {
@@ -10587,10 +10535,10 @@ var Example = (function () {
         attr(i, "class", "scanex-layer-tree-node-folder scanex-layer-tree-icon");
         toggle_class(i, "folder-filled", !
         /*expanded*/
-        ctx[2]);
+        ctx[5]);
         toggle_class(i, "folder-open-filled",
         /*expanded*/
-        ctx[2]);
+        ctx[5]);
       },
       m: function m(target, anchor) {
         insert(target, i, anchor);
@@ -10601,18 +10549,18 @@ var Example = (function () {
       p: function p(ctx, dirty) {
         if (dirty &
         /*expanded*/
-        4) {
+        32) {
           toggle_class(i, "folder-filled", !
           /*expanded*/
-          ctx[2]);
+          ctx[5]);
         }
 
         if (dirty &
         /*expanded*/
-        4) {
+        32) {
           toggle_class(i, "folder-open-filled",
           /*expanded*/
-          ctx[2]);
+          ctx[5]);
         }
       },
       d: function d(detaching) {
@@ -10620,7 +10568,7 @@ var Example = (function () {
         dispose();
       }
     };
-  } // (97:4) {#if Array.isArray(children) && children.length}
+  } // (95:4) {#if Array.isArray(children) && children.length}
 
 
   function create_if_block(ctx) {
@@ -10628,7 +10576,7 @@ var Example = (function () {
     var current;
     var each_value =
     /*children*/
-    ctx[3];
+    ctx[0];
     var each_blocks = [];
 
     for (var i = 0; i < each_value.length; i += 1) {
@@ -10652,7 +10600,7 @@ var Example = (function () {
         attr(div, "class", "scanex-layer-tree-children");
         toggle_class(div, "scanex-layer-tree-hidden", !
         /*expanded*/
-        ctx[2]);
+        ctx[5]);
       },
       m: function m(target, anchor) {
         insert(target, div, anchor);
@@ -10666,10 +10614,10 @@ var Example = (function () {
       p: function p(ctx, dirty) {
         if (dirty &
         /*children, onChangeState*/
-        264) {
+        257) {
           each_value =
           /*children*/
-          ctx[3];
+          ctx[0];
 
           var _i3;
 
@@ -10702,10 +10650,10 @@ var Example = (function () {
 
         if (dirty &
         /*expanded*/
-        4) {
+        32) {
           toggle_class(div, "scanex-layer-tree-hidden", !
           /*expanded*/
-          ctx[2]);
+          ctx[5]);
         }
       },
       i: function i(local) {
@@ -10731,14 +10679,11 @@ var Example = (function () {
         destroy_each(each_blocks, detaching);
       }
     };
-  } // (99:8) {#each children as item, i}
+  } // (97:8) {#each children as item, i}
 
 
   function create_each_block(ctx) {
     var current;
-    var node_spread_levels = [
-    /*item*/
-    ctx[16]];
 
     function change_state_handler() {
       var _ctx;
@@ -10749,27 +10694,37 @@ var Example = (function () {
 
       return (
         /*change_state_handler*/
-        (_ctx = ctx)[15].apply(_ctx, [
+        (_ctx = ctx)[14].apply(_ctx, [
         /*i*/
-        ctx[18]].concat(args))
+        ctx[17]].concat(args))
       );
     }
 
-    var node_props = {};
-
-    for (var i = 0; i < node_spread_levels.length; i += 1) {
-      node_props = assign(node_props, node_spread_levels[i]);
-    }
-
     var node = new Node({
-      props: node_props
+      props: {
+        type:
+        /*item*/
+        ctx[15].type,
+        children:
+        /*item*/
+        ctx[15].content.children,
+        properties:
+        /*item*/
+        ctx[15].content.properties,
+        title:
+        /*item*/
+        ctx[15].content.properties.title,
+        visible:
+        /*item*/
+        ctx[15].content.properties.visible
+      }
     });
     node.$on("change:visible",
     /*change_visible_handler*/
-    ctx[13]);
+    ctx[12]);
     node.$on("change:style",
     /*change_style_handler*/
-    ctx[14]);
+    ctx[13]);
     node.$on("change:state", change_state_handler);
     return {
       c: function c() {
@@ -10781,11 +10736,32 @@ var Example = (function () {
       },
       p: function p(new_ctx, dirty) {
         ctx = new_ctx;
-        var node_changes = dirty &
+        var node_changes = {};
+        if (dirty &
         /*children*/
-        8 ? get_spread_update(node_spread_levels, [get_spread_object(
+        1) node_changes.type =
         /*item*/
-        ctx[16])]) : {};
+        ctx[15].type;
+        if (dirty &
+        /*children*/
+        1) node_changes.children =
+        /*item*/
+        ctx[15].content.children;
+        if (dirty &
+        /*children*/
+        1) node_changes.properties =
+        /*item*/
+        ctx[15].content.properties;
+        if (dirty &
+        /*children*/
+        1) node_changes.title =
+        /*item*/
+        ctx[15].content.properties.title;
+        if (dirty &
+        /*children*/
+        1) node_changes.visible =
+        /*item*/
+        ctx[15].content.properties.visible;
         node.$set(node_changes);
       },
       i: function i(local) {
@@ -10814,22 +10790,22 @@ var Example = (function () {
     var t3;
     var show_if = Array.isArray(
     /*children*/
-    ctx[3]) &&
+    ctx[0]) &&
     /*children*/
-    ctx[3].length;
+    ctx[0].length;
     var current;
     var dispose;
 
     function select_block_type(ctx, dirty) {
       if (
       /*type*/
-      ctx[0] === "group") return create_if_block_1;
+      ctx[2] === "group") return create_if_block_1;
       if (
       /*properties*/
-      ctx[4].type === "Vector") return create_if_block_2;
+      ctx[3].type === "Vector") return create_if_block_2;
       if (
       /*properties*/
-      ctx[4].type === "Raster") return create_if_block_3;
+      ctx[3].type === "Raster") return create_if_block_3;
     }
 
     var current_block_type = select_block_type(ctx);
@@ -10846,19 +10822,19 @@ var Example = (function () {
         label = element("label");
         t2 = text(
         /*title*/
-        ctx[5]);
+        ctx[1]);
         t3 = space();
         if (if_block1) if_block1.c();
         attr(i, "class", "scanex-layer-tree-node-visibility scanex-layer-tree-icon");
         toggle_class(i, "check-square",
         /*state*/
-        ctx[1] === 1);
+        ctx[4] === 1);
         toggle_class(i, "square",
         /*state*/
-        ctx[1] === 0);
+        ctx[4] === 0);
         toggle_class(i, "minus-square",
         /*state*/
-        ctx[1] === -1);
+        ctx[4] === -1);
         attr(label, "class", "scanex-layer-tree-title");
         attr(div0, "class", "scanex-layer-tree-header");
         attr(div1, "class", "scanex-layer-tree-node");
@@ -10885,26 +10861,26 @@ var Example = (function () {
 
         if (dirty &
         /*state*/
-        2) {
+        16) {
           toggle_class(i, "check-square",
           /*state*/
-          ctx[1] === 1);
+          ctx[4] === 1);
         }
 
         if (dirty &
         /*state*/
-        2) {
+        16) {
           toggle_class(i, "square",
           /*state*/
-          ctx[1] === 0);
+          ctx[4] === 0);
         }
 
         if (dirty &
         /*state*/
-        2) {
+        16) {
           toggle_class(i, "minus-square",
           /*state*/
-          ctx[1] === -1);
+          ctx[4] === -1);
         }
 
         if (current_block_type === (current_block_type = select_block_type(ctx)) && if_block0) {
@@ -10921,16 +10897,16 @@ var Example = (function () {
 
         if (!current || dirty &
         /*title*/
-        32) set_data(t2,
+        2) set_data(t2,
         /*title*/
-        ctx[5]);
+        ctx[1]);
         if (dirty &
         /*children*/
-        8) show_if = Array.isArray(
+        1) show_if = Array.isArray(
         /*children*/
-        ctx[3]) &&
+        ctx[0]) &&
         /*children*/
-        ctx[3].length;
+        ctx[0].length;
 
         if (show_if) {
           if (if_block1) {
@@ -10974,8 +10950,11 @@ var Example = (function () {
 
   function instance($$self, $$props, $$invalidate) {
     var dispatch = createEventDispatcher();
-    var content = $$props.content;
+    var title = $$props.title;
     var type = $$props.type;
+    var children = $$props.children;
+    var properties = $$props.properties;
+    var visible = $$props.visible;
     var state = 0;
     var expanded = false;
     var expand = getContext("expand");
@@ -10996,12 +10975,12 @@ var Example = (function () {
                   break;
                 }
 
-                $$invalidate(2, expanded = false);
+                $$invalidate(5, expanded = false);
                 _context.next = 10;
                 break;
 
               case 4:
-                $$invalidate(2, expanded = true);
+                $$invalidate(5, expanded = true);
 
                 if (!((!Array.isArray(children) || children.length === 0) && typeof expand === "function")) {
                   _context.next = 10;
@@ -11013,7 +10992,7 @@ var Example = (function () {
 
               case 8:
                 items = _context.sent;
-                $$invalidate(3, children = items);
+                $$invalidate(0, children = items);
 
               case 10:
               case "end":
@@ -11026,7 +11005,7 @@ var Example = (function () {
     }
 
     function toggleVisibility() {
-      $$invalidate(10, visible = !visible);
+      $$invalidate(9, visible = !visible);
       dispatch("change:visible", {
         properties: properties,
         type: type,
@@ -11041,20 +11020,20 @@ var Example = (function () {
 
     function onChangeState(detail, i) {
       if (Array.isArray(children) && children.length) {
-        $$invalidate(3, children[i].content.properties.visible = detail.visible, children);
+        $$invalidate(0, children[i].content.properties.visible = detail.visible, children);
 
         if (children.every(function (_ref3) {
           var visible = _ref3.content.properties.visible;
           return visible === true;
         })) {
-          $$invalidate(10, visible = true);
+          $$invalidate(9, visible = true);
         } else if (children.every(function (_ref4) {
           var visible = _ref4.content.properties.visible;
           return visible === false;
         })) {
-          $$invalidate(10, visible = false);
+          $$invalidate(9, visible = false);
         } else {
-          $$invalidate(10, visible = undefined);
+          $$invalidate(9, visible = undefined);
         }
 
         dispatch("change:state", {
@@ -11079,55 +11058,29 @@ var Example = (function () {
     };
 
     $$self.$set = function ($$props) {
-      if ("content" in $$props) $$invalidate(9, content = $$props.content);
-      if ("type" in $$props) $$invalidate(0, type = $$props.type);
+      if ("title" in $$props) $$invalidate(1, title = $$props.title);
+      if ("type" in $$props) $$invalidate(2, type = $$props.type);
+      if ("children" in $$props) $$invalidate(0, children = $$props.children);
+      if ("properties" in $$props) $$invalidate(3, properties = $$props.properties);
+      if ("visible" in $$props) $$invalidate(9, visible = $$props.visible);
     };
-
-    var children;
-    var properties;
-    var title;
-    var visible;
 
     $$self.$$.update = function () {
       if ($$self.$$.dirty &
-      /*content*/
-      512) {
-         $$invalidate(3, children = content.children);
-      }
-
-      if ($$self.$$.dirty &
-      /*content*/
-      512) {
-         $$invalidate(4, properties = content.properties);
-      }
-
-      if ($$self.$$.dirty &
-      /*properties*/
-      16) {
-         $$invalidate(5, title = properties.title);
-      }
-
-      if ($$self.$$.dirty &
-      /*properties*/
-      16) {
-         $$invalidate(10, visible = properties.visible);
-      }
-
-      if ($$self.$$.dirty &
       /*visible, children, type*/
-      1033) {
+      517) {
          {
           if (visible === true) {
-            $$invalidate(1, state = 1);
+            $$invalidate(4, state = 1);
           } else if (visible === false) {
-            $$invalidate(1, state = 0);
+            $$invalidate(4, state = 0);
           } else {
-            $$invalidate(1, state = -1);
+            $$invalidate(4, state = -1);
           }
 
           if (Array.isArray(children) && typeof visible !== "undefined") {
             for (var i = 0; i < children.length; i++) {
-              $$invalidate(3, children[i].content.properties.visible = visible, children);
+              $$invalidate(0, children[i].content.properties.visible = visible, children);
               dispatch("change:visible", {
                 properties: children[i].content.properties,
                 type: type,
@@ -11139,7 +11092,7 @@ var Example = (function () {
       }
     };
 
-    return [type, state, expanded, children, properties, title, toggleChildren, toggleVisibility, onChangeState, content, visible, dispatch, expand, change_visible_handler, change_style_handler, change_state_handler];
+    return [children, title, type, properties, state, expanded, toggleChildren, toggleVisibility, onChangeState, visible, dispatch, expand, change_visible_handler, change_style_handler, change_state_handler];
   }
 
   var Node = /*#__PURE__*/function (_SvelteComponent) {
@@ -11152,8 +11105,11 @@ var Example = (function () {
 
       _this = _possibleConstructorReturn(this, _getPrototypeOf(Node).call(this));
       init(_assertThisInitialized(_this), options, instance, create_fragment, safe_not_equal, {
-        content: 9,
-        type: 0
+        title: 1,
+        type: 2,
+        children: 0,
+        properties: 3,
+        visible: 9
       });
       return _this;
     }
@@ -129984,17 +129940,14 @@ var Example = (function () {
 
   function create_fragment$1(ctx) {
     var current;
-    var node_spread_levels = [
-    /*data*/
-    ctx[0]];
-    var node_props = {};
-
-    for (var i = 0; i < node_spread_levels.length; i += 1) {
-      node_props = assign(node_props, node_spread_levels[i]);
-    }
-
     var node = new Node({
-      props: node_props
+      props: {
+        type: "group",
+        children: Result.children,
+        properties: Result.properties,
+        title: Result.properties.title,
+        visible: Result.properties.visible
+      }
     });
     node.$on("change:visible", onChangeVisible);
     return {
@@ -130005,17 +129958,7 @@ var Example = (function () {
         mount_component(node, target, anchor);
         current = true;
       },
-      p: function p(ctx, _ref) {
-        var _ref2 = _slicedToArray(_ref, 1),
-            dirty = _ref2[0];
-
-        var node_changes = dirty &
-        /*data*/
-        1 ? get_spread_update(node_spread_levels, [get_spread_object(
-        /*data*/
-        ctx[0])]) : {};
-        node.$set(node_changes);
-      },
+      p: noop,
       i: function i(local) {
         if (current) return;
         transition_in(node.$$.fragment, local);
@@ -130037,11 +129980,7 @@ var Example = (function () {
 
   function instance$1($$self) {
     console.log(Result);
-    var data = {
-      content: Result,
-      type: "group"
-    };
-    return [data];
+    return [];
   }
 
   var App = /*#__PURE__*/function (_SvelteComponent) {

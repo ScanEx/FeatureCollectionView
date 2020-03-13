@@ -6,19 +6,17 @@
     import 'core-js/stable';    
 
     const dispatch = createEventDispatcher();
-    
-    export let content;    
+        
+    export let title;
     export let type;
+    export let children;
+    export let properties;
+    export let visible;
 
     let state = 0;
-    let expanded = false;    
-    
-    $: children = content.children;
-    $: properties = content.properties;
-    $: title = properties.title;
-    $: visible = properties.visible;
+    let expanded = false;        
 
-    $: {        
+    $: {
         if (visible === true) {
             state = 1;
         }
@@ -46,7 +44,7 @@
             expanded = true;
             if ((!Array.isArray(children) || children.length === 0) && typeof expand === 'function') {
                 const items = await expand(properties);
-                children = items;                
+                children = items;    
             }
         }
     }
@@ -98,7 +96,11 @@
     <div class="scanex-layer-tree-children" class:scanex-layer-tree-hidden="{!expanded}">
         {#each children as item, i}            
             <svelte:self
-                {...item}
+                type="{item.type}"
+                children="{item.content.children}"
+                properties="{item.content.properties}"
+                title="{item.content.properties.title}"                
+                visible="{item.content.properties.visible}"
                 on:change:visible
                 on:change:style
                 on:change:state="{({detail}) => onChangeState(detail, i)}" />            
