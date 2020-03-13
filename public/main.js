@@ -10539,7 +10539,7 @@ var Example = (function () {
     child_ctx[16] = list[i];
     child_ctx[18] = i;
     return child_ctx;
-  } // (93:47) 
+  } // (92:47) 
 
 
   function create_if_block_3(ctx) {
@@ -10557,7 +10557,7 @@ var Example = (function () {
         if (detaching) detach(i);
       }
     };
-  } // (91:47) 
+  } // (90:47) 
 
 
   function create_if_block_2(ctx) {
@@ -10575,7 +10575,7 @@ var Example = (function () {
         if (detaching) detach(i);
       }
     };
-  } // (86:8) {#if type === 'group'}
+  } // (85:8) {#if type === 'group'}
 
 
   function create_if_block_1(ctx) {
@@ -10620,7 +10620,7 @@ var Example = (function () {
         dispose();
       }
     };
-  } // (98:4) {#if Array.isArray(children) && children.length}
+  } // (97:4) {#if Array.isArray(children) && children.length}
 
 
   function create_if_block(ctx) {
@@ -10731,7 +10731,7 @@ var Example = (function () {
         destroy_each(each_blocks, detaching);
       }
     };
-  } // (100:8) {#each children as item, i}
+  } // (99:8) {#each children as item, i}
 
 
   function create_each_block(ctx) {
@@ -10997,14 +10997,14 @@ var Example = (function () {
                 }
 
                 $$invalidate(2, expanded = false);
-                _context.next = 11;
+                _context.next = 10;
                 break;
 
               case 4:
                 $$invalidate(2, expanded = true);
 
                 if (!((!Array.isArray(children) || children.length === 0) && typeof expand === "function")) {
-                  _context.next = 11;
+                  _context.next = 10;
                   break;
                 }
 
@@ -11014,9 +11014,8 @@ var Example = (function () {
               case 8:
                 items = _context.sent;
                 $$invalidate(3, children = items);
-                loaded = true;
 
-              case 11:
+              case 10:
               case "end":
                 return _context.stop();
             }

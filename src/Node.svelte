@@ -46,8 +46,7 @@
             expanded = true;
             if ((!Array.isArray(children) || children.length === 0) && typeof expand === 'function') {
                 const items = await expand(properties);
-                children = items;
-                loaded = true;
+                children = items;                
             }
         }
     }
