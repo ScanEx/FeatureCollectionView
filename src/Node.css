@@ -7,12 +7,11 @@
     height: 18px;
 }
 .scanex-layer-tree-node .scanex-layer-tree-header > * {
-    vertical-align: middle;
+    vertical-align: top;
 }
-.scanex-layer-tree-node .scanex-layer-tree-header > .scanex-layer-tree-node-visibility,
-.scanex-layer-tree-node .scanex-layer-tree-header > .scanex-layer-tree-node-folder {
+.scanex-layer-tree-node .scanex-layer-tree-header > i {
     float: left;
-    margin-right: 6px;
+    margin-right: 5px;
 }
 .scanex-layer-tree-node .scanex-layer-tree-header > .scanex-layer-tree-title {
     clear: left;
@@ -22,7 +21,5 @@
     display: none;
 }
 .scanex-layer-tree-node .scanex-layer-tree-children {
-    margin-left: 21px;
-    margin-top: 6px;
-    margin-bottom: 6px;
+    margin-left: 22px;
 }
