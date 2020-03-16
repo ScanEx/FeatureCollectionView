@@ -8,10 +8,10 @@
 
     const dispatch = createEventDispatcher();
         
-    export let title;
+    export let title = '';
     export let visible = false;
-    export let properties;
-    export let children;
+    export let properties = {};
+    export let children = [];
         
     let expanded = false;
     let state = 0;    

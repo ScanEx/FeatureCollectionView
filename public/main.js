@@ -11176,11 +11176,14 @@ var Example = (function () {
 
   function instance$1($$self, $$props, $$invalidate) {
     var dispatch = createEventDispatcher();
-    var title = $$props.title;
+    var _$$props$title = $$props.title,
+        title = _$$props$title === void 0 ? "" : _$$props$title;
     var _$$props$visible = $$props.visible,
         visible = _$$props$visible === void 0 ? false : _$$props$visible;
-    var properties = $$props.properties;
-    var children = $$props.children;
+    var _$$props$properties = $$props.properties,
+        properties = _$$props$properties === void 0 ? {} : _$$props$properties;
+    var _$$props$children = $$props.children,
+        children = _$$props$children === void 0 ? [] : _$$props$children;
     var expanded = false;
     var state = 0;
     var expand = getContext("expand");
