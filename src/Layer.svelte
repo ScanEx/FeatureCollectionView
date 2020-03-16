@@ -9,7 +9,7 @@
 
     function toggleVisibility () {
         visible = !visible;
-        // properties.visible = visible;
+        properties.visible = visible;
         dispatch('change:visible', {properties, type: 'layer', visible});
     }
 

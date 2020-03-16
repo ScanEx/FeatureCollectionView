@@ -5030,10 +5030,10 @@ var Example = (function () {
     function select_block_type(ctx, dirty) {
       if (
       /*properties*/
-      ctx[2].type === "Vector") return create_if_block;
+      ctx[0].type === "Vector") return create_if_block;
       if (
       /*properties*/
-      ctx[2].type === "Raster") return create_if_block_1;
+      ctx[0].type === "Raster") return create_if_block_1;
     }
 
     var current_block_type = select_block_type(ctx);
@@ -5049,14 +5049,14 @@ var Example = (function () {
         label = element("label");
         t2 = text(
         /*title*/
-        ctx[1]);
+        ctx[2]);
         attr(i, "class", "scanex-layer-tree-node-visibility scanex-layer-tree-icon");
         toggle_class(i, "check-square",
         /*visible*/
-        ctx[0]);
+        ctx[1]);
         toggle_class(i, "square", !
         /*visible*/
-        ctx[0]);
+        ctx[1]);
         attr(label, "class", "scanex-layer-tree-title");
         attr(div0, "class", "scanex-layer-tree-header");
         attr(div1, "class", "scanex-layer-tree-layer");
@@ -5080,18 +5080,18 @@ var Example = (function () {
 
         if (dirty &
         /*visible*/
-        1) {
+        2) {
           toggle_class(i, "check-square",
           /*visible*/
-          ctx[0]);
+          ctx[1]);
         }
 
         if (dirty &
         /*visible*/
-        1) {
+        2) {
           toggle_class(i, "square", !
           /*visible*/
-          ctx[0]);
+          ctx[1]);
         }
 
         if (current_block_type !== (current_block_type = select_block_type(ctx))) {
@@ -5106,9 +5106,9 @@ var Example = (function () {
 
         if (dirty &
         /*title*/
-        2) set_data(t2,
+        4) set_data(t2,
         /*title*/
-        ctx[1]);
+        ctx[2]);
       },
       i: noop,
       o: noop,
@@ -5132,8 +5132,8 @@ var Example = (function () {
         visible = _$$props$visible === void 0 ? false : _$$props$visible;
 
     function toggleVisibility() {
-      $$invalidate(0, visible = !visible); // properties.visible = visible;
-
+      $$invalidate(1, visible = !visible);
+      $$invalidate(0, properties.visible = visible, properties);
       dispatch("change:visible", {
         properties: properties,
         type: "layer",
@@ -5142,12 +5142,12 @@ var Example = (function () {
     }
 
     $$self.$set = function ($$props) {
-      if ("title" in $$props) $$invalidate(1, title = $$props.title);
-      if ("properties" in $$props) $$invalidate(2, properties = $$props.properties);
-      if ("visible" in $$props) $$invalidate(0, visible = $$props.visible);
+      if ("title" in $$props) $$invalidate(2, title = $$props.title);
+      if ("properties" in $$props) $$invalidate(0, properties = $$props.properties);
+      if ("visible" in $$props) $$invalidate(1, visible = $$props.visible);
     };
 
-    return [visible, title, properties, toggleVisibility];
+    return [properties, visible, title, toggleVisibility];
   }
 
   var Layer = /*#__PURE__*/function (_SvelteComponent) {
@@ -5160,9 +5160,9 @@ var Example = (function () {
 
       _this = _possibleConstructorReturn(this, _getPrototypeOf(Layer).call(this));
       init(_assertThisInitialized(_this), options, instance, create_fragment, safe_not_equal, {
-        title: 1,
-        properties: 2,
-        visible: 0
+        title: 2,
+        properties: 0,
+        visible: 1
       });
       return _this;
     }
@@ -10674,10 +10674,11 @@ var Example = (function () {
 
   function get_each_context(ctx, list, i) {
     var child_ctx = ctx.slice();
-    child_ctx[16] = list[i];
-    child_ctx[18] = i;
+    child_ctx[15] = list[i];
+    child_ctx[16] = list;
+    child_ctx[17] = i;
     return child_ctx;
-  } // (90:12) {:else}
+  } // (86:12) {:else}
 
 
   function create_else_block(ctx) {
@@ -10686,7 +10687,9 @@ var Example = (function () {
 
     function layer_visible_binding(value) {
       /*layer_visible_binding*/
-      ctx[14].call(null, value);
+      ctx[13].call(null, value,
+      /*item*/
+      ctx[15]);
     }
 
     function change_visible_handler_1() {
@@ -10698,27 +10701,27 @@ var Example = (function () {
 
       return (
         /*change_visible_handler_1*/
-        (_ctx = ctx)[15].apply(_ctx, [
+        (_ctx = ctx)[14].apply(_ctx, [
         /*i*/
-        ctx[18]].concat(args))
+        ctx[17]].concat(args))
       );
     }
 
     var layer_props = {
       properties:
       /*item*/
-      ctx[16].content.properties,
+      ctx[15].content.properties,
       title:
       /*item*/
-      ctx[16].content.properties.title
+      ctx[15].content.properties.title
     };
 
     if (
-    /*checked*/
-    ctx[4] !== void 0) {
+    /*item*/
+    ctx[15].content.properties.visible !== void 0) {
       layer_props.visible =
-      /*checked*/
-      ctx[4];
+      /*item*/
+      ctx[15].content.properties.visible;
     }
 
     var layer = new Layer({
@@ -10743,20 +10746,20 @@ var Example = (function () {
         /*children*/
         1) layer_changes.properties =
         /*item*/
-        ctx[16].content.properties;
+        ctx[15].content.properties;
         if (dirty &
         /*children*/
         1) layer_changes.title =
         /*item*/
-        ctx[16].content.properties.title;
+        ctx[15].content.properties.title;
 
         if (!updating_visible && dirty &
-        /*checked*/
-        16) {
+        /*children*/
+        1) {
           updating_visible = true;
           layer_changes.visible =
-          /*checked*/
-          ctx[4];
+          /*item*/
+          ctx[15].content.properties.visible;
           add_flush_callback(function () {
             return updating_visible = false;
           });
@@ -10777,7 +10780,7 @@ var Example = (function () {
         destroy_component(layer, detaching);
       }
     };
-  } // (83:12) {#if item.type === 'group'}
+  } // (79:12) {#if item.type === 'group'}
 
 
   function create_if_block$1(ctx) {
@@ -10786,7 +10789,9 @@ var Example = (function () {
 
     function group_visible_binding(value) {
       /*group_visible_binding*/
-      ctx[12].call(null, value);
+      ctx[11].call(null, value,
+      /*item*/
+      ctx[15]);
     }
 
     function change_visible_handler() {
@@ -10798,30 +10803,30 @@ var Example = (function () {
 
       return (
         /*change_visible_handler*/
-        (_ctx2 = ctx)[13].apply(_ctx2, [
+        (_ctx2 = ctx)[12].apply(_ctx2, [
         /*i*/
-        ctx[18]].concat(args))
+        ctx[17]].concat(args))
       );
     }
 
     var group_props = {
       properties:
       /*item*/
-      ctx[16].content.properties,
+      ctx[15].content.properties,
       title:
       /*item*/
-      ctx[16].content.properties.title,
+      ctx[15].content.properties.title,
       children:
       /*item*/
-      ctx[16].content.children
+      ctx[15].content.children
     };
 
     if (
-    /*checked*/
-    ctx[4] !== void 0) {
+    /*item*/
+    ctx[15].content.properties.visible !== void 0) {
       group_props.visible =
-      /*checked*/
-      ctx[4];
+      /*item*/
+      ctx[15].content.properties.visible;
     }
 
     var group = new Group({
@@ -10846,25 +10851,25 @@ var Example = (function () {
         /*children*/
         1) group_changes.properties =
         /*item*/
-        ctx[16].content.properties;
+        ctx[15].content.properties;
         if (dirty &
         /*children*/
         1) group_changes.title =
         /*item*/
-        ctx[16].content.properties.title;
+        ctx[15].content.properties.title;
         if (dirty &
         /*children*/
         1) group_changes.children =
         /*item*/
-        ctx[16].content.children;
+        ctx[15].content.children;
 
         if (!updating_visible && dirty &
-        /*checked*/
-        16) {
+        /*children*/
+        1) {
           updating_visible = true;
           group_changes.visible =
-          /*checked*/
-          ctx[4];
+          /*item*/
+          ctx[15].content.properties.visible;
           add_flush_callback(function () {
             return updating_visible = false;
           });
@@ -10885,7 +10890,7 @@ var Example = (function () {
         destroy_component(group, detaching);
       }
     };
-  } // (82:8) {#each children as item, i}
+  } // (78:8) {#each children as item, i}
 
 
   function create_each_block(ctx) {
@@ -10899,7 +10904,7 @@ var Example = (function () {
     function select_block_type(ctx, dirty) {
       if (
       /*item*/
-      ctx[16].type === "group") return 0;
+      ctx[15].type === "group") return 0;
       return 1;
     }
 
@@ -11045,9 +11050,9 @@ var Example = (function () {
         current = true;
         dispose = [listen(i0, "click", stop_propagation(
         /*toggleVisibility*/
-        ctx[6])), listen(i1, "click", stop_propagation(
+        ctx[5])), listen(i1, "click", stop_propagation(
         /*toggleChildren*/
-        ctx[5]))];
+        ctx[4]))];
       },
       p: function p(ctx, _ref) {
         var _ref2 = _slicedToArray(_ref, 1),
@@ -11100,8 +11105,8 @@ var Example = (function () {
         ctx[1]);
 
         if (dirty &
-        /*children, checked, onChangeVisible*/
-        145) {
+        /*children, onChangeVisible*/
+        65) {
           each_value =
           /*children*/
           ctx[0];
@@ -11178,7 +11183,6 @@ var Example = (function () {
     var children = $$props.children;
     var expanded = false;
     var state = 0;
-    var checked = false;
     var expand = getContext("expand");
 
     function toggleChildren() {
@@ -11227,12 +11231,13 @@ var Example = (function () {
     }
 
     function toggleVisibility() {
-      $$invalidate(8, visible = !visible);
-      $$invalidate(4, checked = visible);
-      $$invalidate(3, state = visible ? 1 : 0); // properties.visible = visible;
-      // for (let i = 0; i < children.length; ++i) {
-      //     children[i].content.properties.visible = checked;
-      // }
+      $$invalidate(7, visible = !visible);
+      $$invalidate(3, state = visible ? 1 : 0);
+      $$invalidate(8, properties.visible = visible, properties);
+
+      for (var i = 0; i < children.length; ++i) {
+        $$invalidate(0, children[i].content.properties.visible = visible, children);
+      }
 
       dispatch("change:visible", {
         properties: properties,
@@ -11242,27 +11247,26 @@ var Example = (function () {
     }
 
     function onChangeVisible(detail, i) {
-      // children[i].content.properties.visible = detail.visible;
+      $$invalidate(0, children[i].content.properties.visible = detail.visible, children);
+
       if (children.every(function (_ref3) {
         var visible = _ref3.content.properties.visible;
         return typeof visible === "boolean" && visible;
       })) {
-        $$invalidate(8, visible = true);
+        $$invalidate(7, visible = true);
         $$invalidate(3, state = 1);
-        $$invalidate(4, checked = true);
       } else if (children.every(function (_ref4) {
         var visible = _ref4.content.properties.visible;
         return typeof visible === "boolean" && !visible;
       })) {
-        $$invalidate(8, visible = false);
+        $$invalidate(7, visible = false);
         $$invalidate(3, state = 0);
-        $$invalidate(4, checked = false);
       } else {
-        $$invalidate(8, visible = undefined);
+        $$invalidate(7, visible = undefined);
         $$invalidate(3, state = -1);
-      } // properties.visible = visible;
+      }
 
-
+      $$invalidate(8, properties.visible = visible, properties);
       dispatch("change:visible", {
         properties: properties,
         type: "group",
@@ -11270,34 +11274,34 @@ var Example = (function () {
       });
     }
 
-    function group_visible_binding(value) {
-      checked = value;
-      $$invalidate(4, checked);
+    function group_visible_binding(value, item) {
+      item.content.properties.visible = value;
+      $$invalidate(0, children);
     }
 
     var change_visible_handler = function change_visible_handler(i, _ref5) {
       var detail = _ref5.detail;
-      return onChangeVisible();
+      return onChangeVisible(detail, i);
     };
 
-    function layer_visible_binding(value) {
-      checked = value;
-      $$invalidate(4, checked);
+    function layer_visible_binding(value, item) {
+      item.content.properties.visible = value;
+      $$invalidate(0, children);
     }
 
     var change_visible_handler_1 = function change_visible_handler_1(i, _ref6) {
       var detail = _ref6.detail;
-      return onChangeVisible();
+      return onChangeVisible(detail, i);
     };
 
     $$self.$set = function ($$props) {
       if ("title" in $$props) $$invalidate(1, title = $$props.title);
-      if ("visible" in $$props) $$invalidate(8, visible = $$props.visible);
-      if ("properties" in $$props) $$invalidate(9, properties = $$props.properties);
+      if ("visible" in $$props) $$invalidate(7, visible = $$props.visible);
+      if ("properties" in $$props) $$invalidate(8, properties = $$props.properties);
       if ("children" in $$props) $$invalidate(0, children = $$props.children);
     };
 
-    return [children, title, expanded, state, checked, toggleChildren, toggleVisibility, onChangeVisible, visible, properties, dispatch, expand, group_visible_binding, change_visible_handler, layer_visible_binding, change_visible_handler_1];
+    return [children, title, expanded, state, toggleChildren, toggleVisibility, onChangeVisible, visible, properties, dispatch, expand, group_visible_binding, change_visible_handler, layer_visible_binding, change_visible_handler_1];
   }
 
   var Group = /*#__PURE__*/function (_SvelteComponent) {
@@ -11311,8 +11315,8 @@ var Example = (function () {
       _this = _possibleConstructorReturn(this, _getPrototypeOf(Group).call(this));
       init(_assertThisInitialized(_this), options, instance$1, create_fragment$1, safe_not_equal, {
         title: 1,
-        visible: 8,
-        properties: 9,
+        visible: 7,
+        properties: 8,
         children: 0
       });
       return _this;

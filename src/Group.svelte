@@ -14,8 +14,7 @@
     export let children;
         
     let expanded = false;
-    let state = 0;
-    let checked = false;
+    let state = 0;    
 
     const expand = getContext('expand');
 
@@ -33,33 +32,30 @@
     }
 
     function toggleVisibility () {                  
-        visible = !visible;
-        checked = visible;
+        visible = !visible;        
         state = visible ? 1 : 0;
-        // properties.visible = visible;
-        // for (let i = 0; i < children.length; ++i) {
-        //     children[i].content.properties.visible = checked;
-        // }
+        properties.visible = visible;
+        for (let i = 0; i < children.length; ++i) {
+            children[i].content.properties.visible = visible;
+        }
         dispatch('change:visible', {properties, type: 'group', visible});
     }
 
     function onChangeVisible (detail, i) {        
-        // children[i].content.properties.visible = detail.visible;
+        children[i].content.properties.visible = detail.visible;
         if (children.every(({content: {properties: {visible}}}) => typeof(visible) === 'boolean' && visible)) {
             visible = true;            
-            state = 1;
-            checked = true;
+            state = 1;            
         }
         else if (children.every(({content: {properties: {visible}}}) => typeof(visible) === 'boolean' && !visible)) {
             visible = false;
-            state = 0;
-            checked = false;
+            state = 0;            
         }
         else {
             visible = undefined;
             state = -1;
         }
-        // properties.visible = visible;
+        properties.visible = visible;
         dispatch('change:visible', {properties, type: 'group', visible});
     }    
 
@@ -84,14 +80,14 @@
             <svelte:self                                
                 properties="{item.content.properties}"
                 title="{item.content.properties.title}"                
-                bind:visible="{checked}"
+                bind:visible="{item.content.properties.visible}"
                 children="{item.content.children}"
                 on:change:visible="{({detail}) => onChangeVisible(detail, i)}" />
             {:else}
             <Layer
                 properties="{item.content.properties}"
                 title="{item.content.properties.title}"                
-                bind:visible="{checked}"
+                bind:visible="{item.content.properties.visible}"
                 on:change:visible="{({detail}) => onChangeVisible(detail, i)}" />
             {/if}
         {/each}
