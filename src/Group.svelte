@@ -1,21 +1,19 @@
 <script>
     import './Group.css';
     import './icons.css';
-    import {createEventDispatcher, getContext} from 'svelte';
-    import Layer from './Layer.svelte';
+    import {createEventDispatcher, getContext, afterUpdate} from 'svelte';
+    import Vector from './Vector.svelte';
+    import Raster from './Raster.svelte';
     import 'regenerator-runtime';
     import 'core-js/stable';    
 
     const dispatch = createEventDispatcher();
-        
-    export let title = '';
-    export let visible = false;
-    export let properties = {};
-    export let children = [];
-        
-    let expanded = false;
-    let state = 0;    
-
+    
+    export let properties;    
+    export let children;   
+    
+    let expanded = false;    
+    
     const expand = getContext('expand');
 
     async function toggleChildren () {
@@ -23,7 +21,7 @@
             expanded = false;
         }
         else {
-            expanded = true;
+            expanded = true;            
             if ((!Array.isArray(children) || children.length === 0) && typeof expand === 'function') {
                 const items = await expand(properties);
                 children = items;
@@ -31,65 +29,65 @@
         }
     }
 
-    function toggleVisibility () {                  
-        visible = !visible;        
-        state = visible ? 1 : 0;
-        properties.visible = visible;
+    function toggleVisibility () {                             
+        properties.visible = !properties.visible;
         for (let i = 0; i < children.length; ++i) {
-            children[i].content.properties.visible = visible;
-        }
-        dispatch('change:visible', {properties, type: 'group', visible});
+            if (children[i].content.properties.visible != properties.visible) {
+                children[i].content.properties.visible = properties.visible;
+            }
+        } 
+        dispatch('change:visible', {properties, type: 'group'});
     }
 
-    function onChangeVisible (detail, i) {        
-        children[i].content.properties.visible = detail.visible;
-        if (children.every(({content: {properties: {visible}}}) => typeof(visible) === 'boolean' && visible)) {
-            visible = true;            
-            state = 1;            
+    function onChangeVisible () {
+        let visible_true = true;
+        let visible_false = true;
+        for (const {content} of children) {
+            visible_true = visible_true && content.properties.visible;
+            visible_false = visible_false && !content.properties.visible;
         }
-        else if (children.every(({content: {properties: {visible}}}) => typeof(visible) === 'boolean' && !visible)) {
-            visible = false;
-            state = 0;            
+        if (visible_true) {
+            properties.visible = true;            
+        }
+        else if (visible_false) {
+            properties.visible = false;            
         }
         else {
-            visible = undefined;
-            state = -1;
-        }
-        properties.visible = visible;
-        dispatch('change:visible', {properties, type: 'group', visible});
-    }    
+            properties.visible = undefined;
+        }        
+        dispatch('change:visible', {properties, type: 'group'});
+    }   
 
 </script>
 
 <div class="scanex-layer-tree-group">
     <div class="scanex-layer-tree-header">
         <i  class="scanex-layer-tree-visibility scanex-layer-tree-icon"
-            class:check-square="{state === 1}"
-            class:square="{state === 0}"
-            class:minus-square="{state === -1}"
-            on:click|stopPropagation="{toggleVisibility}"></i>        
+            class:check-square="{typeof(properties.visible) === 'boolean' && properties.visible}"
+            class:square="{typeof(properties.visible) === 'boolean' && !properties.visible}"
+            class:minus-square="{typeof(properties.visible) === 'undefined'}"
+            on:click|stopPropagation="{toggleVisibility}"></i>
         <i  class="scanex-layer-tree-folder scanex-layer-tree-icon"
             class:folder-filled="{!expanded}"
             class:folder-open-filled="{expanded}"
-            on:click|stopPropagation="{toggleChildren}"></i>        
-        <label class="scanex-layer-tree-title">{title}</label>
-    </div>    
+            on:click|stopPropagation="{toggleChildren}"></i>
+        <label class="scanex-layer-tree-title">{properties.title}</label>
+    </div>
+    {#if Array.isArray(children)}
     <div class="scanex-layer-tree-children" class:scanex-layer-tree-hidden="{!expanded}">
-        {#each children as item, i}
-            {#if item.type === 'group'}
-            <svelte:self                                
-                properties="{item.content.properties}"
-                title="{item.content.properties.title}"                
-                bind:visible="{item.content.properties.visible}"
-                children="{item.content.children}"
-                on:change:visible="{({detail}) => onChangeVisible(detail, i)}" />
+        {#each children as {type, content}}
+            {#if type === 'group'}
+            <svelte:self
+                properties="{content.properties}"
+                children="{content.children}"                
+                on:change:visible="{onChangeVisible}" />
             {:else}
-            <Layer
-                properties="{item.content.properties}"
-                title="{item.content.properties.title}"                
-                bind:visible="{item.content.properties.visible}"
-                on:change:visible="{({detail}) => onChangeVisible(detail, i)}" />
+            <svelte:component
+                this="{content.properties.type === 'Vector' ? Vector : Raster}"
+                properties="{content.properties}"                
+                on:change:visible="{onChangeVisible}" />
             {/if}
         {/each}
-    </div>    
+    </div>
+    {/if}
 </div>
