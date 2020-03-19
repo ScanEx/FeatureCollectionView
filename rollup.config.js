@@ -1,50 +1,47 @@
-import babel from 'rollup-plugin-babel';
-import resolve from 'rollup-plugin-node-resolve';
-import commonjs from 'rollup-plugin-commonjs';
-import css from 'rollup-plugin-css-porter';
-import json from 'rollup-plugin-json';
 import pkg from './package.json';
-import svelte from 'rollup-plugin-svelte';
+import babel from 'rollup-plugin-babel';
+import resolve from '@rollup/plugin-node-resolve';
+import commonjs from '@rollup/plugin-commonjs';
+import json from '@rollup/plugin-json';
+import css from 'rollup-plugin-css-porter';
 
 export default [
     {
-        input: 'example/App.svelte',
+        input: 'example/App.js',
         output: { 
             file: pkg.browser,
             format: 'iife',
             sourcemap: true,
             name: 'Example'
         },
-        plugins: [            
-            svelte(),
+        plugins: [                        
             json(),
             resolve(),            
             commonjs(),
             css({dest: 'public/main.css', minified: false}),            
             babel({                
-                extensions: ['.js', '.mjs', '.svelte'],
+                extensions: ['.js', '.mjs'],
                 exclude: ['node_modules/@babel/**', 'node_modules/core-js/**'],
-                include: ['example/App.svelte', 'src/**','node_modules/svelte/**']
+                include: ['example/App.js', 'src/**']
             }),
         ],
     },
     {
-        input: 'src/Group.svelte',
+        input: 'src/Group.js',
         output: { 
             file: pkg.main,
             format: 'cjs',
             sourcemap: true
         },
-        plugins: [            
-            svelte(),
+        plugins: [        
 	        json(),
             resolve(),
             commonjs(),
             css({dest: 'dist/scanex-feature-collection-view.css', minified: false}),
             babel({                
-                extensions: ['.js', '.mjs', '.svelte'],
+                extensions: ['.js', '.mjs'],
                 exclude: ['node_modules/@babel/**', 'node_modules/core-js/**'],
-                include: ['src/**','node_modules/svelte/**']
+                include: ['src/**']
             }),
         ],
     },   
