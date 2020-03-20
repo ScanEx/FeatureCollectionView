@@ -10357,6 +10357,11 @@ var Group = /*#__PURE__*/function (_EventTarget) {
       this._initChildren(children);
     }
   }, {
+    key: "destroy",
+    value: function destroy() {
+      this._element.remove();
+    }
+  }, {
     key: "_initChildren",
     value: function _initChildren(children) {
       var _this2 = this;

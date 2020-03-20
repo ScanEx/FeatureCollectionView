@@ -21,6 +21,9 @@ class Group extends EventTarget {
         this._visibility.addEventListener('click', this._toggleVisibility.bind(this));
         this._initChildren(children);
     }
+    destroy() { 
+        this._element.remove();       
+    }
     _initChildren(children) {        
         this._items = (Array.isArray (children) && children || []).map(({content, type}) => {
             let item;
