@@ -10553,7 +10553,7 @@ var Example = (function () {
         var _this3 = this;
 
         if (this._items.length === 0 && typeof this.expand === 'function') {
-          this.expand().then(function (children) {
+          this.expand(this._properties).then(function (children) {
             _this3._initChildren(children);
 
             if (value) {

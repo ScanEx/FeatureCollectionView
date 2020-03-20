@@ -135,7 +135,7 @@ class Group extends EventTarget {
     }  
     set expanded (value) {        
         if (this._items.length === 0 && typeof this.expand === 'function') {
-            this.expand()
+            this.expand(this._properties)
             .then(children => {
                 this._initChildren(children);
                 if (value) {
