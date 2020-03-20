@@ -9,13 +9,28 @@ import EventTarget from 'scanex-event-target';
 // }
 
 class Layer extends EventTarget {
-    constructor(container, {properties}) {
+    constructor(container, {properties, geometry}) {
         super();
         this._container = container;                
         this.render(this._container);
         this._properties = properties;
-        this.visible = this._properties.visible;
-        switch (this.type) {
+        this._geometry = geometry;
+        this.initialize();        
+    }   
+    initialize() {
+        
+        if (this._properties.visible) {
+            this._visibility.classList.remove('square');
+            this._visibility.classList.add('check-square');            
+        }
+        else {
+            this._visibility.classList.remove('check-square');
+            this._visibility.classList.add('square');            
+        }
+
+        this._visibility.addEventListener('click', this._toggleVisibility.bind(this));
+
+        switch (this._properties.type) {
             case 'Vector':                
                 this._type.classList.add('block');
                 break;
@@ -25,12 +40,16 @@ class Layer extends EventTarget {
             default:
                 break;
         }
-        this._visibility.addEventListener('click', e => {
-            e.stopPropagation();
-            this.visible = !this.visible;            
-        });
+    
         this._title.innerText = this.title;
-    }    
+    }
+    _toggleVisibility(e) {
+        e.stopPropagation();
+        this.visible = !this.visible;
+    }
+    get geometry () {
+        return this._geometry;
+    }
     get properties () {
         return this._properties;
     }
@@ -41,19 +60,26 @@ class Layer extends EventTarget {
         return typeof this._properties.visible === 'boolean' ? this._properties.visible : false;
     }
     set visible (value) {
-        if (value) {
-            this._visibility.classList.remove('square');
-            this._visibility.classList.add('check-square');
-            this._properties.visible = true;
+        if (this.visible !== value) {
+            if (value) {
+                this._visibility.classList.remove('square');
+                this._visibility.classList.add('check-square');
+                this._properties.visible = true;
+            }
+            else {
+                this._visibility.classList.remove('check-square');
+                this._visibility.classList.add('square');
+                this._properties.visible = false;
+            }            
+            let visibilityEvent = document.createEvent('Event');
+            visibilityEvent.initEvent('change:visible', false, false);
+            this.dispatchEvent(visibilityEvent);
+
+            let stateEvent = document.createEvent('Event');
+            stateEvent.initEvent('change:state', false, false);
+            stateEvent.detail = this;
+            this.dispatchEvent(stateEvent);
         }
-        else {
-            this._visibility.classList.remove('check-square');
-            this._visibility.classList.add('square');
-            this._properties.visible = false;
-        }
-        let event = document.createEvent('Event');
-        event.initEvent('change:visible', false, false);
-        this.dispatchEvent(event);
     }    
     get type () {
         return this._properties.type;
