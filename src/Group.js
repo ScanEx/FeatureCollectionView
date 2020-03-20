@@ -90,7 +90,17 @@ class Group extends EventTarget {
         return undefined;
     }
     set childrenVisibility(visible) {
-        this._items.forEach(item => item.visible = visible);
+        if (this._items.length === 0 && typeof this.expand === 'function') {
+            this.expand(this._properties)
+            .then(children => {
+                this._initChildren(children);
+                this._items.forEach(item => item.visible = visible);
+            })
+            .catch(e => console.log(e));
+        }
+        else {            
+            this._items.forEach(item => item.visible = visible);
+        }        
     }    
     get properties () {
         return this._properties;
@@ -132,46 +142,35 @@ class Group extends EventTarget {
     } 
     get expanded () {
         return this._expanded;
-    }  
-    set expanded (value) {        
+    }
+    _handleExpand(expanded) {
+        if (expanded) {
+            this._folder.classList.remove('folder-filled');
+            this._folder.classList.add('folder-open-filled');
+            this._children.classList.remove('scanex-layer-tree-hidden');
+            this._expanded = true;
+        }
+        else {
+            this._folder.classList.remove('folder-open-filled');
+            this._folder.classList.add('folder-filled');
+            this._children.classList.add('scanex-layer-tree-hidden');
+            this._expanded = false;
+        }        
+        let event = document.createEvent('Event');
+        event.initEvent('change:expanded', false, false);
+        this.dispatchEvent(event);
+    } 
+    set expanded (expanded) {        
         if (this._items.length === 0 && typeof this.expand === 'function') {
             this.expand(this._properties)
             .then(children => {
                 this._initChildren(children);
-                if (value) {
-                    this._folder.classList.remove('folder-filled');
-                    this._folder.classList.add('folder-open-filled');
-                    this._children.classList.remove('scanex-layer-tree-hidden');
-                    this._expanded = true;
-                }
-                else {
-                    this._folder.classList.remove('folder-open-filled');
-                    this._folder.classList.add('folder-filled');
-                    this._children.classList.add('scanex-layer-tree-hidden');
-                    this._expanded = false;
-                }        
-                let event = document.createEvent('Event');
-                event.initEvent('change:expanded', false, false);
-                this.dispatchEvent(event);
+                this._handleExpand(expanded);
             })
             .catch(e => console.log(e));
-        }     
+        }
         else {
-            if (value) {
-                this._folder.classList.remove('folder-filled');
-                this._folder.classList.add('folder-open-filled');
-                this._children.classList.remove('scanex-layer-tree-hidden');
-                this._expanded = true;
-            }
-            else {
-                this._folder.classList.remove('folder-open-filled');
-                this._folder.classList.add('folder-filled');
-                this._children.classList.add('scanex-layer-tree-hidden');
-                this._expanded = false;
-            }        
-            let event = document.createEvent('Event');
-            event.initEvent('change:expanded', false, false);
-            this.dispatchEvent(event);
+            this._handleExpand(expanded);
         }   
     }  
     render (container) {

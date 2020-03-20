@@ -37,6 +37,9 @@ class Layer extends EventTarget {
             case 'Raster':
                 this._type.classList.add('picture');
                 break;
+            case 'Virtual':
+                this._type.classList.add('cloud');
+                break;
             default:
                 break;
         }

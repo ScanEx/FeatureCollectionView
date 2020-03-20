@@ -10208,6 +10208,11 @@ var Layer = /*#__PURE__*/function (_EventTarget) {
           this._type.classList.add('picture');
 
           break;
+
+        case 'Virtual':
+          this._type.classList.add('cloud');
+
+          break;
       }
 
       this._title.innerText = this.title;
@@ -10411,6 +10416,31 @@ var Group = /*#__PURE__*/function (_EventTarget) {
       this.dispatchEvent(event);
     }
   }, {
+    key: "_handleExpand",
+    value: function _handleExpand(expanded) {
+      if (expanded) {
+        this._folder.classList.remove('folder-filled');
+
+        this._folder.classList.add('folder-open-filled');
+
+        this._children.classList.remove('scanex-layer-tree-hidden');
+
+        this._expanded = true;
+      } else {
+        this._folder.classList.remove('folder-open-filled');
+
+        this._folder.classList.add('folder-filled');
+
+        this._children.classList.add('scanex-layer-tree-hidden');
+
+        this._expanded = false;
+      }
+
+      var event = document.createEvent('Event');
+      event.initEvent('change:expanded', false, false);
+      this.dispatchEvent(event);
+    }
+  }, {
     key: "render",
     value: function render(container) {
       this._element = document.createElement('div');
@@ -10487,9 +10517,23 @@ var Group = /*#__PURE__*/function (_EventTarget) {
       return undefined;
     },
     set: function set(visible) {
-      this._items.forEach(function (item) {
-        return item.visible = visible;
-      });
+      var _this3 = this;
+
+      if (this._items.length === 0 && typeof this.expand === 'function') {
+        this.expand(this._properties).then(function (children) {
+          _this3._initChildren(children);
+
+          _this3._items.forEach(function (item) {
+            return item.visible = visible;
+          });
+        }).catch(function (e) {
+          return console.log(e);
+        });
+      } else {
+        this._items.forEach(function (item) {
+          return item.visible = visible;
+        });
+      }
     }
   }, {
     key: "properties",
@@ -10548,60 +10592,19 @@ var Group = /*#__PURE__*/function (_EventTarget) {
     get: function get() {
       return this._expanded;
     },
-    set: function set(value) {
-      var _this3 = this;
+    set: function set(expanded) {
+      var _this4 = this;
 
       if (this._items.length === 0 && typeof this.expand === 'function') {
         this.expand(this._properties).then(function (children) {
-          _this3._initChildren(children);
+          _this4._initChildren(children);
 
-          if (value) {
-            _this3._folder.classList.remove('folder-filled');
-
-            _this3._folder.classList.add('folder-open-filled');
-
-            _this3._children.classList.remove('scanex-layer-tree-hidden');
-
-            _this3._expanded = true;
-          } else {
-            _this3._folder.classList.remove('folder-open-filled');
-
-            _this3._folder.classList.add('folder-filled');
-
-            _this3._children.classList.add('scanex-layer-tree-hidden');
-
-            _this3._expanded = false;
-          }
-
-          var event = document.createEvent('Event');
-          event.initEvent('change:expanded', false, false);
-
-          _this3.dispatchEvent(event);
+          _this4._handleExpand(expanded);
         }).catch(function (e) {
           return console.log(e);
         });
       } else {
-        if (value) {
-          this._folder.classList.remove('folder-filled');
-
-          this._folder.classList.add('folder-open-filled');
-
-          this._children.classList.remove('scanex-layer-tree-hidden');
-
-          this._expanded = true;
-        } else {
-          this._folder.classList.remove('folder-open-filled');
-
-          this._folder.classList.add('folder-filled');
-
-          this._children.classList.add('scanex-layer-tree-hidden');
-
-          this._expanded = false;
-        }
-
-        var event = document.createEvent('Event');
-        event.initEvent('change:expanded', false, false);
-        this.dispatchEvent(event);
+        this._handleExpand(expanded);
       }
     }
   }]);
