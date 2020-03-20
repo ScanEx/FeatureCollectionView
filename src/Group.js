@@ -4,24 +4,28 @@ import Layer from './Layer.js';
 import EventTarget from 'scanex-event-target';
 
 class Group extends EventTarget {
-    constructor(container, {properties, children}) {
+    constructor(container, {properties, children}, expand) {
         super();
         this._container = container;                
         this.render(this._container);
-        this._properties = properties;        
-        this.initialize(Array.isArray (children) && children || []);
+        this._properties = properties;
+        this.expand = expand;
+        this._init(children);
     }
-    initialize(children) {
-        
+    _init(children) {        
         this._expanded = false;
         this._folder.classList.add('folder-filled');
         this._children.classList.add('scanex-layer-tree-hidden');        
         this._folder.addEventListener('click', this._toggleChildren.bind(this));
-
-        this._items = children.map(({content, type}) => {
+        this._title.innerText = this.title;
+        this._visibility.addEventListener('click', this._toggleVisibility.bind(this));
+        this._initChildren(children);
+    }
+    _initChildren(children) {        
+        this._items = (Array.isArray (children) && children || []).map(({content, type}) => {
             let item;
             if (type === 'group') {
-                item = new Group (this._children, content);
+                item = new Group (this._children, content, this.expand);
             }
             else if (type === 'layer') {
                 item = new Layer (this._children, content);
@@ -43,12 +47,6 @@ class Group extends EventTarget {
         else {
             this._visibility.classList.add('minus-square');
         }
-        this._visibility.addEventListener('click', this._toggleVisibility.bind(this));
-            
-        this._title.innerText = this.title;
-    }
-    set childrenVisibility(visible) {
-        this._items.forEach(item => item.visible = visible);
     }
     _toggleChildren(e) {
         e.stopPropagation();
@@ -58,7 +56,21 @@ class Group extends EventTarget {
         e.stopPropagation();        
         this.childrenVisibility = !this.visible;
     }
+    _onChangeVisible(e) {
+        e.stopPropagation();
+        this.visible = this.childrenVisibility;
+    } 
+    _onChangeState (e) {
+        e.stopPropagation();
+        let event = document.createEvent('Event');
+        event.initEvent('change:state', false, false);
+        event.detail = e.detail;
+        this.dispatchEvent(event);
+    }    
     get childrenVisibility() {
+        if (this._items.length === 0) {
+            return false;
+        }
         const state = this._items.map(item => item.visible);
         let isTrue = true;
         for (let i = 0; i < state.length; ++i) {
@@ -77,17 +89,9 @@ class Group extends EventTarget {
         }
         return undefined;
     }
-    _onChangeVisible(e) {
-        e.stopPropagation();
-        this.visible = this.childrenVisibility;
-    } 
-    _onChangeState (e) {
-        e.stopPropagation();
-        let event = document.createEvent('Event');
-        event.initEvent('change:state', false, false);
-        event.detail = e.detail;
-        this.dispatchEvent(event);
-    }
+    set childrenVisibility(visible) {
+        this._items.forEach(item => item.visible = visible);
+    }    
     get properties () {
         return this._properties;
     }
@@ -130,21 +134,45 @@ class Group extends EventTarget {
         return this._expanded;
     }  
     set expanded (value) {        
-        if (value) {
-            this._folder.classList.remove('folder-filled');
-            this._folder.classList.add('folder-open-filled');
-            this._children.classList.remove('scanex-layer-tree-hidden');
-            this._expanded = true;
-        }
+        if (this._items.length === 0 && typeof this.expand === 'function') {
+            this.expand()
+            .then(children => {
+                this._initChildren(children);
+                if (value) {
+                    this._folder.classList.remove('folder-filled');
+                    this._folder.classList.add('folder-open-filled');
+                    this._children.classList.remove('scanex-layer-tree-hidden');
+                    this._expanded = true;
+                }
+                else {
+                    this._folder.classList.remove('folder-open-filled');
+                    this._folder.classList.add('folder-filled');
+                    this._children.classList.add('scanex-layer-tree-hidden');
+                    this._expanded = false;
+                }        
+                let event = document.createEvent('Event');
+                event.initEvent('change:expanded', false, false);
+                this.dispatchEvent(event);
+            })
+            .catch(e => console.log(e));
+        }     
         else {
-            this._folder.classList.remove('folder-open-filled');
-            this._folder.classList.add('folder-filled');
-            this._children.classList.add('scanex-layer-tree-hidden');
-            this._expanded = false;
-        }
-        let event = document.createEvent('Event');
-        event.initEvent('change:expanded', false, false);
-        this.dispatchEvent(event);
+            if (value) {
+                this._folder.classList.remove('folder-filled');
+                this._folder.classList.add('folder-open-filled');
+                this._children.classList.remove('scanex-layer-tree-hidden');
+                this._expanded = true;
+            }
+            else {
+                this._folder.classList.remove('folder-open-filled');
+                this._folder.classList.add('folder-filled');
+                this._children.classList.add('scanex-layer-tree-hidden');
+                this._expanded = false;
+            }        
+            let event = document.createEvent('Event');
+            event.initEvent('change:expanded', false, false);
+            this.dispatchEvent(event);
+        }   
     }  
     render (container) {
         this._element = document.createElement('div');

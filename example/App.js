@@ -1,5 +1,5 @@
 import Group from '../src/Group.js';
-import {Result} from './ais.json';
+import {Result} from './moskva.json';
 
 console.log(Result);
 

@@ -10178,14 +10178,14 @@ var Layer = /*#__PURE__*/function (_EventTarget) {
     _this._properties = properties;
     _this._geometry = geometry;
 
-    _this.initialize();
+    _this._init();
 
     return _this;
   }
 
   _createClass(Layer, [{
-    key: "initialize",
-    value: function initialize() {
+    key: "_init",
+    value: function _init() {
       if (this._properties.visible) {
         this._visibility.classList.remove('square');
 
@@ -10313,7 +10313,7 @@ var Layer = /*#__PURE__*/function (_EventTarget) {
 var Group = /*#__PURE__*/function (_EventTarget) {
   _inherits(Group, _EventTarget);
 
-  function Group(container, _ref) {
+  function Group(container, _ref, expand) {
     var _this;
 
     var properties = _ref.properties,
@@ -10327,17 +10327,16 @@ var Group = /*#__PURE__*/function (_EventTarget) {
     _this.render(_this._container);
 
     _this._properties = properties;
+    _this.expand = expand;
 
-    _this.initialize(Array.isArray(children) && children || []);
+    _this._init(children);
 
     return _this;
   }
 
   _createClass(Group, [{
-    key: "initialize",
-    value: function initialize(children) {
-      var _this2 = this;
-
+    key: "_init",
+    value: function _init(children) {
       this._expanded = false;
 
       this._folder.classList.add('folder-filled');
@@ -10346,13 +10345,24 @@ var Group = /*#__PURE__*/function (_EventTarget) {
 
       this._folder.addEventListener('click', this._toggleChildren.bind(this));
 
-      this._items = children.map(function (_ref2) {
+      this._title.innerText = this.title;
+
+      this._visibility.addEventListener('click', this._toggleVisibility.bind(this));
+
+      this._initChildren(children);
+    }
+  }, {
+    key: "_initChildren",
+    value: function _initChildren(children) {
+      var _this2 = this;
+
+      this._items = (Array.isArray(children) && children || []).map(function (_ref2) {
         var content = _ref2.content,
             type = _ref2.type;
         var item;
 
         if (type === 'group') {
-          item = new Group(_this2._children, content);
+          item = new Group(_this2._children, content, _this2.expand);
         } else if (type === 'layer') {
           item = new Layer(_this2._children, content);
         }
@@ -10372,10 +10382,6 @@ var Group = /*#__PURE__*/function (_EventTarget) {
       } else {
         this._visibility.classList.add('minus-square');
       }
-
-      this._visibility.addEventListener('click', this._toggleVisibility.bind(this));
-
-      this._title.innerText = this.title;
     }
   }, {
     key: "_toggleChildren",
@@ -10449,12 +10455,11 @@ var Group = /*#__PURE__*/function (_EventTarget) {
     }
   }, {
     key: "childrenVisibility",
-    set: function set(visible) {
-      this._items.forEach(function (item) {
-        return item.visible = visible;
-      });
-    },
     get: function get() {
+      if (this._items.length === 0) {
+        return false;
+      }
+
       var state = this._items.map(function (item) {
         return item.visible;
       });
@@ -10480,6 +10485,11 @@ var Group = /*#__PURE__*/function (_EventTarget) {
       }
 
       return undefined;
+    },
+    set: function set(visible) {
+      this._items.forEach(function (item) {
+        return item.visible = visible;
+      });
     }
   }, {
     key: "properties",
@@ -10539,27 +10549,60 @@ var Group = /*#__PURE__*/function (_EventTarget) {
       return this._expanded;
     },
     set: function set(value) {
-      if (value) {
-        this._folder.classList.remove('folder-filled');
+      var _this3 = this;
 
-        this._folder.classList.add('folder-open-filled');
+      if (this._items.length === 0 && typeof this.expand === 'function') {
+        this.expand().then(function (children) {
+          _this3._initChildren(children);
 
-        this._children.classList.remove('scanex-layer-tree-hidden');
+          if (value) {
+            _this3._folder.classList.remove('folder-filled');
 
-        this._expanded = true;
+            _this3._folder.classList.add('folder-open-filled');
+
+            _this3._children.classList.remove('scanex-layer-tree-hidden');
+
+            _this3._expanded = true;
+          } else {
+            _this3._folder.classList.remove('folder-open-filled');
+
+            _this3._folder.classList.add('folder-filled');
+
+            _this3._children.classList.add('scanex-layer-tree-hidden');
+
+            _this3._expanded = false;
+          }
+
+          var event = document.createEvent('Event');
+          event.initEvent('change:expanded', false, false);
+
+          _this3.dispatchEvent(event);
+        }).catch(function (e) {
+          return console.log(e);
+        });
       } else {
-        this._folder.classList.remove('folder-open-filled');
+        if (value) {
+          this._folder.classList.remove('folder-filled');
 
-        this._folder.classList.add('folder-filled');
+          this._folder.classList.add('folder-open-filled');
 
-        this._children.classList.add('scanex-layer-tree-hidden');
+          this._children.classList.remove('scanex-layer-tree-hidden');
 
-        this._expanded = false;
+          this._expanded = true;
+        } else {
+          this._folder.classList.remove('folder-open-filled');
+
+          this._folder.classList.add('folder-filled');
+
+          this._children.classList.add('scanex-layer-tree-hidden');
+
+          this._expanded = false;
+        }
+
+        var event = document.createEvent('Event');
+        event.initEvent('change:expanded', false, false);
+        this.dispatchEvent(event);
       }
-
-      var event = document.createEvent('Event');
-      event.initEvent('change:expanded', false, false);
-      this.dispatchEvent(event);
     }
   }]);
 

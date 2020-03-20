@@ -15,9 +15,9 @@ class Layer extends EventTarget {
         this.render(this._container);
         this._properties = properties;
         this._geometry = geometry;
-        this.initialize();        
+        this._init();        
     }   
-    initialize() {
+    _init() {
         
         if (this._properties.visible) {
             this._visibility.classList.remove('square');
