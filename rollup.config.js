@@ -37,7 +37,7 @@ export default [
 	        json(),
             resolve(),
             commonjs(),
-            css({dest: 'dist/scanex-feature-collection-view.css', minified: false}),
+            css({dest: 'dist/scanex-layer-tree-view.css', minified: false}),
             babel({                
                 extensions: ['.js', '.mjs'],
                 exclude: ['node_modules/@babel/**', 'node_modules/core-js/**'],
