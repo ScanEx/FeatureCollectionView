@@ -10328,7 +10328,7 @@ var Group = /*#__PURE__*/function (_EventTarget) {
 
     _this._properties = properties;
 
-    _this.initialize(children);
+    _this.initialize(Array.isArray(children) && children || []);
 
     return _this;
   }

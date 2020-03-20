@@ -8,9 +8,8 @@ class Group extends EventTarget {
         super();
         this._container = container;                
         this.render(this._container);
-        this._properties = properties;
-        
-        this.initialize(children);
+        this._properties = properties;        
+        this.initialize(Array.isArray (children) && children || []);
     }
     initialize(children) {
         
