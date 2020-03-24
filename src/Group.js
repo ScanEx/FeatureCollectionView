@@ -18,6 +18,10 @@ class Group extends EventTarget {
         this._properties = properties;
         this._init(children);
     }
+    get layers () {
+        return Array.isArray(this._items) ?
+            this._items.reduce((a,x) => a.concat(x.layers), []) : [];
+    }
     _init(children) {        
         this._expanded = false;
         this._folder.classList.add('folder-filled');

@@ -590,33 +590,10 @@ var Example = (function () {
     }
   };
 
-  var aFunction$1 = function (it) {
-    if (typeof it != 'function') {
-      throw TypeError(String(it) + ' is not a function');
-    } return it;
-  };
-
-  // optional / simple context binding
-  var functionBindContext = function (fn, that, length) {
-    aFunction$1(fn);
-    if (that === undefined) return fn;
-    switch (length) {
-      case 0: return function () {
-        return fn.call(that);
-      };
-      case 1: return function (a) {
-        return fn.call(that, a);
-      };
-      case 2: return function (a, b) {
-        return fn.call(that, a, b);
-      };
-      case 3: return function (a, b, c) {
-        return fn.call(that, a, b, c);
-      };
-    }
-    return function (/* ...args */) {
-      return fn.apply(that, arguments);
-    };
+  // `IsArray` abstract operation
+  // https://tc39.github.io/ecma262/#sec-isarray
+  var isArray = Array.isArray || function isArray(arg) {
+    return classofRaw(arg) == 'Array';
   };
 
   // `ToObject` abstract operation
@@ -625,10 +602,10 @@ var Example = (function () {
     return Object(requireObjectCoercible(argument));
   };
 
-  // `IsArray` abstract operation
-  // https://tc39.github.io/ecma262/#sec-isarray
-  var isArray = Array.isArray || function isArray(arg) {
-    return classofRaw(arg) == 'Array';
+  var createProperty = function (object, key, value) {
+    var propertyKey = toPrimitive(key);
+    if (propertyKey in object) objectDefineProperty.f(object, propertyKey, createPropertyDescriptor(0, value));
+    else object[propertyKey] = value;
   };
 
   var nativeSymbol = !!Object.getOwnPropertySymbols && !fails(function () {
@@ -669,6 +646,119 @@ var Example = (function () {
         if (C === null) C = undefined;
       }
     } return new (C === undefined ? Array : C)(length === 0 ? 0 : length);
+  };
+
+  var engineUserAgent = getBuiltIn('navigator', 'userAgent') || '';
+
+  var process = global_1.process;
+  var versions = process && process.versions;
+  var v8 = versions && versions.v8;
+  var match, version;
+
+  if (v8) {
+    match = v8.split('.');
+    version = match[0] + match[1];
+  } else if (engineUserAgent) {
+    match = engineUserAgent.match(/Edge\/(\d+)/);
+    if (!match || match[1] >= 74) {
+      match = engineUserAgent.match(/Chrome\/(\d+)/);
+      if (match) version = match[1];
+    }
+  }
+
+  var engineV8Version = version && +version;
+
+  var SPECIES$1 = wellKnownSymbol('species');
+
+  var arrayMethodHasSpeciesSupport = function (METHOD_NAME) {
+    // We can't use this feature detection in V8 since it causes
+    // deoptimization and serious performance degradation
+    // https://github.com/zloirock/core-js/issues/677
+    return engineV8Version >= 51 || !fails(function () {
+      var array = [];
+      var constructor = array.constructor = {};
+      constructor[SPECIES$1] = function () {
+        return { foo: 1 };
+      };
+      return array[METHOD_NAME](Boolean).foo !== 1;
+    });
+  };
+
+  var IS_CONCAT_SPREADABLE = wellKnownSymbol('isConcatSpreadable');
+  var MAX_SAFE_INTEGER = 0x1FFFFFFFFFFFFF;
+  var MAXIMUM_ALLOWED_INDEX_EXCEEDED = 'Maximum allowed index exceeded';
+
+  // We can't use this feature detection in V8 since it causes
+  // deoptimization and serious performance degradation
+  // https://github.com/zloirock/core-js/issues/679
+  var IS_CONCAT_SPREADABLE_SUPPORT = engineV8Version >= 51 || !fails(function () {
+    var array = [];
+    array[IS_CONCAT_SPREADABLE] = false;
+    return array.concat()[0] !== array;
+  });
+
+  var SPECIES_SUPPORT = arrayMethodHasSpeciesSupport('concat');
+
+  var isConcatSpreadable = function (O) {
+    if (!isObject(O)) return false;
+    var spreadable = O[IS_CONCAT_SPREADABLE];
+    return spreadable !== undefined ? !!spreadable : isArray(O);
+  };
+
+  var FORCED = !IS_CONCAT_SPREADABLE_SUPPORT || !SPECIES_SUPPORT;
+
+  // `Array.prototype.concat` method
+  // https://tc39.github.io/ecma262/#sec-array.prototype.concat
+  // with adding support of @@isConcatSpreadable and @@species
+  _export({ target: 'Array', proto: true, forced: FORCED }, {
+    concat: function concat(arg) { // eslint-disable-line no-unused-vars
+      var O = toObject(this);
+      var A = arraySpeciesCreate(O, 0);
+      var n = 0;
+      var i, k, length, len, E;
+      for (i = -1, length = arguments.length; i < length; i++) {
+        E = i === -1 ? O : arguments[i];
+        if (isConcatSpreadable(E)) {
+          len = toLength(E.length);
+          if (n + len > MAX_SAFE_INTEGER) throw TypeError(MAXIMUM_ALLOWED_INDEX_EXCEEDED);
+          for (k = 0; k < len; k++, n++) if (k in E) createProperty(A, n, E[k]);
+        } else {
+          if (n >= MAX_SAFE_INTEGER) throw TypeError(MAXIMUM_ALLOWED_INDEX_EXCEEDED);
+          createProperty(A, n++, E);
+        }
+      }
+      A.length = n;
+      return A;
+    }
+  });
+
+  var aFunction$1 = function (it) {
+    if (typeof it != 'function') {
+      throw TypeError(String(it) + ' is not a function');
+    } return it;
+  };
+
+  // optional / simple context binding
+  var functionBindContext = function (fn, that, length) {
+    aFunction$1(fn);
+    if (that === undefined) return fn;
+    switch (length) {
+      case 0: return function () {
+        return fn.call(that);
+      };
+      case 1: return function (a) {
+        return fn.call(that, a);
+      };
+      case 2: return function (a, b) {
+        return fn.call(that, a, b);
+      };
+      case 3: return function (a, b, c) {
+        return fn.call(that, a, b, c);
+      };
+    }
+    return function (/* ...args */) {
+      return fn.apply(that, arguments);
+    };
   };
 
   var push = [].push;
@@ -782,42 +872,6 @@ var Example = (function () {
     forEach: arrayForEach
   });
 
-  var engineUserAgent = getBuiltIn('navigator', 'userAgent') || '';
-
-  var process = global_1.process;
-  var versions = process && process.versions;
-  var v8 = versions && versions.v8;
-  var match, version;
-
-  if (v8) {
-    match = v8.split('.');
-    version = match[0] + match[1];
-  } else if (engineUserAgent) {
-    match = engineUserAgent.match(/Edge\/(\d+)/);
-    if (!match || match[1] >= 74) {
-      match = engineUserAgent.match(/Chrome\/(\d+)/);
-      if (match) version = match[1];
-    }
-  }
-
-  var engineV8Version = version && +version;
-
-  var SPECIES$1 = wellKnownSymbol('species');
-
-  var arrayMethodHasSpeciesSupport = function (METHOD_NAME) {
-    // We can't use this feature detection in V8 since it causes
-    // deoptimization and serious performance degradation
-    // https://github.com/zloirock/core-js/issues/677
-    return engineV8Version >= 51 || !fails(function () {
-      var array = [];
-      var constructor = array.constructor = {};
-      constructor[SPECIES$1] = function () {
-        return { foo: 1 };
-      };
-      return array[METHOD_NAME](Boolean).foo !== 1;
-    });
-  };
-
   var $map = arrayIteration.map;
 
 
@@ -832,6 +886,57 @@ var Example = (function () {
   _export({ target: 'Array', proto: true, forced: !HAS_SPECIES_SUPPORT || !USES_TO_LENGTH$1 }, {
     map: function map(callbackfn /* , thisArg */) {
       return $map(this, callbackfn, arguments.length > 1 ? arguments[1] : undefined);
+    }
+  });
+
+  // `Array.prototype.{ reduce, reduceRight }` methods implementation
+  var createMethod$2 = function (IS_RIGHT) {
+    return function (that, callbackfn, argumentsLength, memo) {
+      aFunction$1(callbackfn);
+      var O = toObject(that);
+      var self = indexedObject(O);
+      var length = toLength(O.length);
+      var index = IS_RIGHT ? length - 1 : 0;
+      var i = IS_RIGHT ? -1 : 1;
+      if (argumentsLength < 2) while (true) {
+        if (index in self) {
+          memo = self[index];
+          index += i;
+          break;
+        }
+        index += i;
+        if (IS_RIGHT ? index < 0 : length <= index) {
+          throw TypeError('Reduce of empty array with no initial value');
+        }
+      }
+      for (;IS_RIGHT ? index >= 0 : length > index; index += i) if (index in self) {
+        memo = callbackfn(memo, self[index], index, O);
+      }
+      return memo;
+    };
+  };
+
+  var arrayReduce = {
+    // `Array.prototype.reduce` method
+    // https://tc39.github.io/ecma262/#sec-array.prototype.reduce
+    left: createMethod$2(false),
+    // `Array.prototype.reduceRight` method
+    // https://tc39.github.io/ecma262/#sec-array.prototype.reduceright
+    right: createMethod$2(true)
+  };
+
+  var $reduce = arrayReduce.left;
+
+
+
+  var STRICT_METHOD$1 = arrayMethodIsStrict('reduce');
+  var USES_TO_LENGTH$2 = arrayMethodUsesToLength('reduce', { 1: 0 });
+
+  // `Array.prototype.reduce` method
+  // https://tc39.github.io/ecma262/#sec-array.prototype.reduce
+  _export({ target: 'Array', proto: true, forced: !STRICT_METHOD$1 || !USES_TO_LENGTH$2 }, {
+    reduce: function reduce(callbackfn /* , initialValue */) {
+      return $reduce(this, callbackfn, arguments.length, arguments.length > 1 ? arguments[1] : undefined);
     }
   });
 
@@ -1240,7 +1345,7 @@ var Example = (function () {
   };
 
   // `Array.prototype.{ indexOf, includes }` methods implementation
-  var createMethod$2 = function (IS_INCLUDES) {
+  var createMethod$3 = function (IS_INCLUDES) {
     return function ($this, el, fromIndex) {
       var O = toIndexedObject$1($this);
       var length = toLength$1(O.length);
@@ -1262,10 +1367,10 @@ var Example = (function () {
   var arrayIncludes$1 = {
     // `Array.prototype.includes` method
     // https://tc39.github.io/ecma262/#sec-array.prototype.includes
-    includes: createMethod$2(true),
+    includes: createMethod$3(true),
     // `Array.prototype.indexOf` method
     // https://tc39.github.io/ecma262/#sec-array.prototype.indexof
-    indexOf: createMethod$2(false)
+    indexOf: createMethod$3(false)
   };
 
   var indexOf$1 = arrayIncludes$1.indexOf;
@@ -1456,7 +1561,7 @@ var Example = (function () {
     } return new (C === undefined ? Array : C)(length === 0 ? 0 : length);
   };
 
-  var createProperty = function (object, key, value) {
+  var createProperty$1 = function (object, key, value) {
     var propertyKey = toPrimitive$1(key);
     if (propertyKey in object) objectDefineProperty$1.f(object, propertyKey, createPropertyDescriptor$1(0, value));
     else object[propertyKey] = value;
@@ -1523,17 +1628,17 @@ var Example = (function () {
   };
 
   var HAS_SPECIES_SUPPORT$1 = arrayMethodHasSpeciesSupport$1('splice');
-  var USES_TO_LENGTH$2 = arrayMethodUsesToLength$1('splice', { ACCESSORS: true, 0: 0, 1: 2 });
+  var USES_TO_LENGTH$3 = arrayMethodUsesToLength$1('splice', { ACCESSORS: true, 0: 0, 1: 2 });
 
   var max$1$1 = Math.max;
   var min$2$1 = Math.min;
-  var MAX_SAFE_INTEGER = 0x1FFFFFFFFFFFFF;
+  var MAX_SAFE_INTEGER$1 = 0x1FFFFFFFFFFFFF;
   var MAXIMUM_ALLOWED_LENGTH_EXCEEDED = 'Maximum allowed length exceeded';
 
   // `Array.prototype.splice` method
   // https://tc39.github.io/ecma262/#sec-array.prototype.splice
   // with adding support of @@species
-  _export$1({ target: 'Array', proto: true, forced: !HAS_SPECIES_SUPPORT$1 || !USES_TO_LENGTH$2 }, {
+  _export$1({ target: 'Array', proto: true, forced: !HAS_SPECIES_SUPPORT$1 || !USES_TO_LENGTH$3 }, {
     splice: function splice(start, deleteCount /* , ...items */) {
       var O = toObject$1(this);
       var len = toLength$1(O.length);
@@ -1549,13 +1654,13 @@ var Example = (function () {
         insertCount = argumentsLength - 2;
         actualDeleteCount = min$2$1(max$1$1(toInteger$1(deleteCount), 0), len - actualStart);
       }
-      if (len + insertCount - actualDeleteCount > MAX_SAFE_INTEGER) {
+      if (len + insertCount - actualDeleteCount > MAX_SAFE_INTEGER$1) {
         throw TypeError(MAXIMUM_ALLOWED_LENGTH_EXCEEDED);
       }
       A = arraySpeciesCreate$1(O, actualDeleteCount);
       for (k = 0; k < actualDeleteCount; k++) {
         from = actualStart + k;
-        if (from in O) createProperty(A, k, O[from]);
+        if (from in O) createProperty$1(A, k, O[from]);
       }
       A.length = actualDeleteCount;
       if (insertCount < actualDeleteCount) {
@@ -2502,7 +2607,7 @@ var Example = (function () {
     fromEntries: function fromEntries(iterable) {
       var obj = {};
       iterate_1(iterable, function (k, v) {
-        createProperty(obj, k, v);
+        createProperty$1(obj, k, v);
       }, undefined, true);
       return obj;
     }
@@ -2512,11 +2617,11 @@ var Example = (function () {
 
 
   var FAILS_ON_PRIMITIVES$1 = fails$1(function () { nativeGetOwnPropertyDescriptor$2(1); });
-  var FORCED = !descriptors$1 || FAILS_ON_PRIMITIVES$1;
+  var FORCED$1 = !descriptors$1 || FAILS_ON_PRIMITIVES$1;
 
   // `Object.getOwnPropertyDescriptor` method
   // https://tc39.github.io/ecma262/#sec-object.getownpropertydescriptor
-  _export$1({ target: 'Object', stat: true, forced: FORCED, sham: !descriptors$1 }, {
+  _export$1({ target: 'Object', stat: true, forced: FORCED$1, sham: !descriptors$1 }, {
     getOwnPropertyDescriptor: function getOwnPropertyDescriptor(it, key) {
       return nativeGetOwnPropertyDescriptor$2(toIndexedObject$1(it), key);
     }
@@ -2534,7 +2639,7 @@ var Example = (function () {
       var key, descriptor;
       while (keys.length > index) {
         descriptor = getOwnPropertyDescriptor(O, key = keys[index++]);
-        if (descriptor !== undefined) createProperty(result, key, descriptor);
+        if (descriptor !== undefined) createProperty$1(result, key, descriptor);
       }
       return result;
     }
@@ -2876,14 +2981,14 @@ var Example = (function () {
       result = new C();
       for (;!(step = next.call(iterator)).done; index++) {
         value = mapping ? callWithSafeIterationClosing(iterator, mapfn, [step.value, index], true) : step.value;
-        createProperty(result, index, value);
+        createProperty$1(result, index, value);
       }
     } else {
       length = toLength$1(O.length);
       result = new C(length);
       for (;length > index; index++) {
         value = mapping ? mapfn(O[index], index) : O[index];
-        createProperty(result, index, value);
+        createProperty$1(result, index, value);
       }
     }
     result.length = index;
@@ -2956,39 +3061,39 @@ var Example = (function () {
       var index = 0;
       var argumentsLength = arguments.length;
       var result = new (typeof this == 'function' ? this : Array)(argumentsLength);
-      while (argumentsLength > index) createProperty(result, index, arguments[index++]);
+      while (argumentsLength > index) createProperty$1(result, index, arguments[index++]);
       result.length = argumentsLength;
       return result;
     }
   });
 
-  var IS_CONCAT_SPREADABLE = wellKnownSymbol$1('isConcatSpreadable');
-  var MAX_SAFE_INTEGER$1 = 0x1FFFFFFFFFFFFF;
-  var MAXIMUM_ALLOWED_INDEX_EXCEEDED = 'Maximum allowed index exceeded';
+  var IS_CONCAT_SPREADABLE$1 = wellKnownSymbol$1('isConcatSpreadable');
+  var MAX_SAFE_INTEGER$1$1 = 0x1FFFFFFFFFFFFF;
+  var MAXIMUM_ALLOWED_INDEX_EXCEEDED$1 = 'Maximum allowed index exceeded';
 
   // We can't use this feature detection in V8 since it causes
   // deoptimization and serious performance degradation
   // https://github.com/zloirock/core-js/issues/679
-  var IS_CONCAT_SPREADABLE_SUPPORT = engineV8Version$1 >= 51 || !fails$1(function () {
+  var IS_CONCAT_SPREADABLE_SUPPORT$1 = engineV8Version$1 >= 51 || !fails$1(function () {
     var array = [];
-    array[IS_CONCAT_SPREADABLE] = false;
+    array[IS_CONCAT_SPREADABLE$1] = false;
     return array.concat()[0] !== array;
   });
 
-  var SPECIES_SUPPORT = arrayMethodHasSpeciesSupport$1('concat');
+  var SPECIES_SUPPORT$1 = arrayMethodHasSpeciesSupport$1('concat');
 
-  var isConcatSpreadable = function (O) {
+  var isConcatSpreadable$1 = function (O) {
     if (!isObject$1(O)) return false;
-    var spreadable = O[IS_CONCAT_SPREADABLE];
+    var spreadable = O[IS_CONCAT_SPREADABLE$1];
     return spreadable !== undefined ? !!spreadable : isArray$1(O);
   };
 
-  var FORCED$1 = !IS_CONCAT_SPREADABLE_SUPPORT || !SPECIES_SUPPORT;
+  var FORCED$1$1 = !IS_CONCAT_SPREADABLE_SUPPORT$1 || !SPECIES_SUPPORT$1;
 
   // `Array.prototype.concat` method
   // https://tc39.github.io/ecma262/#sec-array.prototype.concat
   // with adding support of @@isConcatSpreadable and @@species
-  _export$1({ target: 'Array', proto: true, forced: FORCED$1 }, {
+  _export$1({ target: 'Array', proto: true, forced: FORCED$1$1 }, {
     concat: function concat(arg) { // eslint-disable-line no-unused-vars
       var O = toObject$1(this);
       var A = arraySpeciesCreate$1(O, 0);
@@ -2996,13 +3101,13 @@ var Example = (function () {
       var i, k, length, len, E;
       for (i = -1, length = arguments.length; i < length; i++) {
         E = i === -1 ? O : arguments[i];
-        if (isConcatSpreadable(E)) {
+        if (isConcatSpreadable$1(E)) {
           len = toLength$1(E.length);
-          if (n + len > MAX_SAFE_INTEGER$1) throw TypeError(MAXIMUM_ALLOWED_INDEX_EXCEEDED);
-          for (k = 0; k < len; k++, n++) if (k in E) createProperty(A, n, E[k]);
+          if (n + len > MAX_SAFE_INTEGER$1$1) throw TypeError(MAXIMUM_ALLOWED_INDEX_EXCEEDED$1);
+          for (k = 0; k < len; k++, n++) if (k in E) createProperty$1(A, n, E[k]);
         } else {
-          if (n >= MAX_SAFE_INTEGER$1) throw TypeError(MAXIMUM_ALLOWED_INDEX_EXCEEDED);
-          createProperty(A, n++, E);
+          if (n >= MAX_SAFE_INTEGER$1$1) throw TypeError(MAXIMUM_ALLOWED_INDEX_EXCEEDED$1);
+          createProperty$1(A, n++, E);
         }
       }
       A.length = n;
@@ -3073,12 +3178,12 @@ var Example = (function () {
 
 
 
-  var STRICT_METHOD$1 = arrayMethodIsStrict$1('every');
+  var STRICT_METHOD$2 = arrayMethodIsStrict$1('every');
   var USES_TO_LENGTH$1$1 = arrayMethodUsesToLength$1('every');
 
   // `Array.prototype.every` method
   // https://tc39.github.io/ecma262/#sec-array.prototype.every
-  _export$1({ target: 'Array', proto: true, forced: !STRICT_METHOD$1 || !USES_TO_LENGTH$1$1 }, {
+  _export$1({ target: 'Array', proto: true, forced: !STRICT_METHOD$2 || !USES_TO_LENGTH$1$1 }, {
     every: function every(callbackfn /* , thisArg */) {
       return $every(this, callbackfn, arguments.length > 1 ? arguments[1] : undefined);
     }
@@ -3130,14 +3235,14 @@ var Example = (function () {
   var FIND = 'find';
   var SKIPS_HOLES = true;
 
-  var USES_TO_LENGTH$3 = arrayMethodUsesToLength$1(FIND);
+  var USES_TO_LENGTH$3$1 = arrayMethodUsesToLength$1(FIND);
 
   // Shouldn't skip holes
   if (FIND in []) Array(1)[FIND](function () { SKIPS_HOLES = false; });
 
   // `Array.prototype.find` method
   // https://tc39.github.io/ecma262/#sec-array.prototype.find
-  _export$1({ target: 'Array', proto: true, forced: SKIPS_HOLES || !USES_TO_LENGTH$3 }, {
+  _export$1({ target: 'Array', proto: true, forced: SKIPS_HOLES || !USES_TO_LENGTH$3$1 }, {
     find: function find(callbackfn /* , that = undefined */) {
       return $find(this, callbackfn, arguments.length > 1 ? arguments[1] : undefined);
     }
@@ -3267,12 +3372,12 @@ var Example = (function () {
   var nativeIndexOf = [].indexOf;
 
   var NEGATIVE_ZERO = !!nativeIndexOf && 1 / [1].indexOf(1, -0) < 0;
-  var STRICT_METHOD$2 = arrayMethodIsStrict$1('indexOf');
+  var STRICT_METHOD$2$1 = arrayMethodIsStrict$1('indexOf');
   var USES_TO_LENGTH$7 = arrayMethodUsesToLength$1('indexOf', { ACCESSORS: true, 1: 0 });
 
   // `Array.prototype.indexOf` method
   // https://tc39.github.io/ecma262/#sec-array.prototype.indexof
-  _export$1({ target: 'Array', proto: true, forced: NEGATIVE_ZERO || !STRICT_METHOD$2 || !USES_TO_LENGTH$7 }, {
+  _export$1({ target: 'Array', proto: true, forced: NEGATIVE_ZERO || !STRICT_METHOD$2$1 || !USES_TO_LENGTH$7 }, {
     indexOf: function indexOf(searchElement /* , fromIndex = 0 */) {
       return NEGATIVE_ZERO
         // convert -0 to +0
@@ -3340,7 +3445,7 @@ var Example = (function () {
   });
 
   // `Array.prototype.{ reduce, reduceRight }` methods implementation
-  var createMethod$3 = function (IS_RIGHT) {
+  var createMethod$3$1 = function (IS_RIGHT) {
     return function (that, callbackfn, argumentsLength, memo) {
       aFunction$1$1(callbackfn);
       var O = toObject$1(that);
@@ -3366,16 +3471,16 @@ var Example = (function () {
     };
   };
 
-  var arrayReduce = {
+  var arrayReduce$1 = {
     // `Array.prototype.reduce` method
     // https://tc39.github.io/ecma262/#sec-array.prototype.reduce
-    left: createMethod$3(false),
+    left: createMethod$3$1(false),
     // `Array.prototype.reduceRight` method
     // https://tc39.github.io/ecma262/#sec-array.prototype.reduceright
-    right: createMethod$3(true)
+    right: createMethod$3$1(true)
   };
 
-  var $reduce = arrayReduce.left;
+  var $reduce$1 = arrayReduce$1.left;
 
 
 
@@ -3386,11 +3491,11 @@ var Example = (function () {
   // https://tc39.github.io/ecma262/#sec-array.prototype.reduce
   _export$1({ target: 'Array', proto: true, forced: !STRICT_METHOD$5 || !USES_TO_LENGTH$a }, {
     reduce: function reduce(callbackfn /* , initialValue */) {
-      return $reduce(this, callbackfn, arguments.length, arguments.length > 1 ? arguments[1] : undefined);
+      return $reduce$1(this, callbackfn, arguments.length, arguments.length > 1 ? arguments[1] : undefined);
     }
   });
 
-  var $reduceRight = arrayReduce.right;
+  var $reduceRight = arrayReduce$1.right;
 
 
 
@@ -3453,7 +3558,7 @@ var Example = (function () {
         }
       }
       result = new (Constructor === undefined ? Array : Constructor)(max$2(fin - k, 0));
-      for (n = 0; k < fin; k++, n++) if (k in O) createProperty(result, n, O[k]);
+      for (n = 0; k < fin; k++, n++) if (k in O) createProperty$1(result, n, O[k]);
       result.length = n;
       return result;
     }
@@ -8006,7 +8111,7 @@ var Example = (function () {
     });
   });
 
-  var $reduce$1 = arrayReduce.left;
+  var $reduce$1$1 = arrayReduce$1.left;
 
   var aTypedArray$e = arrayBufferViewCore.aTypedArray;
   var exportTypedArrayMethod$e = arrayBufferViewCore.exportTypedArrayMethod;
@@ -8014,10 +8119,10 @@ var Example = (function () {
   // `%TypedArray%.prototype.reduce` method
   // https://tc39.github.io/ecma262/#sec-%typedarray%.prototype.reduce
   exportTypedArrayMethod$e('reduce', function reduce(callbackfn /* , initialValue */) {
-    return $reduce$1(aTypedArray$e(this), callbackfn, arguments.length, arguments.length > 1 ? arguments[1] : undefined);
+    return $reduce$1$1(aTypedArray$e(this), callbackfn, arguments.length, arguments.length > 1 ? arguments[1] : undefined);
   });
 
-  var $reduceRight$1 = arrayReduce.right;
+  var $reduceRight$1 = arrayReduce$1.right;
 
   var aTypedArray$f = arrayBufferViewCore.aTypedArray;
   var exportTypedArrayMethod$f = arrayBufferViewCore.exportTypedArrayMethod;
@@ -10262,6 +10367,11 @@ var Example = (function () {
         container.appendChild(this._element);
       }
     }, {
+      key: "layers",
+      get: function get() {
+        return this.properties.LayerID ? [this.properties.LayerID] : [];
+      }
+    }, {
       key: "geometry",
       get: function get() {
         return this._geometry;
@@ -10497,6 +10607,13 @@ var Example = (function () {
       key: "items",
       get: function get() {
         return this._items;
+      }
+    }, {
+      key: "layers",
+      get: function get() {
+        return Array.isArray(this._items) ? this._items.reduce(function (a, x) {
+          return a.concat(x.layers);
+        }, []) : [];
       }
     }, {
       key: "childrenVisibility",
@@ -129469,6 +129586,8 @@ var Example = (function () {
     });
 
     this._root.update(Result);
+
+    console.log(this._root.layers);
   };
 
   return Example;

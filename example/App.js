@@ -9,6 +9,7 @@ class Example {
             console.log({title, visible, geometry});
         });
         this._root.update(Result);
+        console.log(this._root.layers);
     }
 }
 
