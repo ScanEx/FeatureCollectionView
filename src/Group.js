@@ -4,12 +4,18 @@ import Layer from './Layer.js';
 import EventTarget from 'scanex-event-target';
 
 class Group extends EventTarget {
-    constructor(container, {properties, children}, expand) {
+    constructor(container, expand) {
         super();
-        this._container = container;                
+        this._container = container;        
+        this.expand = expand;        
+    }    
+    get items () {
+        return this._items;
+    }
+    update({properties, children}) {
+        this.destroy();
         this.render(this._container);
         this._properties = properties;
-        this.expand = expand;
         this._init(children);
     }
     _init(children) {        
@@ -22,13 +28,16 @@ class Group extends EventTarget {
         this._initChildren(children);
     }
     destroy() { 
-        this._element.remove();       
+        if (this._element) {
+            this._element.remove();
+        }        
     }
     _initChildren(children) {        
         this._items = (Array.isArray (children) && children || []).map(({content, type}) => {
-            let item;
+            let item;            
             if (type === 'group') {
-                item = new Group (this._children, content, this.expand);
+                item = new Group (this._children, this.expand);                
+                item.update(content);
             }
             else if (type === 'layer') {
                 item = new Layer (this._children, content);
@@ -107,6 +116,9 @@ class Group extends EventTarget {
     }    
     get properties () {
         return this._properties;
+    }
+    set properties (properties) {
+        this._properties = properties;
     }
     get title () {
         return this._properties.title;

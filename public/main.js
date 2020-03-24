@@ -10319,28 +10319,29 @@ var Example = (function () {
   var Group = /*#__PURE__*/function (_EventTarget) {
     _inherits(Group, _EventTarget);
 
-    function Group(container, _ref, expand) {
+    function Group(container, expand) {
       var _this;
-
-      var properties = _ref.properties,
-          children = _ref.children;
 
       _classCallCheck(this, Group);
 
       _this = _possibleConstructorReturn(this, _getPrototypeOf(Group).call(this));
       _this._container = container;
-
-      _this.render(_this._container);
-
-      _this._properties = properties;
       _this.expand = expand;
-
-      _this._init(children);
-
       return _this;
     }
 
     _createClass(Group, [{
+      key: "update",
+      value: function update(_ref) {
+        var properties = _ref.properties,
+            children = _ref.children;
+        this.destroy();
+        this.render(this._container);
+        this._properties = properties;
+
+        this._init(children);
+      }
+    }, {
       key: "_init",
       value: function _init(children) {
         this._expanded = false;
@@ -10360,7 +10361,9 @@ var Example = (function () {
     }, {
       key: "destroy",
       value: function destroy() {
-        this._element.remove();
+        if (this._element) {
+          this._element.remove();
+        }
       }
     }, {
       key: "_initChildren",
@@ -10373,7 +10376,8 @@ var Example = (function () {
           var item;
 
           if (type === 'group') {
-            item = new Group(_this2._children, content, _this2.expand);
+            item = new Group(_this2._children, _this2.expand);
+            item.update(content);
           } else if (type === 'layer') {
             item = new Layer(_this2._children, content);
           }
@@ -10490,6 +10494,11 @@ var Example = (function () {
         container.appendChild(this._element);
       }
     }, {
+      key: "items",
+      get: function get() {
+        return this._items;
+      }
+    }, {
       key: "childrenVisibility",
       get: function get() {
         if (this._items.length === 0) {
@@ -10545,6 +10554,9 @@ var Example = (function () {
       key: "properties",
       get: function get() {
         return this._properties;
+      },
+      set: function set(properties) {
+        this._properties = properties;
       }
     }, {
       key: "title",
@@ -129439,12 +129451,10 @@ var Example = (function () {
   	}
   };
 
-  console.log(Result);
-
   var Example = function Example(container) {
     _classCallCheck(this, Example);
 
-    this._root = new Group(container, Result);
+    this._root = new Group(container);
 
     this._root.on('change:state', function (e) {
       var _e$detail = e.detail,
@@ -129457,6 +129467,8 @@ var Example = (function () {
         geometry: geometry
       });
     });
+
+    this._root.update(Result);
   };
 
   return Example;
