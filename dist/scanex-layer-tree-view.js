@@ -10366,9 +10366,13 @@ var Layer = /*#__PURE__*/function (_EventTarget) {
       container.appendChild(this._element);
     }
   }, {
-    key: "layers",
+    key: "features",
     get: function get() {
-      return this.properties.LayerID ? [this.properties.LayerID] : [];
+      return [{
+        type: 'Feature',
+        geometry: this.geometry,
+        properties: this.properties
+      }];
     }
   }, {
     key: "geometry",
@@ -10435,6 +10439,7 @@ var Group = /*#__PURE__*/function (_EventTarget) {
 
     _this = _possibleConstructorReturn(this, _getPrototypeOf(Group).call(this));
     _this._container = container;
+    _this._items = [];
     _this.expand = expand;
     return _this;
   }
@@ -10466,6 +10471,8 @@ var Group = /*#__PURE__*/function (_EventTarget) {
       this._visibility.addEventListener('click', this._toggleVisibility.bind(this));
 
       this._initChildren(children);
+
+      this.expanded = !!this._properties.expanded;
     }
   }, {
     key: "destroy",
@@ -10512,6 +10519,10 @@ var Group = /*#__PURE__*/function (_EventTarget) {
     value: function _toggleChildren(e) {
       e.stopPropagation();
       this.expanded = !this.expanded;
+      var event = document.createEvent('Event');
+      event.initEvent('change:state', false, false);
+      event.detail = this;
+      this.dispatchEvent(event);
     }
   }, {
     key: "_toggleVisibility",
@@ -10608,10 +10619,10 @@ var Group = /*#__PURE__*/function (_EventTarget) {
       return this._items;
     }
   }, {
-    key: "layers",
+    key: "features",
     get: function get() {
       return Array.isArray(this._items) ? this._items.reduce(function (a, x) {
-        return a.concat(x.layers);
+        return a.concat(x.features);
       }, []) : [];
     }
   }, {

@@ -5,11 +5,11 @@ class Example {
     constructor(container) {
         this._root = new Group(container);        
         this._root.on('change:state', e => {
-            const {detail: {title, visible, geometry}} = e;
-            console.log({title, visible, geometry});
+            const {detail: {title, visible, expanded, geometry}} = e;
+            console.log({title, visible, expanded, geometry});
         });
         this._root.update(Result);
-        console.log(this._root.layers);
+        console.log({type: 'FeatureCollection', features: this._root.features});
     }
 }
 

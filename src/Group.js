@@ -7,6 +7,7 @@ class Group extends EventTarget {
     constructor(container, expand) {
         super();
         this._container = container;        
+        this._items = [];
         this.expand = expand;        
     }    
     get items () {
@@ -18,9 +19,9 @@ class Group extends EventTarget {
         this._properties = properties;
         this._init(children);
     }
-    get layers () {
+    get features () {
         return Array.isArray(this._items) ?
-            this._items.reduce((a,x) => a.concat(x.layers), []) : [];
+            this._items.reduce((a,x) => a.concat(x.features), []) : [];
     }
     _init(children) {        
         this._expanded = false;
@@ -30,6 +31,7 @@ class Group extends EventTarget {
         this._title.innerText = this.title;
         this._visibility.addEventListener('click', this._toggleVisibility.bind(this));
         this._initChildren(children);
+        this.expanded = !!this._properties.expanded;
     }
     destroy() { 
         if (this._element) {
@@ -67,6 +69,10 @@ class Group extends EventTarget {
     _toggleChildren(e) {
         e.stopPropagation();
         this.expanded = !this.expanded;
+        let event = document.createEvent('Event');
+        event.initEvent('change:state', false, false);
+        event.detail = this;
+        this.dispatchEvent(event);
     }
     _toggleVisibility(e) {
         e.stopPropagation();        

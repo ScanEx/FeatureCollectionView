@@ -50,8 +50,8 @@ class Layer extends EventTarget {
         e.stopPropagation();
         this.visible = !this.visible;
     }
-    get layers () {
-        return this.properties.LayerID ? [this.properties.LayerID] : [];
+    get features () {
+        return [{type: 'Feature', geometry: this.geometry, properties: this.properties}];
     }
     get geometry () {
         return this._geometry;
