@@ -4,15 +4,24 @@ import Layer from './Layer.js';
 import EventTarget from 'scanex-event-target';
 
 class Group extends EventTarget {
-    constructor(container, expand) {
+    constructor(container, expand, order) {
         super();
-        this._container = container;        
+        this._container = container;
         this._items = [];
-        this.expand = expand;        
+        this.expand = expand;
+        this._order = order || 0;
+    }
+    get order () {
+        return this._order;
     }    
     get items () {
         return this._items;
     }
+    get count () {
+        return this.items.reduce((a,item) => {
+            return a + item.count;
+        }, 0);
+    } 
     update({properties, children}) {
         this.destroy();
         this.render(this._container);
@@ -21,7 +30,9 @@ class Group extends EventTarget {
     }
     get features () {
         return Array.isArray(this._items) ?
-            this._items.reduce((a,x) => a.concat(x.features), []) : [];
+            this._items.reduce((a,x) => {
+                return a.concat(x.features);
+            }, []) : [];
     }
     _init(children) {        
         this._expanded = false;
@@ -39,17 +50,19 @@ class Group extends EventTarget {
         }        
     }
     _initChildren(children) {        
+        let count = this._order;
         this._items = (Array.isArray (children) && children || []).map(({content, type}) => {
             let item;            
             if (type === 'group') {
-                item = new Group (this._children, this.expand);                
-                item.update(content);
+                item = new Group (this._children, this.expand, count + 1);
+                item.update(content);                
             }
             else if (type === 'layer') {
-                item = new Layer (this._children, content);
+                item = new Layer (this._children, content, count + 1);
             }
             item.addEventListener('change:visible', this._onChangeVisible.bind(this));
             item.addEventListener('change:state', this._onChangeState.bind(this));
+            count += item.count;
             return item;
         });
 

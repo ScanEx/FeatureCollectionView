@@ -10268,7 +10268,7 @@ var Example = (function () {
   var Layer = /*#__PURE__*/function (_EventTarget) {
     _inherits(Layer, _EventTarget);
 
-    function Layer(container, _ref) {
+    function Layer(container, _ref, order) {
       var _this;
 
       var properties = _ref.properties,
@@ -10286,6 +10286,7 @@ var Example = (function () {
 
       _this._init();
 
+      _this._order = order;
       return _this;
     }
 
@@ -10367,6 +10368,16 @@ var Example = (function () {
         container.appendChild(this._element);
       }
     }, {
+      key: "order",
+      get: function get() {
+        return this._order;
+      }
+    }, {
+      key: "count",
+      get: function get() {
+        return 1;
+      }
+    }, {
       key: "features",
       get: function get() {
         return [{
@@ -10433,7 +10444,7 @@ var Example = (function () {
   var Group = /*#__PURE__*/function (_EventTarget) {
     _inherits(Group, _EventTarget);
 
-    function Group(container, expand) {
+    function Group(container, expand, order) {
       var _this;
 
       _classCallCheck(this, Group);
@@ -10442,6 +10453,7 @@ var Example = (function () {
       _this._container = container;
       _this._items = [];
       _this.expand = expand;
+      _this._order = order || 0;
       return _this;
     }
 
@@ -10487,20 +10499,22 @@ var Example = (function () {
       value: function _initChildren(children) {
         var _this2 = this;
 
+        var count = this._order;
         this._items = (Array.isArray(children) && children || []).map(function (_ref2) {
           var content = _ref2.content,
               type = _ref2.type;
           var item;
 
           if (type === 'group') {
-            item = new Group(_this2._children, _this2.expand);
+            item = new Group(_this2._children, _this2.expand, count + 1);
             item.update(content);
           } else if (type === 'layer') {
-            item = new Layer(_this2._children, content);
+            item = new Layer(_this2._children, content, count + 1);
           }
 
           item.addEventListener('change:visible', _this2._onChangeVisible.bind(_this2));
           item.addEventListener('change:state', _this2._onChangeState.bind(_this2));
+          count += item.count;
           return item;
         });
         this._visible = this.childrenVisibility;
@@ -10615,9 +10629,21 @@ var Example = (function () {
         container.appendChild(this._element);
       }
     }, {
+      key: "order",
+      get: function get() {
+        return this._order;
+      }
+    }, {
       key: "items",
       get: function get() {
         return this._items;
+      }
+    }, {
+      key: "count",
+      get: function get() {
+        return this.items.reduce(function (a, item) {
+          return a + item.count;
+        }, 0);
       }
     }, {
       key: "features",
@@ -129589,21 +129615,20 @@ var Example = (function () {
           title = _e$detail.title,
           visible = _e$detail.visible,
           expanded = _e$detail.expanded,
-          geometry = _e$detail.geometry;
+          geometry = _e$detail.geometry,
+          order = _e$detail.order;
       console.log({
         title: title,
         visible: visible,
         expanded: expanded,
-        geometry: geometry
+        geometry: geometry,
+        order: order
       });
     });
 
     this._root.update(Result);
 
-    console.log({
-      type: 'FeatureCollection',
-      features: this._root.features
-    });
+    console.log(this._root);
   };
 
   return Example;

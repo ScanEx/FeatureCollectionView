@@ -9,14 +9,18 @@ import EventTarget from 'scanex-event-target';
 // }
 
 class Layer extends EventTarget {
-    constructor(container, {properties, geometry}) {
+    constructor(container, {properties, geometry}, order) {
         super();
         this._container = container;                
         this.render(this._container);
         this._properties = properties;
         this._geometry = geometry;
-        this._init();        
-    }   
+        this._init();
+        this._order = order;
+    }
+    get order () {
+        return this._order;
+    }  
     _init() {
         
         if (this._properties.visible) {
@@ -49,6 +53,9 @@ class Layer extends EventTarget {
     _toggleVisibility(e) {
         e.stopPropagation();
         this.visible = !this.visible;
+    }
+    get count() {
+        return 1;
     }
     get features () {
         return [{type: 'Feature', geometry: this.geometry, properties: this.properties}];
