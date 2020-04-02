@@ -939,6 +939,55 @@ function _createClass(Constructor, protoProps, staticProps) {
   return Constructor;
 }
 
+function _defineProperty(obj, key, value) {
+  if (key in obj) {
+    Object.defineProperty(obj, key, {
+      value: value,
+      enumerable: true,
+      configurable: true,
+      writable: true
+    });
+  } else {
+    obj[key] = value;
+  }
+
+  return obj;
+}
+
+function ownKeys$1(object, enumerableOnly) {
+  var keys = Object.keys(object);
+
+  if (Object.getOwnPropertySymbols) {
+    var symbols = Object.getOwnPropertySymbols(object);
+    if (enumerableOnly) symbols = symbols.filter(function (sym) {
+      return Object.getOwnPropertyDescriptor(object, sym).enumerable;
+    });
+    keys.push.apply(keys, symbols);
+  }
+
+  return keys;
+}
+
+function _objectSpread2(target) {
+  for (var i = 1; i < arguments.length; i++) {
+    var source = arguments[i] != null ? arguments[i] : {};
+
+    if (i % 2) {
+      ownKeys$1(Object(source), true).forEach(function (key) {
+        _defineProperty(target, key, source[key]);
+      });
+    } else if (Object.getOwnPropertyDescriptors) {
+      Object.defineProperties(target, Object.getOwnPropertyDescriptors(source));
+    } else {
+      ownKeys$1(Object(source)).forEach(function (key) {
+        Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));
+      });
+    }
+  }
+
+  return target;
+}
+
 function _inherits(subClass, superClass) {
   if (typeof superClass !== "function" && superClass !== null) {
     throw new TypeError("Super expression must either be null or a function");
@@ -1418,14 +1467,14 @@ var objectGetOwnPropertySymbols$1 = {
 };
 
 // all object keys, includes non-enumerable and symbols
-var ownKeys$1 = getBuiltIn$1('Reflect', 'ownKeys') || function ownKeys(it) {
+var ownKeys$2 = getBuiltIn$1('Reflect', 'ownKeys') || function ownKeys(it) {
   var keys = objectGetOwnPropertyNames$1.f(anObject$1(it));
   var getOwnPropertySymbols = objectGetOwnPropertySymbols$1.f;
   return getOwnPropertySymbols ? keys.concat(getOwnPropertySymbols(it)) : keys;
 };
 
 var copyConstructorProperties$1 = function (target, source) {
-  var keys = ownKeys$1(source);
+  var keys = ownKeys$2(source);
   var defineProperty = objectDefineProperty$1.f;
   var getOwnPropertyDescriptor = objectGetOwnPropertyDescriptor$1.f;
   for (var i = 0; i < keys.length; i++) {
@@ -2632,7 +2681,7 @@ _export$1({ target: 'Object', stat: true, sham: !descriptors$1 }, {
   getOwnPropertyDescriptors: function getOwnPropertyDescriptors(object) {
     var O = toIndexedObject$1(object);
     var getOwnPropertyDescriptor = objectGetOwnPropertyDescriptor$1.f;
-    var keys = ownKeys$1(O);
+    var keys = ownKeys$2(O);
     var result = {};
     var index = 0;
     var key, descriptor;
@@ -8427,7 +8476,7 @@ _export$1({ target: 'Reflect', stat: true }, {
 // `Reflect.ownKeys` method
 // https://tc39.github.io/ecma262/#sec-reflect.ownkeys
 _export$1({ target: 'Reflect', stat: true }, {
-  ownKeys: ownKeys$1
+  ownKeys: ownKeys$2
 });
 
 // `Reflect.preventExtensions` method
@@ -10382,7 +10431,9 @@ var Layer = /*#__PURE__*/function (_EventTarget) {
       return [{
         type: 'Feature',
         geometry: this.geometry,
-        properties: this.properties
+        properties: _objectSpread2({
+          order: this.order
+        }, this.properties)
       }];
     }
   }, {
