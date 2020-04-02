@@ -58,7 +58,9 @@ class Layer extends EventTarget {
         return 1;
     }
     get features () {
-        return [{type: 'Feature', geometry: this.geometry, properties: {order: this.order, ...this.properties } }];
+        let properties = this.properties;
+        properties.order = this.order;
+        return [{type: 'Feature', geometry: this.geometry, properties }];
     }
     get geometry () {
         return this._geometry;
