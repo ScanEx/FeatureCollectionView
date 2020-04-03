@@ -1,3 +1,6 @@
+.scanex-layer-tree-group {
+    clear: left;
+}
 .scanex-layer-tree-group .scanex-layer-tree-icon {
     cursor: pointer;
     display: inline-block;
@@ -14,7 +17,6 @@
     margin-right: 5px;
 }
 .scanex-layer-tree-group .scanex-layer-tree-header > .scanex-layer-tree-title {
-    clear: left;
     overflow-wrap: break-word;
 }
 .scanex-layer-tree-group .scanex-layer-tree-hidden {
