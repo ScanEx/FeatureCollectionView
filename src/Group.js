@@ -28,10 +28,10 @@ class Group extends EventTarget {
         this._properties = properties;
         this._init(children);
     }
-    get features () {
+    get layers () {
         return Array.isArray(this._items) ?
             this._items.reduce((a,x) => {
-                return a.concat(x.features);
+                return a.concat(x instanceof Group ? x.layers : [x]);
             }, []) : [];
     }
     _init(children) {        

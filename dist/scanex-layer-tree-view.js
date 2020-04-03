@@ -10377,17 +10377,6 @@ var Layer = /*#__PURE__*/function (_EventTarget) {
       return 1;
     }
   }, {
-    key: "features",
-    get: function get() {
-      var properties = this.properties;
-      properties.order = this.order;
-      return [{
-        type: 'Feature',
-        geometry: this.geometry,
-        properties: properties
-      }];
-    }
-  }, {
     key: "geometry",
     get: function get() {
       return this._geometry;
@@ -10647,10 +10636,10 @@ var Group = /*#__PURE__*/function (_EventTarget) {
       }, 0);
     }
   }, {
-    key: "features",
+    key: "layers",
     get: function get() {
       return Array.isArray(this._items) ? this._items.reduce(function (a, x) {
-        return a.concat(x.features);
+        return a.concat(x instanceof Group ? x.layers : [x]);
       }, []) : [];
     }
   }, {

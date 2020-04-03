@@ -9,7 +9,7 @@ class Example {
             console.log({title, visible, expanded, geometry, order});
         });
         this._root.update(Result);
-        console.log(this._root);
+        console.log(this._root.layers);
     }
 }
 

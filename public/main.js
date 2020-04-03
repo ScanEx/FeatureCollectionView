@@ -10378,17 +10378,6 @@ var Example = (function () {
         return 1;
       }
     }, {
-      key: "features",
-      get: function get() {
-        var properties = this.properties;
-        properties.order = this.order;
-        return [{
-          type: 'Feature',
-          geometry: this.geometry,
-          properties: properties
-        }];
-      }
-    }, {
       key: "geometry",
       get: function get() {
         return this._geometry;
@@ -10648,10 +10637,10 @@ var Example = (function () {
         }, 0);
       }
     }, {
-      key: "features",
+      key: "layers",
       get: function get() {
         return Array.isArray(this._items) ? this._items.reduce(function (a, x) {
-          return a.concat(x.features);
+          return a.concat(x instanceof Group ? x.layers : [x]);
         }, []) : [];
       }
     }, {
@@ -129630,7 +129619,7 @@ var Example = (function () {
 
     this._root.update(Result);
 
-    console.log(this._root);
+    console.log(this._root.layers);
   };
 
   return Example;
