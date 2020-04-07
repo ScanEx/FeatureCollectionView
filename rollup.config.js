@@ -27,7 +27,7 @@ export default [
         ],
     },
     {
-        input: 'src/Group.js',
+        input: 'src/Tree.js',
         output: { 
             file: pkg.main,
             format: 'cjs',
