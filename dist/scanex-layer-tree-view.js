@@ -10267,7 +10267,7 @@ var scanexEventTarget_cjs = EventTarget;
 var Layer = /*#__PURE__*/function (_EventTarget) {
   _inherits(Layer, _EventTarget);
 
-  function Layer(container, _ref, order) {
+  function Layer(container, _ref) {
     var _this;
 
     var properties = _ref.properties,
@@ -10285,11 +10285,13 @@ var Layer = /*#__PURE__*/function (_EventTarget) {
 
     _this._init();
 
-    _this._order = order;
     return _this;
   }
 
   _createClass(Layer, [{
+    key: "enumerate",
+    value: function enumerate() {}
+  }, {
     key: "_init",
     value: function _init() {
       if (this._properties.visible) {
@@ -10370,6 +10372,9 @@ var Layer = /*#__PURE__*/function (_EventTarget) {
     key: "order",
     get: function get() {
       return this._order;
+    },
+    set: function set(order) {
+      this._order = order;
     }
   }, {
     key: "count",
@@ -10434,7 +10439,7 @@ var Layer = /*#__PURE__*/function (_EventTarget) {
 var Group = /*#__PURE__*/function (_EventTarget) {
   _inherits(Group, _EventTarget);
 
-  function Group(container, expand, order) {
+  function Group(container, expand) {
     var _this;
 
     _classCallCheck(this, Group);
@@ -10443,11 +10448,22 @@ var Group = /*#__PURE__*/function (_EventTarget) {
     _this._container = container;
     _this._items = [];
     _this.expand = expand;
-    _this._order = order || 0;
+    _this._order = 0;
     return _this;
   }
 
   _createClass(Group, [{
+    key: "enumerate",
+    value: function enumerate() {
+      var count = this._order;
+
+      this._items.forEach(function (item) {
+        item.order = count + 1;
+        count += item.count;
+        item.enumerate();
+      });
+    }
+  }, {
     key: "update",
     value: function update(_ref) {
       var properties = _ref.properties,
@@ -10489,22 +10505,21 @@ var Group = /*#__PURE__*/function (_EventTarget) {
     value: function _initChildren(children) {
       var _this2 = this;
 
-      var count = this._order;
       this._items = (Array.isArray(children) && children || []).map(function (_ref2) {
         var content = _ref2.content,
             type = _ref2.type;
         var item;
 
         if (type === 'group') {
-          item = new Group(_this2._children, _this2.expand, count + 1);
+          item = new Group(_this2._children, _this2.expand);
           item.update(content);
         } else if (type === 'layer') {
-          item = new Layer(_this2._children, content, count + 1);
+          item = new Layer(_this2._children, content);
         }
 
         item.addEventListener('change:visible', _this2._onChangeVisible.bind(_this2));
         item.addEventListener('change:state', _this2._onChangeState.bind(_this2));
-        count += item.count;
+        item.addEventListener('expanded', _this2._onExpanded.bind(_this2));
         return item;
       });
       this._visible = this.childrenVisibility;
@@ -10534,6 +10549,13 @@ var Group = /*#__PURE__*/function (_EventTarget) {
     value: function _toggleVisibility(e) {
       e.stopPropagation();
       this.childrenVisibility = !this.visible;
+    }
+  }, {
+    key: "_onExpanded",
+    value: function _onExpanded() {
+      var event = document.createEvent('Event');
+      event.initEvent('expanded', false, false);
+      this.dispatchEvent(event);
     }
   }, {
     key: "_onChangeVisible",
@@ -10622,6 +10644,9 @@ var Group = /*#__PURE__*/function (_EventTarget) {
     key: "order",
     get: function get() {
       return this._order;
+    },
+    set: function set(order) {
+      this._order = order;
     }
   }, {
     key: "items",
@@ -10685,6 +10710,8 @@ var Group = /*#__PURE__*/function (_EventTarget) {
           _this3._items.forEach(function (item) {
             return item.visible = visible;
           });
+
+          _this3._onExpanded();
         }).catch(function (e) {
           return console.log(e);
         });

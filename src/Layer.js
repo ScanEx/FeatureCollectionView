@@ -9,18 +9,23 @@ import EventTarget from 'scanex-event-target';
 // }
 
 class Layer extends EventTarget {
-    constructor(container, {properties, geometry}, order) {
+    constructor(container, {properties, geometry}) {
         super();
         this._container = container;                
         this.render(this._container);
         this._properties = properties;
         this._geometry = geometry;
-        this._init();
-        this._order = order;
+        this._init();        
     }
     get order () {
         return this._order;
-    }  
+    }
+    set order (order) {
+        this._order = order;
+    }
+    enumerate () {
+
+    }
     _init() {
         
         if (this._properties.visible) {

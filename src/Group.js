@@ -4,16 +4,19 @@ import Layer from './Layer.js';
 import EventTarget from 'scanex-event-target';
 
 class Group extends EventTarget {
-    constructor(container, expand, order) {
+    constructor(container, expand) {
         super();
         this._container = container;
         this._items = [];
         this.expand = expand;
-        this._order = order || 0;
+        this._order = 0;
     }
     get order () {
         return this._order;
-    }    
+    } 
+    set order (order) {
+        this._order = order;
+    }   
     get items () {
         return this._items;
     }
@@ -22,11 +25,19 @@ class Group extends EventTarget {
             return a + item.count;
         }, 0);
     } 
+    enumerate () {
+        let count = this._order;
+        this._items.forEach(item => {
+            item.order = count + 1;
+            count += item.count;
+            item.enumerate();
+        });
+    }
     update({properties, children}) {
         this.destroy();
         this.render(this._container);
         this._properties = properties;
-        this._init(children);
+        this._init(children);        
     }
     get layers () {
         return Array.isArray(this._items) ?
@@ -50,19 +61,18 @@ class Group extends EventTarget {
         }        
     }
     _initChildren(children) {        
-        let count = this._order;
         this._items = (Array.isArray (children) && children || []).map(({content, type}) => {
             let item;            
             if (type === 'group') {
-                item = new Group (this._children, this.expand, count + 1);
+                item = new Group (this._children, this.expand);
                 item.update(content);                
             }
             else if (type === 'layer') {
-                item = new Layer (this._children, content, count + 1);
+                item = new Layer (this._children, content);
             }
             item.addEventListener('change:visible', this._onChangeVisible.bind(this));
             item.addEventListener('change:state', this._onChangeState.bind(this));
-            count += item.count;
+            item.addEventListener('expanded', this._onExpanded.bind(this));
             return item;
         });
 
@@ -90,6 +100,11 @@ class Group extends EventTarget {
     _toggleVisibility(e) {
         e.stopPropagation();        
         this.childrenVisibility = !this.visible;
+    }
+    _onExpanded () {
+        let event = document.createEvent('Event');
+        event.initEvent('expanded', false, false);        
+        this.dispatchEvent(event);
     }
     _onChangeVisible(e) {
         e.stopPropagation();
@@ -130,6 +145,7 @@ class Group extends EventTarget {
             .then(children => {
                 this._initChildren(children);
                 this._items.forEach(item => item.visible = visible);
+                this._onExpanded();
             })
             .catch(e => console.log(e));
         }
