@@ -218,8 +218,9 @@ class Group extends EventTarget {
         if (this._items.length === 0 && typeof this.expand === 'function') {
             this.expand(this._properties)
             .then(children => {
-                this._initChildren(children);
+                this._initChildren(children);                
                 this._handleExpand(expanded);
+                this._onExpanded();
             })
             .catch(e => console.log(e));
         }

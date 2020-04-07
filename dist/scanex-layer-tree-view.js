@@ -10789,6 +10789,8 @@ var Group = /*#__PURE__*/function (_EventTarget) {
           _this4._initChildren(children);
 
           _this4._handleExpand(expanded);
+
+          _this4._onExpanded();
         }).catch(function (e) {
           return console.log(e);
         });
