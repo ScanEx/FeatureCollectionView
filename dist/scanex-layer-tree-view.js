@@ -10804,13 +10804,14 @@ var Group = /*#__PURE__*/function (_EventTarget) {
 var Tree = /*#__PURE__*/function (_EventTarget) {
   _inherits(Tree, _EventTarget);
 
-  function Tree(container) {
+  function Tree(container, expand) {
     var _this;
 
     _classCallCheck(this, Tree);
 
     _this = _possibleConstructorReturn(this, _getPrototypeOf(Tree).call(this));
     _this._root = new Group(container);
+    _this._root.expand = expand;
 
     _this._root.on('change:state', function (e) {
       var event = document.createEvent('Event');

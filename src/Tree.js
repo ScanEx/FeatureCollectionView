@@ -2,9 +2,10 @@ import EventTarget from 'scanex-event-target';
 import Group from './Group.js';
 
 class Tree extends EventTarget {
-    constructor(container){
+    constructor(container, expand){
         super();
         this._root = new Group(container);
+        this._root.expand = expand;
         this._root.on('change:state', e => {            
             let event = document.createEvent('Event');
             event.initEvent('change:state', false, false);
