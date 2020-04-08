@@ -7,7 +7,11 @@ class Example {
         this._root.on('change:state', e => {
             const {detail: {title, visible, expanded, geometry, order}} = e;
             console.log({title, visible, expanded, geometry, order});
-        });        
+        });     
+        this._root.on('redraw', e => {
+            const {detail: {title, visible, expanded, geometry, order}} = e;
+            console.log({title, visible, expanded, geometry, order});
+        });   
         this._root.update(Result);        
         console.log(this._root.layers);
     }

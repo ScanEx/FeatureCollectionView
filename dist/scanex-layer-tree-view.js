@@ -10292,6 +10292,16 @@ var Layer = /*#__PURE__*/function (_EventTarget) {
     key: "enumerate",
     value: function enumerate() {}
   }, {
+    key: "redraw",
+    value: function redraw() {
+      if (this.visible) {
+        var event = document.createEvent('Event');
+        event.initEvent('redraw', false, false);
+        event.detail = this;
+        this.dispatchEvent(event);
+      }
+    }
+  }, {
     key: "_init",
     value: function _init() {
       if (this._properties.visible) {
@@ -10464,6 +10474,15 @@ var Group = /*#__PURE__*/function (_EventTarget) {
       });
     }
   }, {
+    key: "redraw",
+    value: function redraw() {
+      this._items.forEach(function (item) {
+        if (!(typeof item.visible === 'boolean' && !item.visible)) {
+          item.redraw();
+        }
+      });
+    }
+  }, {
     key: "update",
     value: function update(_ref) {
       var properties = _ref.properties,
@@ -10519,6 +10538,7 @@ var Group = /*#__PURE__*/function (_EventTarget) {
 
         item.addEventListener('change:visible', _this2._onChangeVisible.bind(_this2));
         item.addEventListener('change:state', _this2._onChangeState.bind(_this2));
+        item.addEventListener('redraw', _this2._onRedraw.bind(_this2));
         item.addEventListener('expanded', _this2._onExpanded.bind(_this2));
         return item;
       });
@@ -10549,6 +10569,14 @@ var Group = /*#__PURE__*/function (_EventTarget) {
     value: function _toggleVisibility(e) {
       e.stopPropagation();
       this.childrenVisibility = !this.visible;
+    }
+  }, {
+    key: "_onRedraw",
+    value: function _onRedraw(e) {
+      var event = document.createEvent('Event');
+      event.initEvent('redraw', false, false);
+      event.detail = e.detail;
+      this.dispatchEvent(event);
     }
   }, {
     key: "_onExpanded",
@@ -10827,6 +10855,14 @@ var Tree = /*#__PURE__*/function (_EventTarget) {
       return _this._root.enumerate();
     });
 
+    _this._root.on('redraw', function (e) {
+      var event = document.createEvent('Event');
+      event.initEvent('redraw', false, false);
+      event.detail = e.detail;
+
+      _this.dispatchEvent(event);
+    });
+
     return _this;
   }
 
@@ -10836,6 +10872,8 @@ var Tree = /*#__PURE__*/function (_EventTarget) {
       this._root.update(data);
 
       this._root.enumerate();
+
+      this._root.redraw();
     }
   }, {
     key: "layers",

@@ -11,26 +11,33 @@ class Group extends EventTarget {
         this.expand = expand;
         this._order = 0;
     }
-    get order () {
+    get order() {
         return this._order;
     } 
-    set order (order) {
+    set order(order) {
         this._order = order;
     }   
-    get items () {
+    get items() {
         return this._items;
     }
-    get count () {
+    get count() {
         return this.items.reduce((a,item) => {
             return a + item.count;
         }, 0);
     } 
-    enumerate () {
+    enumerate() {
         let count = this._order;
         this._items.forEach(item => {
             item.order = count + 1;
             count += item.count;
             item.enumerate();
+        });
+    }
+    redraw() {
+        this._items.forEach(item => {
+            if (!(typeof item.visible === 'boolean' && !item.visible)) {
+                item.redraw();
+            }            
         });
     }
     update({properties, children}) {
@@ -39,7 +46,7 @@ class Group extends EventTarget {
         this._properties = properties;
         this._init(children);        
     }
-    get layers () {
+    get layers() {
         return Array.isArray(this._items) ?
             this._items.reduce((a,x) => {
                 return a.concat(x instanceof Group ? x.layers : [x]);
@@ -72,6 +79,7 @@ class Group extends EventTarget {
             }
             item.addEventListener('change:visible', this._onChangeVisible.bind(this));
             item.addEventListener('change:state', this._onChangeState.bind(this));
+            item.addEventListener('redraw', this._onRedraw.bind(this));
             item.addEventListener('expanded', this._onExpanded.bind(this));
             return item;
         });
@@ -100,6 +108,12 @@ class Group extends EventTarget {
     _toggleVisibility(e) {
         e.stopPropagation();        
         this.childrenVisibility = !this.visible;
+    }
+    _onRedraw(e) {
+        let event = document.createEvent('Event');
+        event.initEvent('redraw', false, false);
+        event.detail = e.detail;
+        this.dispatchEvent(event);
     }
     _onExpanded () {
         let event = document.createEvent('Event');

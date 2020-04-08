@@ -26,8 +26,15 @@ class Layer extends EventTarget {
     enumerate () {
 
     }
-    _init() {
-        
+    redraw() {
+        if (this.visible) {
+            let event = document.createEvent('Event');
+            event.initEvent('redraw', false, false);
+            event.detail = this;
+            this.dispatchEvent(event);
+        }     
+    }
+    _init() {        
         if (this._properties.visible) {
             this._visibility.classList.remove('square');
             this._visibility.classList.add('check-square');            
