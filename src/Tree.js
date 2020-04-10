@@ -4,6 +4,7 @@ import Group from './Group.js';
 class Tree extends EventTarget {
     constructor(container, expand){
         super();
+        this._vectorFirst = false;
         this._root = new Group(container);
         this._root.expand = expand;
         this._root.on('change:state', e => {            
@@ -18,12 +19,34 @@ class Tree extends EventTarget {
             event.initEvent('redraw', false, false);
             event.detail = e.detail;
             this.dispatchEvent(event);            
-        });        
+        });
     }
     update (data) {
         this._root.update(data);
-        this._root.enumerate();
+        if (this._vectorFirst) {
+            this._root.enumVectors();                
+            this._root.enumRest(this._root.vectorCount);
+        }
+        else {
+            this._root.enumerate();
+        }
         this._root.redraw();
+    }
+    get vectorFirst () {
+        return this._vectorFirst;
+    }
+    set vectorFirst (vectorFirst) {
+        if (this._vectorFirst !== vectorFirst) {
+            this._vectorFirst = vectorFirst;
+            if (this._vectorFirst) {
+                this._root.enumVectors();                
+                this._root.enumRest(this._root.vectorCount);
+            }
+            else {
+                this._root.enumerate();
+            }
+            this._root.redraw();
+        }        
     }
     get layers () {
         return this._root.layers;

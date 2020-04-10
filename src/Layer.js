@@ -15,7 +15,16 @@ class Layer extends EventTarget {
         this.render(this._container);
         this._properties = properties;
         this._geometry = geometry;
+        this._vectorFirst = false;
         this._init();        
+    }
+    get vectorFirst () {
+        return this._vectorFirst;
+    }
+    set vectorFirst (vectorFirst) {
+        if (this._vectorFirst !== vectorFirst) {
+            this._vectorFirst = vectorFirst;            
+        }        
     }
     get order () {
         return this._order;
@@ -23,9 +32,9 @@ class Layer extends EventTarget {
     set order (order) {
         this._order = order;
     }
-    enumerate () {
-
-    }
+    enumerate () {}
+    enumVectors() {}
+    enumRest() {}
     redraw() {
         if (this.visible) {
             let event = document.createEvent('Event');
@@ -68,7 +77,13 @@ class Layer extends EventTarget {
     }
     get count() {
         return 1;
-    }    
+    }
+    get vectorCount() {
+        return this.type === 'Vector' ? 1 : 0;
+    }
+    get restCount() {
+        return this.type === 'Vector' ? 0 : 1;
+    }   
     get geometry () {
         return this._geometry;
     }

@@ -8,9 +8,9 @@ class Group extends EventTarget {
         super();
         this._container = container;
         this._items = [];
-        this.expand = expand;
+        this.expand = expand;        
         this._order = 0;
-    }
+    }    
     get order() {
         return this._order;
     } 
@@ -31,6 +31,40 @@ class Group extends EventTarget {
             item.order = count + 1;
             count += item.count;
             item.enumerate();
+        });
+    }
+    get vectorCount() {
+        return this.items.reduce((a,item) => {
+            return a + item.vectorCount;
+        }, 0);
+    }
+    get restCount() {
+        return this.items.reduce((a,item) => {
+            return a + item.restCount;
+        }, 0);
+    }
+    enumVectors() {
+        let count = this._order;
+        this._items.forEach(item => {
+            switch (item.type) {
+                case 'Group':
+                case 'Vector':
+                    item.order = count + 1;
+                    count += item.vectorCount;
+                    item.enumVectors();
+                    break;
+                default:
+                    break;
+            }
+        });
+    }
+    enumRest(count) {        
+        this._items.forEach(item => {
+            if (item.type === 'Group' || item.type !== 'Vector') {
+                item.order = count + 1;
+                count += item.restCount;
+                item.enumRest(count);
+            }
         });
     }
     redraw() {

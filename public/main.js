@@ -10283,6 +10283,7 @@ var Example = (function () {
 
       _this._properties = properties;
       _this._geometry = geometry;
+      _this._vectorFirst = false;
 
       _this._init();
 
@@ -10292,6 +10293,12 @@ var Example = (function () {
     _createClass(Layer, [{
       key: "enumerate",
       value: function enumerate() {}
+    }, {
+      key: "enumVectors",
+      value: function enumVectors() {}
+    }, {
+      key: "enumRest",
+      value: function enumRest() {}
     }, {
       key: "redraw",
       value: function redraw() {
@@ -10380,6 +10387,16 @@ var Example = (function () {
         container.appendChild(this._element);
       }
     }, {
+      key: "vectorFirst",
+      get: function get() {
+        return this._vectorFirst;
+      },
+      set: function set(vectorFirst) {
+        if (this._vectorFirst !== vectorFirst) {
+          this._vectorFirst = vectorFirst;
+        }
+      }
+    }, {
       key: "order",
       get: function get() {
         return this._order;
@@ -10391,6 +10408,16 @@ var Example = (function () {
       key: "count",
       get: function get() {
         return 1;
+      }
+    }, {
+      key: "vectorCount",
+      get: function get() {
+        return this.type === 'Vector' ? 1 : 0;
+      }
+    }, {
+      key: "restCount",
+      get: function get() {
+        return this.type === 'Vector' ? 0 : 1;
       }
     }, {
       key: "geometry",
@@ -10472,6 +10499,33 @@ var Example = (function () {
           item.order = count + 1;
           count += item.count;
           item.enumerate();
+        });
+      }
+    }, {
+      key: "enumVectors",
+      value: function enumVectors() {
+        var count = this._order;
+
+        this._items.forEach(function (item) {
+          switch (item.type) {
+            case 'Group':
+            case 'Vector':
+              item.order = count + 1;
+              count += item.vectorCount;
+              item.enumVectors();
+              break;
+          }
+        });
+      }
+    }, {
+      key: "enumRest",
+      value: function enumRest(count) {
+        this._items.forEach(function (item) {
+          if (item.type === 'Group' || item.type !== 'Vector') {
+            item.order = count + 1;
+            count += item.restCount;
+            item.enumRest(count);
+          }
         });
       }
     }, {
@@ -10690,6 +10744,20 @@ var Example = (function () {
         }, 0);
       }
     }, {
+      key: "vectorCount",
+      get: function get() {
+        return this.items.reduce(function (a, item) {
+          return a + item.vectorCount;
+        }, 0);
+      }
+    }, {
+      key: "restCount",
+      get: function get() {
+        return this.items.reduce(function (a, item) {
+          return a + item.restCount;
+        }, 0);
+      }
+    }, {
       key: "layers",
       get: function get() {
         return Array.isArray(this._items) ? this._items.reduce(function (a, x) {
@@ -10841,6 +10909,7 @@ var Example = (function () {
       _classCallCheck(this, Tree);
 
       _this = _possibleConstructorReturn(this, _getPrototypeOf(Tree).call(this));
+      _this._vectorFirst = false;
       _this._root = new Group(container);
       _this._root.expand = expand;
 
@@ -10872,9 +10941,35 @@ var Example = (function () {
       value: function update(data) {
         this._root.update(data);
 
-        this._root.enumerate();
+        if (this._vectorFirst) {
+          this._root.enumVectors();
+
+          this._root.enumRest(this._root.vectorCount);
+        } else {
+          this._root.enumerate();
+        }
 
         this._root.redraw();
+      }
+    }, {
+      key: "vectorFirst",
+      get: function get() {
+        return this._vectorFirst;
+      },
+      set: function set(vectorFirst) {
+        if (this._vectorFirst !== vectorFirst) {
+          this._vectorFirst = vectorFirst;
+
+          if (this._vectorFirst) {
+            this._root.enumVectors();
+
+            this._root.enumRest(this._root.vectorCount);
+          } else {
+            this._root.enumerate();
+          }
+
+          this._root.redraw();
+        }
       }
     }, {
       key: "layers",
@@ -129746,7 +129841,9 @@ var Example = (function () {
 
     this._root.update(Result);
 
-    console.log(this._root.layers);
+    console.log('natural:', this._root.layers);
+    this._root.vectorFirst = true;
+    console.log('vectors first:', this._root.layers);
   };
 
   return Example;

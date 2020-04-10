@@ -13,7 +13,9 @@ class Example {
             console.log({title, visible, expanded, geometry, order});
         });   
         this._root.update(Result);        
-        console.log(this._root.layers);
+        console.log('natural:', this._root.layers);
+        this._root.vectorFirst = true;
+        console.log('vectors first:', this._root.layers);
     }
 }
 
