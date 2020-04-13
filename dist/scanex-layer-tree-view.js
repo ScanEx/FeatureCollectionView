@@ -10913,7 +10913,9 @@ var Tree = /*#__PURE__*/function (_EventTarget) {
     });
 
     _this._root.on('expanded', function () {
-      return _this._root.enumerate();
+      _this._root.enumerate();
+
+      _this._root.redraw();
     });
 
     _this._root.on('redraw', function (e) {

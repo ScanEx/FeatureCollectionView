@@ -13,7 +13,10 @@ class Tree extends EventTarget {
             event.detail = e.detail;
             this.dispatchEvent(event);            
         });
-        this._root.on('expanded', () => this._root.enumerate());        
+        this._root.on('expanded', () => {
+            this._root.enumerate();
+            this._root.redraw();
+        });   
         this._root.on('redraw', e => {            
             let event = document.createEvent('Event');
             event.initEvent('redraw', false, false);
