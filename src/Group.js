@@ -19,7 +19,7 @@ class Group extends EventTarget {
     }    
     get items() {
         return this._items;
-    }    
+    }
     enumerate(start, select) {        
         return this._items.length > 0 ?
             this._items.reduce((a,item) => {
@@ -44,12 +44,12 @@ class Group extends EventTarget {
         this._properties = properties;
         this._init(children);        
     }
-    // get layers() {
-    //     return Array.isArray(this._items) ?
-    //         this._items.reduce((a,x) => {
-    //             return a.concat(x instanceof Group ? x.layers : [x]);
-    //         }, []) : [];
-    // }
+    get layers () {
+        return this._items.length > 0 ?
+            this._items.reduce((a,item) => {
+                return a.concat(item instanceof Group ? item.layers : item);
+            }, []) : [];
+    }
     _init(children) {        
         this._expanded = false;
         this._folder.classList.add('folder-filled');

@@ -59,9 +59,9 @@ class Tree extends EventTarget {
             this._root.redraw();
         }        
     }
-    // get layers () {
-    //     return this._root.layers;
-    // }
+    get layers () {
+        return this._root.layers;
+    }
 }
 
 export default Tree;

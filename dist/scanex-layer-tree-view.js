@@ -9860,33 +9860,10 @@ var _export$1 = function (options, source) {
   }
 };
 
-var aFunction$3 = function (it) {
-  if (typeof it != 'function') {
-    throw TypeError(String(it) + ' is not a function');
-  } return it;
-};
-
-// optional / simple context binding
-var functionBindContext$1 = function (fn, that, length) {
-  aFunction$3(fn);
-  if (that === undefined) return fn;
-  switch (length) {
-    case 0: return function () {
-      return fn.call(that);
-    };
-    case 1: return function (a) {
-      return fn.call(that, a);
-    };
-    case 2: return function (a, b) {
-      return fn.call(that, a, b);
-    };
-    case 3: return function (a, b, c) {
-      return fn.call(that, a, b, c);
-    };
-  }
-  return function (/* ...args */) {
-    return fn.apply(that, arguments);
-  };
+// `IsArray` abstract operation
+// https://tc39.github.io/ecma262/#sec-isarray
+var isArray$1 = Array.isArray || function isArray(arg) {
+  return classofRaw$1(arg) == 'Array';
 };
 
 // `ToObject` abstract operation
@@ -9895,10 +9872,10 @@ var toObject$1 = function (argument) {
   return Object(requireObjectCoercible$1(argument));
 };
 
-// `IsArray` abstract operation
-// https://tc39.github.io/ecma262/#sec-isarray
-var isArray$1 = Array.isArray || function isArray(arg) {
-  return classofRaw$1(arg) == 'Array';
+var createProperty$1 = function (object, key, value) {
+  var propertyKey = toPrimitive$1(key);
+  if (propertyKey in object) objectDefineProperty$1.f(object, propertyKey, createPropertyDescriptor$1(0, value));
+  else object[propertyKey] = value;
 };
 
 var nativeSymbol$1 = !!Object.getOwnPropertySymbols && !fails$1(function () {
@@ -9939,6 +9916,119 @@ var arraySpeciesCreate$1 = function (originalArray, length) {
       if (C === null) C = undefined;
     }
   } return new (C === undefined ? Array : C)(length === 0 ? 0 : length);
+};
+
+var engineUserAgent$1 = getBuiltIn$1('navigator', 'userAgent') || '';
+
+var process$5 = global_1$1.process;
+var versions$1 = process$5 && process$5.versions;
+var v8$1 = versions$1 && versions$1.v8;
+var match$1, version$1;
+
+if (v8$1) {
+  match$1 = v8$1.split('.');
+  version$1 = match$1[0] + match$1[1];
+} else if (engineUserAgent$1) {
+  match$1 = engineUserAgent$1.match(/Edge\/(\d+)/);
+  if (!match$1 || match$1[1] >= 74) {
+    match$1 = engineUserAgent$1.match(/Chrome\/(\d+)/);
+    if (match$1) version$1 = match$1[1];
+  }
+}
+
+var engineV8Version$1 = version$1 && +version$1;
+
+var SPECIES$8 = wellKnownSymbol$1('species');
+
+var arrayMethodHasSpeciesSupport$1 = function (METHOD_NAME) {
+  // We can't use this feature detection in V8 since it causes
+  // deoptimization and serious performance degradation
+  // https://github.com/zloirock/core-js/issues/677
+  return engineV8Version$1 >= 51 || !fails$1(function () {
+    var array = [];
+    var constructor = array.constructor = {};
+    constructor[SPECIES$8] = function () {
+      return { foo: 1 };
+    };
+    return array[METHOD_NAME](Boolean).foo !== 1;
+  });
+};
+
+var IS_CONCAT_SPREADABLE$1 = wellKnownSymbol$1('isConcatSpreadable');
+var MAX_SAFE_INTEGER$2 = 0x1FFFFFFFFFFFFF;
+var MAXIMUM_ALLOWED_INDEX_EXCEEDED$1 = 'Maximum allowed index exceeded';
+
+// We can't use this feature detection in V8 since it causes
+// deoptimization and serious performance degradation
+// https://github.com/zloirock/core-js/issues/679
+var IS_CONCAT_SPREADABLE_SUPPORT$1 = engineV8Version$1 >= 51 || !fails$1(function () {
+  var array = [];
+  array[IS_CONCAT_SPREADABLE$1] = false;
+  return array.concat()[0] !== array;
+});
+
+var SPECIES_SUPPORT$1 = arrayMethodHasSpeciesSupport$1('concat');
+
+var isConcatSpreadable$1 = function (O) {
+  if (!isObject$1(O)) return false;
+  var spreadable = O[IS_CONCAT_SPREADABLE$1];
+  return spreadable !== undefined ? !!spreadable : isArray$1(O);
+};
+
+var FORCED$m = !IS_CONCAT_SPREADABLE_SUPPORT$1 || !SPECIES_SUPPORT$1;
+
+// `Array.prototype.concat` method
+// https://tc39.github.io/ecma262/#sec-array.prototype.concat
+// with adding support of @@isConcatSpreadable and @@species
+_export$1({ target: 'Array', proto: true, forced: FORCED$m }, {
+  concat: function concat(arg) { // eslint-disable-line no-unused-vars
+    var O = toObject$1(this);
+    var A = arraySpeciesCreate$1(O, 0);
+    var n = 0;
+    var i, k, length, len, E;
+    for (i = -1, length = arguments.length; i < length; i++) {
+      E = i === -1 ? O : arguments[i];
+      if (isConcatSpreadable$1(E)) {
+        len = toLength$1(E.length);
+        if (n + len > MAX_SAFE_INTEGER$2) throw TypeError(MAXIMUM_ALLOWED_INDEX_EXCEEDED$1);
+        for (k = 0; k < len; k++, n++) if (k in E) createProperty$1(A, n, E[k]);
+      } else {
+        if (n >= MAX_SAFE_INTEGER$2) throw TypeError(MAXIMUM_ALLOWED_INDEX_EXCEEDED$1);
+        createProperty$1(A, n++, E);
+      }
+    }
+    A.length = n;
+    return A;
+  }
+});
+
+var aFunction$3 = function (it) {
+  if (typeof it != 'function') {
+    throw TypeError(String(it) + ' is not a function');
+  } return it;
+};
+
+// optional / simple context binding
+var functionBindContext$1 = function (fn, that, length) {
+  aFunction$3(fn);
+  if (that === undefined) return fn;
+  switch (length) {
+    case 0: return function () {
+      return fn.call(that);
+    };
+    case 1: return function (a) {
+      return fn.call(that, a);
+    };
+    case 2: return function (a, b) {
+      return fn.call(that, a, b);
+    };
+    case 3: return function (a, b, c) {
+      return fn.call(that, a, b, c);
+    };
+  }
+  return function (/* ...args */) {
+    return fn.apply(that, arguments);
+  };
 };
 
 var push$1 = [].push;
@@ -10051,42 +10141,6 @@ var arrayForEach$1 = (!STRICT_METHOD$9 || !USES_TO_LENGTH$e) ? function forEach(
 _export$1({ target: 'Array', proto: true, forced: [].forEach != arrayForEach$1 }, {
   forEach: arrayForEach$1
 });
-
-var engineUserAgent$1 = getBuiltIn$1('navigator', 'userAgent') || '';
-
-var process$5 = global_1$1.process;
-var versions$1 = process$5 && process$5.versions;
-var v8$1 = versions$1 && versions$1.v8;
-var match$1, version$1;
-
-if (v8$1) {
-  match$1 = v8$1.split('.');
-  version$1 = match$1[0] + match$1[1];
-} else if (engineUserAgent$1) {
-  match$1 = engineUserAgent$1.match(/Edge\/(\d+)/);
-  if (!match$1 || match$1[1] >= 74) {
-    match$1 = engineUserAgent$1.match(/Chrome\/(\d+)/);
-    if (match$1) version$1 = match$1[1];
-  }
-}
-
-var engineV8Version$1 = version$1 && +version$1;
-
-var SPECIES$8 = wellKnownSymbol$1('species');
-
-var arrayMethodHasSpeciesSupport$1 = function (METHOD_NAME) {
-  // We can't use this feature detection in V8 since it causes
-  // deoptimization and serious performance degradation
-  // https://github.com/zloirock/core-js/issues/677
-  return engineV8Version$1 >= 51 || !fails$1(function () {
-    var array = [];
-    var constructor = array.constructor = {};
-    constructor[SPECIES$8] = function () {
-      return { foo: 1 };
-    };
-    return array[METHOD_NAME](Boolean).foo !== 1;
-  });
-};
 
 var $map$2 = arrayIteration$1.map;
 
@@ -10441,13 +10495,7 @@ var Group = /*#__PURE__*/function (_EventTarget) {
       this._properties = properties;
 
       this._init(children);
-    } // get layers() {
-    //     return Array.isArray(this._items) ?
-    //         this._items.reduce((a,x) => {
-    //             return a.concat(x instanceof Group ? x.layers : [x]);
-    //         }, []) : [];
-    // }
-
+    }
   }, {
     key: "_init",
     value: function _init(children) {
@@ -10610,6 +10658,13 @@ var Group = /*#__PURE__*/function (_EventTarget) {
     key: "items",
     get: function get() {
       return this._items;
+    }
+  }, {
+    key: "layers",
+    get: function get() {
+      return this._items.length > 0 ? this._items.reduce(function (a, item) {
+        return a.concat(item instanceof Group ? item.layers : item);
+      }, []) : [];
     }
   }, {
     key: "childrenVisibility",
@@ -10827,10 +10882,12 @@ var Tree = /*#__PURE__*/function (_EventTarget) {
 
         this._root.redraw();
       }
-    } // get layers () {
-    //     return this._root.layers;
-    // }
-
+    }
+  }, {
+    key: "layers",
+    get: function get() {
+      return this._root.layers;
+    }
   }]);
 
   return Tree;

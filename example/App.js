@@ -8,13 +8,18 @@ class Example {
             const {detail: {title, visible, geometry, order}} = e;
             console.log('change:', {title, visible, geometry, order});
         });
-        this._root.on('redraw', e => {
-            const {detail: {title, visible, geometry, order}} = e;
-            console.log('redraw:', {title, visible, geometry, order});
-        });
+        // this._root.on('redraw', e => {
+        //     const {detail: {title, visible, geometry, order}} = e;
+        //     console.log('redraw:', {title, visible, geometry, order});
+        // });
         this._root.update(Result);
+        const vectors = item => item.type === 'Vector';
+        const rasters = item => item.type === 'Raster';
+        const ord = item => item.order;
+        console.log('vector:', this._root.layers.filter(vectors).map(ord), ', raster:', this._root.layers.filter(rasters).map(ord));
         console.log('change order');
-        this._root.vectorFirst = true;        
+        this._root.vectorFirst = true;
+        console.log('vector:', this._root.layers.filter(vectors).map(ord), ', raster:', this._root.layers.filter(rasters).map(ord));
     }
 }
 
