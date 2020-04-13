@@ -10292,7 +10292,9 @@ var Example = (function () {
 
     _createClass(Layer, [{
       key: "enumerate",
-      value: function enumerate() {}
+      value: function enumerate() {
+        return this.order;
+      }
     }, {
       key: "enumVectors",
       value: function enumVectors() {}
@@ -10502,13 +10504,10 @@ var Example = (function () {
     }, {
       key: "enumerate",
       value: function enumerate() {
-        var count = this._order;
-
-        this._items.forEach(function (item) {
-          item.order = count + 1;
-          count += item.count + 1;
-          item.enumerate();
-        });
+        return this._items.reduce(function (a, item) {
+          item.order = a + 1;
+          return item.enumerate();
+        }, this._order);
       }
     }, {
       key: "enumVectors",

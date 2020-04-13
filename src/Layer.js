@@ -32,7 +32,9 @@ class Layer extends EventTarget {
     set order (order) {
         this._order = order;
     }
-    enumerate () {}
+    enumerate () {
+        return this.order;
+    }
     enumVectors() {}
     enumRest() {}
     redraw() {

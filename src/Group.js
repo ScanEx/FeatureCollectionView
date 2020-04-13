@@ -33,12 +33,10 @@ class Group extends EventTarget {
         }, 0);
     } 
     enumerate() {
-        let count = this._order;
-        this._items.forEach(item => {                        
-            item.order = count + 1;
-            count += item.count + 1;
-            item.enumerate();
-        });
+        return this._items.reduce((a,item) => {
+            item.order = a + 1;            
+            return item.enumerate();
+        }, this._order);
     }
     get vectorCount() {
         return this.items.reduce((a,item) => {
