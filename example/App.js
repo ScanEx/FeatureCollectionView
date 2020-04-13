@@ -6,11 +6,11 @@ class Example {
         this._root = new Tree(container);
         this._root.on('change:state', e => {
             const {detail: {title, visible, expanded, geometry, order}} = e;
-            console.log({title, visible, expanded, geometry, order});
+            console.log('change:', {title, visible, expanded, geometry, order});
         });     
         this._root.on('redraw', e => {
             const {detail: {title, visible, expanded, geometry, order}} = e;
-            console.log({title, visible, expanded, geometry, order});
+            console.log('redraw:', {title, visible, expanded, geometry, order});
         });   
         this._root.update(Result);        
         console.log('natural:', this._root.layers);

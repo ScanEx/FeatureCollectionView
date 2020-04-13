@@ -10491,6 +10491,15 @@ var Example = (function () {
     }
 
     _createClass(Group, [{
+      key: "_forwardEvent",
+      value: function _forwardEvent(e) {
+        e.stopPropagation();
+        var event = document.createEvent('Event');
+        event.initEvent(e.type, false, false);
+        event.detail = e.detail;
+        this.dispatchEvent(event);
+      }
+    }, {
       key: "enumerate",
       value: function enumerate() {
         var count = this._order;
@@ -10592,9 +10601,9 @@ var Example = (function () {
           }
 
           item.addEventListener('change:visible', _this2._onChangeVisible.bind(_this2));
-          item.addEventListener('change:state', _this2._onChangeState.bind(_this2));
-          item.addEventListener('redraw', _this2._onRedraw.bind(_this2));
-          item.addEventListener('expanded', _this2._onExpanded.bind(_this2));
+          item.addEventListener('change:state', _this2._forwardEvent.bind(_this2));
+          item.addEventListener('redraw', _this2._forwardEvent.bind(_this2));
+          item.addEventListener('expanded', _this2._forwardEvent.bind(_this2));
           return item;
         });
         this._visible = this.childrenVisibility;
@@ -10614,10 +10623,6 @@ var Example = (function () {
       value: function _toggleChildren(e) {
         e.stopPropagation();
         this.expanded = !this.expanded;
-        var event = document.createEvent('Event');
-        event.initEvent('change:state', false, false);
-        event.detail = this;
-        this.dispatchEvent(event);
       }
     }, {
       key: "_toggleVisibility",
@@ -10647,15 +10652,6 @@ var Example = (function () {
         this.visible = this.childrenVisibility;
       }
     }, {
-      key: "_onChangeState",
-      value: function _onChangeState(e) {
-        e.stopPropagation();
-        var event = document.createEvent('Event');
-        event.initEvent('change:state', false, false);
-        event.detail = e.detail;
-        this.dispatchEvent(event);
-      }
-    }, {
       key: "_handleExpand",
       value: function _handleExpand(expanded) {
         if (expanded) {
@@ -10675,10 +10671,6 @@ var Example = (function () {
 
           this._expanded = false;
         }
-
-        var event = document.createEvent('Event');
-        event.initEvent('change:expanded', false, false);
-        this.dispatchEvent(event);
       }
     }, {
       key: "render",
@@ -129814,7 +129806,7 @@ var Example = (function () {
           expanded = _e$detail.expanded,
           geometry = _e$detail.geometry,
           order = _e$detail.order;
-      console.log({
+      console.log('change:', {
         title: title,
         visible: visible,
         expanded: expanded,
@@ -129830,7 +129822,7 @@ var Example = (function () {
           expanded = _e$detail2.expanded,
           geometry = _e$detail2.geometry,
           order = _e$detail2.order;
-      console.log({
+      console.log('redraw:', {
         title: title,
         visible: visible,
         expanded: expanded,

@@ -10,7 +10,14 @@ class Group extends EventTarget {
         this._items = [];
         this.expand = expand;        
         this._order = 0;
-    }    
+    }
+    _forwardEvent(e) {
+        e.stopPropagation();
+        let event = document.createEvent('Event');
+        event.initEvent(e.type, false, false);
+        event.detail = e.detail;
+        this.dispatchEvent(event);
+    }
     get order() {
         return this._order;
     } 
@@ -112,9 +119,9 @@ class Group extends EventTarget {
                 item = new Layer (this._children, content);
             }
             item.addEventListener('change:visible', this._onChangeVisible.bind(this));
-            item.addEventListener('change:state', this._onChangeState.bind(this));
-            item.addEventListener('redraw', this._onRedraw.bind(this));
-            item.addEventListener('expanded', this._onExpanded.bind(this));
+            item.addEventListener('change:state', this._forwardEvent.bind(this));
+            item.addEventListener('redraw', this._forwardEvent.bind(this));
+            item.addEventListener('expanded', this._forwardEvent.bind(this));
             return item;
         });
 
@@ -133,11 +140,7 @@ class Group extends EventTarget {
     }
     _toggleChildren(e) {
         e.stopPropagation();
-        this.expanded = !this.expanded;
-        let event = document.createEvent('Event');
-        event.initEvent('change:state', false, false);
-        event.detail = this;
-        this.dispatchEvent(event);
+        this.expanded = !this.expanded;        
     }
     _toggleVisibility(e) {
         e.stopPropagation();        
@@ -157,14 +160,7 @@ class Group extends EventTarget {
     _onChangeVisible(e) {
         e.stopPropagation();
         this.visible = this.childrenVisibility;
-    } 
-    _onChangeState (e) {
-        e.stopPropagation();
-        let event = document.createEvent('Event');
-        event.initEvent('change:state', false, false);
-        event.detail = e.detail;
-        this.dispatchEvent(event);
-    }    
+    }       
     get childrenVisibility() {
         if (this._items.length === 0) {
             return false;
@@ -258,9 +254,6 @@ class Group extends EventTarget {
             this._children.classList.add('scanex-layer-tree-hidden');
             this._expanded = false;
         }        
-        let event = document.createEvent('Event');
-        event.initEvent('change:expanded', false, false);
-        this.dispatchEvent(event);
     } 
     set expanded (expanded) {        
         if (this._items.length === 0 && typeof this.expand === 'function') {
