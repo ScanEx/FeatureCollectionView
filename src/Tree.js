@@ -27,8 +27,8 @@ class Tree extends EventTarget {
     update (data) {
         this._root.update(data);
         if (this._vectorFirst) {
-            this._root.enumVectors();                
-            this._root.enumRest(this._root.vectorCount);
+            const count = this._root.enumVectors();                
+            this._root.enumRest(count);
         }
         else {
             this._root.enumerate();
@@ -42,8 +42,8 @@ class Tree extends EventTarget {
         if (this._vectorFirst !== vectorFirst) {
             this._vectorFirst = vectorFirst;
             if (this._vectorFirst) {
-                this._root.enumVectors();                
-                this._root.enumRest(this._root.vectorCount);
+                const count = this._root.enumVectors();                
+                this._root.enumRest(count);
             }
             else {
                 this._root.enumerate();

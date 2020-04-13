@@ -10282,7 +10282,6 @@ var Layer = /*#__PURE__*/function (_EventTarget) {
 
     _this._properties = properties;
     _this._geometry = geometry;
-    _this._vectorFirst = false;
 
     _this._init();
 
@@ -10296,10 +10295,14 @@ var Layer = /*#__PURE__*/function (_EventTarget) {
     }
   }, {
     key: "enumVectors",
-    value: function enumVectors() {}
+    value: function enumVectors() {
+      return this.enumerate();
+    }
   }, {
     key: "enumRest",
-    value: function enumRest() {}
+    value: function enumRest() {
+      return this.enumerate();
+    }
   }, {
     key: "redraw",
     value: function redraw() {
@@ -10388,37 +10391,12 @@ var Layer = /*#__PURE__*/function (_EventTarget) {
       container.appendChild(this._element);
     }
   }, {
-    key: "vectorFirst",
-    get: function get() {
-      return this._vectorFirst;
-    },
-    set: function set(vectorFirst) {
-      if (this._vectorFirst !== vectorFirst) {
-        this._vectorFirst = vectorFirst;
-      }
-    }
-  }, {
     key: "order",
     get: function get() {
       return this._order;
     },
     set: function set(order) {
       this._order = order;
-    }
-  }, {
-    key: "count",
-    get: function get() {
-      return 1;
-    }
-  }, {
-    key: "vectorCount",
-    get: function get() {
-      return this.type === 'Vector' ? 1 : 0;
-    }
-  }, {
-    key: "restCount",
-    get: function get() {
-      return this.type === 'Vector' ? 0 : 1;
     }
   }, {
     key: "geometry",
@@ -10511,29 +10489,26 @@ var Group = /*#__PURE__*/function (_EventTarget) {
   }, {
     key: "enumVectors",
     value: function enumVectors() {
-      var count = this._order;
-
-      this._items.forEach(function (item) {
-        switch (item.type) {
-          case 'Group':
-          case 'Vector':
-            item.order = count + 1;
-            count += item.vectorCount;
-            item.enumVectors();
-            break;
+      return this._items.reduce(function (a, item) {
+        if (item.type === 'Group' || item.type === 'Vector') {
+          item.order = a + 1;
+          return item.enumVectors();
+        } else {
+          return a;
         }
-      });
+      }, this._order);
     }
   }, {
     key: "enumRest",
-    value: function enumRest(count) {
-      this._items.forEach(function (item) {
+    value: function enumRest(start) {
+      return this._items.reduce(function (a, item) {
         if (item.type === 'Group' || item.type !== 'Vector') {
-          item.order = count + 1;
-          count += item.restCount;
-          item.enumRest(count);
+          item.order = a + 1;
+          return item.enumRest(item.order);
+        } else {
+          return a;
         }
-      });
+      }, start);
     }
   }, {
     key: "redraw",
@@ -10570,8 +10545,9 @@ var Group = /*#__PURE__*/function (_EventTarget) {
 
       this._visibility.addEventListener('click', this._toggleVisibility.bind(this));
 
-      this._initChildren(children); // this.expanded = !!this._properties.expanded;
+      this._initChildren(children);
 
+      this.expanded = !!this._properties.expanded;
     }
   }, {
     key: "destroy",
@@ -10724,27 +10700,6 @@ var Group = /*#__PURE__*/function (_EventTarget) {
     key: "items",
     get: function get() {
       return this._items;
-    }
-  }, {
-    key: "count",
-    get: function get() {
-      return this.items.reduce(function (a, item) {
-        return a + item.count;
-      }, 0);
-    }
-  }, {
-    key: "vectorCount",
-    get: function get() {
-      return this.items.reduce(function (a, item) {
-        return a + item.vectorCount;
-      }, 0);
-    }
-  }, {
-    key: "restCount",
-    get: function get() {
-      return this.items.reduce(function (a, item) {
-        return a + item.restCount;
-      }, 0);
     }
   }, {
     key: "layers",
@@ -10933,9 +10888,9 @@ var Tree = /*#__PURE__*/function (_EventTarget) {
       this._root.update(data);
 
       if (this._vectorFirst) {
-        this._root.enumVectors();
+        var count = this._root.enumVectors();
 
-        this._root.enumRest(this._root.vectorCount);
+        this._root.enumRest(count);
       } else {
         this._root.enumerate();
       }
@@ -10952,9 +10907,9 @@ var Tree = /*#__PURE__*/function (_EventTarget) {
         this._vectorFirst = vectorFirst;
 
         if (this._vectorFirst) {
-          this._root.enumVectors();
+          var count = this._root.enumVectors();
 
-          this._root.enumRest(this._root.vectorCount);
+          this._root.enumRest(count);
         } else {
           this._root.enumerate();
         }

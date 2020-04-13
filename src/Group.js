@@ -26,51 +26,34 @@ class Group extends EventTarget {
     }   
     get items() {
         return this._items;
-    }
-    get count() {
-        return this.items.reduce((a,item) => {
-            return a + item.count;
-        }, 0);
-    } 
+    }    
     enumerate() {
         return this._items.reduce((a,item) => {
             item.order = a + 1;            
             return item.enumerate();
         }, this._order);
-    }
-    get vectorCount() {
-        return this.items.reduce((a,item) => {
-            return a + item.vectorCount;
-        }, 0);
-    }
-    get restCount() {
-        return this.items.reduce((a,item) => {
-            return a + item.restCount;
-        }, 0);
-    }
-    enumVectors() {
-        let count = this._order;
-        this._items.forEach(item => {
-            switch (item.type) {
-                case 'Group':
-                case 'Vector':
-                    item.order = count + 1;
-                    count += item.vectorCount;
-                    item.enumVectors();
-                    break;
-                default:
-                    break;
+    }    
+    enumVectors() {        
+        return this._items.reduce((a,item) => {
+            if (item.type === 'Group' || item.type === 'Vector') {
+                item.order = a + 1;
+                return item.enumVectors();
             }
-        });
+            else {
+                return a;
+            }            
+        }, this._order);
     }
-    enumRest(count) {        
-        this._items.forEach(item => {
+    enumRest(start) {
+        return this._items.reduce((a,item) => {
             if (item.type === 'Group' || item.type !== 'Vector') {
-                item.order = count + 1;
-                count += item.restCount;
-                item.enumRest(count);
+                item.order = a + 1;          
+                return item.enumRest(item.order);
             }
-        });
+            else {
+                return a;
+            }
+        }, start);
     }
     redraw() {
         this._items.forEach(item => {
@@ -99,7 +82,7 @@ class Group extends EventTarget {
         this._title.innerText = this.title;
         this._visibility.addEventListener('click', this._toggleVisibility.bind(this));
         this._initChildren(children);
-        // this.expanded = !!this._properties.expanded;
+        this.expanded = !!this._properties.expanded;
     }
     destroy() { 
         if (this._element) {
