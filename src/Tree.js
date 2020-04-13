@@ -14,7 +14,7 @@ class Tree extends EventTarget {
             this.dispatchEvent(event);            
         });
         this._root.on('expanded', () => {
-            this._root.enumerate();
+            this._root.enumerate(0);
             this._root.redraw();
         });   
         this._root.on('redraw', e => {            
@@ -27,11 +27,15 @@ class Tree extends EventTarget {
     update (data) {
         this._root.update(data);
         if (this._vectorFirst) {
-            const count = this._root.enumVectors();                
-            this._root.enumRest(count);
+            const count = this._root.enumerate(0, item => {
+                return item.type === 'Group' || item.type === 'Vector';
+            });
+            this._root.enumerate(count, item => {
+                return item.type === 'Group' || item.type !== 'Vector';
+            });
         }
         else {
-            this._root.enumerate();
+            this._root.enumerate(0);
         }
         this._root.redraw();
     }
@@ -42,18 +46,22 @@ class Tree extends EventTarget {
         if (this._vectorFirst !== vectorFirst) {
             this._vectorFirst = vectorFirst;
             if (this._vectorFirst) {
-                const count = this._root.enumVectors();                
-                this._root.enumRest(count);
+                const count = this._root.enumerate(0, item => {
+                    return item instanceof Group || item.type === 'Vector';
+                });
+                this._root.enumerate(count, item => {
+                    return item instanceof Group || item.type !== 'Vector';
+                });
             }
             else {
-                this._root.enumerate();
+                this._root.enumerate(0);
             }
             this._root.redraw();
         }        
     }
-    get layers () {
-        return this._root.layers;
-    }
+    // get layers () {
+    //     return this._root.layers;
+    // }
 }
 
 export default Tree;

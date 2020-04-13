@@ -8,8 +8,7 @@ class Group extends EventTarget {
         super();
         this._container = container;
         this._items = [];
-        this.expand = expand;        
-        this._order = 0;
+        this.expand = expand;
     }
     _forwardEvent(e) {
         e.stopPropagation();
@@ -17,44 +16,21 @@ class Group extends EventTarget {
         event.initEvent(e.type, false, false);
         event.detail = e.detail;
         this.dispatchEvent(event);
-    }
-    get order() {
-        return this._order;
-    } 
-    set order(order) {
-        this._order = order;
-    }   
+    }    
     get items() {
         return this._items;
     }    
-    enumerate() {
-        return this._items.reduce((a,item) => {
-            item.order = a + 1;            
-            return item.enumerate();
-        }, this._order);
+    enumerate(start, select) {        
+        return this._items.length > 0 ?
+            this._items.reduce((a,item) => {
+                if (typeof select === 'function') {
+                    return select(item) ? item.enumerate(a + 1, select) : a;
+                }
+                else {
+                    return item.enumerate(a + 1);
+                }
+            }, start) : start;        
     }    
-    enumVectors() {        
-        return this._items.reduce((a,item) => {
-            if (item.type === 'Group' || item.type === 'Vector') {
-                item.order = a + 1;
-                return item.enumVectors();
-            }
-            else {
-                return a;
-            }            
-        }, this._order);
-    }
-    enumRest(start) {
-        return this._items.reduce((a,item) => {
-            if (item.type === 'Group' || item.type !== 'Vector') {
-                item.order = a + 1;          
-                return item.enumRest(item.order);
-            }
-            else {
-                return a;
-            }
-        }, start);
-    }
     redraw() {
         this._items.forEach(item => {
             if (!(typeof item.visible === 'boolean' && !item.visible)) {
@@ -68,12 +44,12 @@ class Group extends EventTarget {
         this._properties = properties;
         this._init(children);        
     }
-    get layers() {
-        return Array.isArray(this._items) ?
-            this._items.reduce((a,x) => {
-                return a.concat(x instanceof Group ? x.layers : [x]);
-            }, []) : [];
-    }
+    // get layers() {
+    //     return Array.isArray(this._items) ?
+    //         this._items.reduce((a,x) => {
+    //             return a.concat(x instanceof Group ? x.layers : [x]);
+    //         }, []) : [];
+    // }
     _init(children) {        
         this._expanded = false;
         this._folder.classList.add('folder-filled');

@@ -19,19 +19,11 @@ class Layer extends EventTarget {
     }    
     get order () {
         return this._order;
-    }
-    set order (order) {
-        this._order = order;
-    }
-    enumerate () {
-        return this.order;
-    }
-    enumVectors() {
-        return this.enumerate();
-    }
-    enumRest() {
-        return this.enumerate();
-    }
+    }    
+    enumerate (start) {
+        this._order = start;
+        return this._order;
+    }    
     redraw() {
         if (this.visible) {
             let event = document.createEvent('Event');
