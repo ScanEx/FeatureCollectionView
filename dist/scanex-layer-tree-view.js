@@ -10571,9 +10571,8 @@ var Group = /*#__PURE__*/function (_EventTarget) {
 
       this._visibility.addEventListener('click', this._toggleVisibility.bind(this));
 
-      this._initChildren(children);
+      this._initChildren(children); // this.expanded = !!this._properties.expanded;
 
-      this.expanded = !!this._properties.expanded;
     }
   }, {
     key: "destroy",

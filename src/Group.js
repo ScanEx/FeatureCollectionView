@@ -101,7 +101,7 @@ class Group extends EventTarget {
         this._title.innerText = this.title;
         this._visibility.addEventListener('click', this._toggleVisibility.bind(this));
         this._initChildren(children);
-        this.expanded = !!this._properties.expanded;
+        // this.expanded = !!this._properties.expanded;
     }
     destroy() { 
         if (this._element) {
