@@ -10505,7 +10505,7 @@ var Group = /*#__PURE__*/function (_EventTarget) {
 
       this._items.forEach(function (item) {
         item.order = count + 1;
-        count += item.count;
+        count += item.count + 1;
         item.enumerate();
       });
     }

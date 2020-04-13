@@ -34,9 +34,9 @@ class Group extends EventTarget {
     } 
     enumerate() {
         let count = this._order;
-        this._items.forEach(item => {
+        this._items.forEach(item => {                        
             item.order = count + 1;
-            count += item.count;
+            count += item.count + 1;
             item.enumerate();
         });
     }

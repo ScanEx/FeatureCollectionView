@@ -10506,7 +10506,7 @@ var Example = (function () {
 
         this._items.forEach(function (item) {
           item.order = count + 1;
-          count += item.count;
+          count += item.count + 1;
           item.enumerate();
         });
       }
