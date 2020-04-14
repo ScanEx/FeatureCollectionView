@@ -10320,8 +10320,8 @@ var Layer = /*#__PURE__*/function (_EventTarget) {
     }
   }, {
     key: "redraw",
-    value: function redraw() {
-      if (this.visible) {
+    value: function redraw(filter) {
+      if (this.visible && (typeof filter !== 'function' || filter(this))) {
         var event = document.createEvent('Event');
         event.initEvent('node:redraw', false, false);
         event.detail = this;
@@ -10515,10 +10515,10 @@ var Group = /*#__PURE__*/function (_EventTarget) {
     }
   }, {
     key: "redraw",
-    value: function redraw() {
+    value: function redraw(filter) {
       this._items.forEach(function (item) {
         if (!(typeof item.visible === 'boolean' && !item.visible)) {
-          item.redraw();
+          item.redraw(filter);
         }
       });
     }
@@ -10870,6 +10870,11 @@ var Tree = /*#__PURE__*/function (_EventTarget) {
   }
 
   _createClass(Tree, [{
+    key: "redraw",
+    value: function redraw(filter) {
+      this._root.redraw(filter);
+    }
+  }, {
     key: "_forwardEvent",
     value: function _forwardEvent(e) {
       e.stopPropagation();

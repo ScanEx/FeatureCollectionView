@@ -34,8 +34,8 @@ class Layer extends EventTarget {
         this._order = start;
         return this._order;
     }    
-    redraw() {
-        if (this.visible) {
+    redraw(filter) {
+        if (this.visible && (typeof filter !== 'function' || filter(this))) {            
             let event = document.createEvent('Event');
             event.initEvent('node:redraw', false, false);
             event.detail = this;

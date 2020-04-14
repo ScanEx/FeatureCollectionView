@@ -31,11 +31,11 @@ class Group extends EventTarget {
                 }
             }, start) : start;        
     }    
-    redraw() {
+    redraw(filter) {
         this._items.forEach(item => {
             if (!(typeof item.visible === 'boolean' && !item.visible)) {
-                item.redraw();
-            }            
+                item.redraw(filter);
+            }
         });
     }
     update({properties, children}) {

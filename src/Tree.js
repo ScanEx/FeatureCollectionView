@@ -19,6 +19,9 @@ class Tree extends EventTarget {
     get temporal() {
         return this._root.layers.some(layer => layer.temporal);
     }
+    redraw(filter) {
+        this._root.redraw(filter);
+    }
     _forwardEvent(e) {
         e.stopPropagation();
         let event = document.createEvent('Event');
