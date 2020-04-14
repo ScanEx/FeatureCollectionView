@@ -10866,7 +10866,6 @@ var Example = (function () {
 
 	      var event = document.createEvent('Event');
 	      event.initEvent('expanded', false, false);
-	      event.detail = e.detail;
 
 	      _this.dispatchEvent(event);
 	    });

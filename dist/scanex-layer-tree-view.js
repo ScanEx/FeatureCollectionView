@@ -10865,7 +10865,6 @@ var Tree = /*#__PURE__*/function (_EventTarget) {
 
       var event = document.createEvent('Event');
       event.initEvent('expanded', false, false);
-      event.detail = e.detail;
 
       _this.dispatchEvent(event);
     });
