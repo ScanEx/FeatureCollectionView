@@ -12,6 +12,10 @@ class Tree extends EventTarget {
         this._root.on('node:expanded', () => {
             this._root.enumerate(0);
             this._root.redraw();
+            let event = document.createEvent('Event');
+            event.initEvent('expanded', false, false);
+            event.detail = e.detail;
+            this.dispatchEvent(event);
         });        
         this._root.on('node:redraw', this._forwardEvent.bind(this));
         this._root.on('node:click', this._forwardEvent.bind(this));

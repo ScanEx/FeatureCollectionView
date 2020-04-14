@@ -10863,6 +10863,12 @@ var Example = (function () {
 	      _this._root.enumerate(0);
 
 	      _this._root.redraw();
+
+	      var event = document.createEvent('Event');
+	      event.initEvent('expanded', false, false);
+	      event.detail = e.detail;
+
+	      _this.dispatchEvent(event);
 	    });
 
 	    _this._root.on('node:redraw', _this._forwardEvent.bind(_assertThisInitialized(_this)));
