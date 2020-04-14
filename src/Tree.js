@@ -17,7 +17,10 @@ class Tree extends EventTarget {
         this._root.on('node:click', this._forwardEvent.bind(this));
     }
     get temporal() {
-        return this._root.layers.some(layer => layer.temporal);
+        return this._root.temporal;
+    }
+    getLayers(filter) {
+        return this._root.getLayers(filter);
     }
     redraw(filter) {
         this._root.redraw(filter);
@@ -64,10 +67,7 @@ class Tree extends EventTarget {
             }
             this._root.redraw();
         }        
-    }
-    get layers () {
-        return this._root.layers;
-    }
+    }    
 }
 
 export default Tree;

@@ -722,35 +722,18 @@ var Example = (function () {
 	  });
 	};
 
-	var $filter = arrayIteration.filter;
-
-
-
-	var HAS_SPECIES_SUPPORT = arrayMethodHasSpeciesSupport('filter');
-	// Edge 14- issue
-	var USES_TO_LENGTH = arrayMethodUsesToLength('filter');
-
-	// `Array.prototype.filter` method
-	// https://tc39.github.io/ecma262/#sec-array.prototype.filter
-	// with adding support of @@species
-	_export({ target: 'Array', proto: true, forced: !HAS_SPECIES_SUPPORT || !USES_TO_LENGTH }, {
-	  filter: function filter(callbackfn /* , thisArg */) {
-	    return $filter(this, callbackfn, arguments.length > 1 ? arguments[1] : undefined);
-	  }
-	});
-
 	var $map = arrayIteration.map;
 
 
 
-	var HAS_SPECIES_SUPPORT$1 = arrayMethodHasSpeciesSupport('map');
+	var HAS_SPECIES_SUPPORT = arrayMethodHasSpeciesSupport('map');
 	// FF49- issue
-	var USES_TO_LENGTH$1 = arrayMethodUsesToLength('map');
+	var USES_TO_LENGTH = arrayMethodUsesToLength('map');
 
 	// `Array.prototype.map` method
 	// https://tc39.github.io/ecma262/#sec-array.prototype.map
 	// with adding support of @@species
-	_export({ target: 'Array', proto: true, forced: !HAS_SPECIES_SUPPORT$1 || !USES_TO_LENGTH$1 }, {
+	_export({ target: 'Array', proto: true, forced: !HAS_SPECIES_SUPPORT || !USES_TO_LENGTH }, {
 	  map: function map(callbackfn /* , thisArg */) {
 	    return $map(this, callbackfn, arguments.length > 1 ? arguments[1] : undefined);
 	  }
@@ -824,29 +807,6 @@ var Example = (function () {
 
 	  return _assertThisInitialized(self);
 	}
-
-	var arrayMethodIsStrict = function (METHOD_NAME, argument) {
-	  var method = [][METHOD_NAME];
-	  return !!method && fails(function () {
-	    // eslint-disable-next-line no-useless-call,no-throw-literal
-	    method.call(null, argument || function () { throw 1; }, 1);
-	  });
-	};
-
-	var $some = arrayIteration.some;
-
-
-
-	var STRICT_METHOD = arrayMethodIsStrict('some');
-	var USES_TO_LENGTH$2 = arrayMethodUsesToLength('some');
-
-	// `Array.prototype.some` method
-	// https://tc39.github.io/ecma262/#sec-array.prototype.some
-	_export({ target: 'Array', proto: true, forced: !STRICT_METHOD || !USES_TO_LENGTH$2 }, {
-	  some: function some(callbackfn /* , thisArg */) {
-	    return $some(this, callbackfn, arguments.length > 1 ? arguments[1] : undefined);
-	  }
-	});
 
 	var commonjsGlobal$1 = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof commonjsGlobal !== 'undefined' ? commonjsGlobal : typeof self !== 'undefined' ? self : {};
 
@@ -1488,8 +1448,8 @@ var Example = (function () {
 	  });
 	};
 
-	var HAS_SPECIES_SUPPORT$2 = arrayMethodHasSpeciesSupport$1('splice');
-	var USES_TO_LENGTH$3 = arrayMethodUsesToLength$1('splice', { ACCESSORS: true, 0: 0, 1: 2 });
+	var HAS_SPECIES_SUPPORT$1 = arrayMethodHasSpeciesSupport$1('splice');
+	var USES_TO_LENGTH$1 = arrayMethodUsesToLength$1('splice', { ACCESSORS: true, 0: 0, 1: 2 });
 
 	var max$1$1 = Math.max;
 	var min$2$1 = Math.min;
@@ -1499,7 +1459,7 @@ var Example = (function () {
 	// `Array.prototype.splice` method
 	// https://tc39.github.io/ecma262/#sec-array.prototype.splice
 	// with adding support of @@species
-	_export$1({ target: 'Array', proto: true, forced: !HAS_SPECIES_SUPPORT$2 || !USES_TO_LENGTH$3 }, {
+	_export$1({ target: 'Array', proto: true, forced: !HAS_SPECIES_SUPPORT$1 || !USES_TO_LENGTH$1 }, {
 	  splice: function splice(start, deleteCount /* , ...items */) {
 	    var O = toObject$1(this);
 	    var len = toLength$1(O.length);
@@ -3027,7 +2987,7 @@ var Example = (function () {
 	// https://tc39.github.io/ecma262/#sec-array.prototype-@@unscopables
 	addToUnscopables('copyWithin');
 
-	var arrayMethodIsStrict$1 = function (METHOD_NAME, argument) {
+	var arrayMethodIsStrict = function (METHOD_NAME, argument) {
 	  var method = [][METHOD_NAME];
 	  return !!method && fails$1(function () {
 	    // eslint-disable-next-line no-useless-call,no-throw-literal
@@ -3039,12 +2999,12 @@ var Example = (function () {
 
 
 
-	var STRICT_METHOD$1 = arrayMethodIsStrict$1('every');
+	var STRICT_METHOD = arrayMethodIsStrict('every');
 	var USES_TO_LENGTH$1$1 = arrayMethodUsesToLength$1('every');
 
 	// `Array.prototype.every` method
 	// https://tc39.github.io/ecma262/#sec-array.prototype.every
-	_export$1({ target: 'Array', proto: true, forced: !STRICT_METHOD$1 || !USES_TO_LENGTH$1$1 }, {
+	_export$1({ target: 'Array', proto: true, forced: !STRICT_METHOD || !USES_TO_LENGTH$1$1 }, {
 	  every: function every(callbackfn /* , thisArg */) {
 	    return $every(this, callbackfn, arguments.length > 1 ? arguments[1] : undefined);
 	  }
@@ -3072,20 +3032,20 @@ var Example = (function () {
 	// https://tc39.github.io/ecma262/#sec-array.prototype-@@unscopables
 	addToUnscopables('fill');
 
-	var $filter$1 = arrayIteration$1.filter;
+	var $filter = arrayIteration$1.filter;
 
 
 
 	var HAS_SPECIES_SUPPORT$1$1 = arrayMethodHasSpeciesSupport$1('filter');
 	// Edge 14- issue
-	var USES_TO_LENGTH$2$1 = arrayMethodUsesToLength$1('filter');
+	var USES_TO_LENGTH$2 = arrayMethodUsesToLength$1('filter');
 
 	// `Array.prototype.filter` method
 	// https://tc39.github.io/ecma262/#sec-array.prototype.filter
 	// with adding support of @@species
-	_export$1({ target: 'Array', proto: true, forced: !HAS_SPECIES_SUPPORT$1$1 || !USES_TO_LENGTH$2$1 }, {
+	_export$1({ target: 'Array', proto: true, forced: !HAS_SPECIES_SUPPORT$1$1 || !USES_TO_LENGTH$2 }, {
 	  filter: function filter(callbackfn /* , thisArg */) {
-	    return $filter$1(this, callbackfn, arguments.length > 1 ? arguments[1] : undefined);
+	    return $filter(this, callbackfn, arguments.length > 1 ? arguments[1] : undefined);
 	  }
 	});
 
@@ -3096,14 +3056,14 @@ var Example = (function () {
 	var FIND = 'find';
 	var SKIPS_HOLES = true;
 
-	var USES_TO_LENGTH$3$1 = arrayMethodUsesToLength$1(FIND);
+	var USES_TO_LENGTH$3 = arrayMethodUsesToLength$1(FIND);
 
 	// Shouldn't skip holes
 	if (FIND in []) Array(1)[FIND](function () { SKIPS_HOLES = false; });
 
 	// `Array.prototype.find` method
 	// https://tc39.github.io/ecma262/#sec-array.prototype.find
-	_export$1({ target: 'Array', proto: true, forced: SKIPS_HOLES || !USES_TO_LENGTH$3$1 }, {
+	_export$1({ target: 'Array', proto: true, forced: SKIPS_HOLES || !USES_TO_LENGTH$3 }, {
 	  find: function find(callbackfn /* , that = undefined */) {
 	    return $find(this, callbackfn, arguments.length > 1 ? arguments[1] : undefined);
 	  }
@@ -3194,12 +3154,12 @@ var Example = (function () {
 
 
 
-	var STRICT_METHOD$1$1 = arrayMethodIsStrict$1('forEach');
+	var STRICT_METHOD$1 = arrayMethodIsStrict('forEach');
 	var USES_TO_LENGTH$5 = arrayMethodUsesToLength$1('forEach');
 
 	// `Array.prototype.forEach` method implementation
 	// https://tc39.github.io/ecma262/#sec-array.prototype.foreach
-	var arrayForEach = (!STRICT_METHOD$1$1 || !USES_TO_LENGTH$5) ? function forEach(callbackfn /* , thisArg */) {
+	var arrayForEach = (!STRICT_METHOD$1 || !USES_TO_LENGTH$5) ? function forEach(callbackfn /* , thisArg */) {
 	  return $forEach$1(this, callbackfn, arguments.length > 1 ? arguments[1] : undefined);
 	} : [].forEach;
 
@@ -3233,7 +3193,7 @@ var Example = (function () {
 	var nativeIndexOf = [].indexOf;
 
 	var NEGATIVE_ZERO = !!nativeIndexOf && 1 / [1].indexOf(1, -0) < 0;
-	var STRICT_METHOD$2 = arrayMethodIsStrict$1('indexOf');
+	var STRICT_METHOD$2 = arrayMethodIsStrict('indexOf');
 	var USES_TO_LENGTH$7 = arrayMethodUsesToLength$1('indexOf', { ACCESSORS: true, 1: 0 });
 
 	// `Array.prototype.indexOf` method
@@ -3250,7 +3210,7 @@ var Example = (function () {
 	var nativeJoin = [].join;
 
 	var ES3_STRINGS = indexedObject$1 != Object;
-	var STRICT_METHOD$3 = arrayMethodIsStrict$1('join', ',');
+	var STRICT_METHOD$3 = arrayMethodIsStrict('join', ',');
 
 	// `Array.prototype.join` method
 	// https://tc39.github.io/ecma262/#sec-array.prototype.join
@@ -3263,7 +3223,7 @@ var Example = (function () {
 	var min$4 = Math.min;
 	var nativeLastIndexOf = [].lastIndexOf;
 	var NEGATIVE_ZERO$1 = !!nativeLastIndexOf && 1 / [1].lastIndexOf(1, -0) < 0;
-	var STRICT_METHOD$4 = arrayMethodIsStrict$1('lastIndexOf');
+	var STRICT_METHOD$4 = arrayMethodIsStrict('lastIndexOf');
 	// For preventing possible almost infinite loop in non-standard implementations, test the forward version of the method
 	var USES_TO_LENGTH$8 = arrayMethodUsesToLength$1('indexOf', { ACCESSORS: true, 1: 0 });
 	var FORCED$2 = NEGATIVE_ZERO$1 || !STRICT_METHOD$4 || !USES_TO_LENGTH$8;
@@ -3292,14 +3252,14 @@ var Example = (function () {
 
 
 
-	var HAS_SPECIES_SUPPORT$2$1 = arrayMethodHasSpeciesSupport$1('map');
+	var HAS_SPECIES_SUPPORT$2 = arrayMethodHasSpeciesSupport$1('map');
 	// FF49- issue
 	var USES_TO_LENGTH$9 = arrayMethodUsesToLength$1('map');
 
 	// `Array.prototype.map` method
 	// https://tc39.github.io/ecma262/#sec-array.prototype.map
 	// with adding support of @@species
-	_export$1({ target: 'Array', proto: true, forced: !HAS_SPECIES_SUPPORT$2$1 || !USES_TO_LENGTH$9 }, {
+	_export$1({ target: 'Array', proto: true, forced: !HAS_SPECIES_SUPPORT$2 || !USES_TO_LENGTH$9 }, {
 	  map: function map(callbackfn /* , thisArg */) {
 	    return $map$1(this, callbackfn, arguments.length > 1 ? arguments[1] : undefined);
 	  }
@@ -3345,7 +3305,7 @@ var Example = (function () {
 
 
 
-	var STRICT_METHOD$5 = arrayMethodIsStrict$1('reduce');
+	var STRICT_METHOD$5 = arrayMethodIsStrict('reduce');
 	var USES_TO_LENGTH$a = arrayMethodUsesToLength$1('reduce', { 1: 0 });
 
 	// `Array.prototype.reduce` method
@@ -3360,7 +3320,7 @@ var Example = (function () {
 
 
 
-	var STRICT_METHOD$6 = arrayMethodIsStrict$1('reduceRight');
+	var STRICT_METHOD$6 = arrayMethodIsStrict('reduceRight');
 	// For preventing possible almost infinite loop in non-standard implementations, test the forward version of the method
 	var USES_TO_LENGTH$b = arrayMethodUsesToLength$1('reduce', { 1: 0 });
 
@@ -3425,18 +3385,18 @@ var Example = (function () {
 	  }
 	});
 
-	var $some$1 = arrayIteration$1.some;
+	var $some = arrayIteration$1.some;
 
 
 
-	var STRICT_METHOD$7 = arrayMethodIsStrict$1('some');
+	var STRICT_METHOD$7 = arrayMethodIsStrict('some');
 	var USES_TO_LENGTH$d = arrayMethodUsesToLength$1('some');
 
 	// `Array.prototype.some` method
 	// https://tc39.github.io/ecma262/#sec-array.prototype.some
 	_export$1({ target: 'Array', proto: true, forced: !STRICT_METHOD$7 || !USES_TO_LENGTH$d }, {
 	  some: function some(callbackfn /* , thisArg */) {
-	    return $some$1(this, callbackfn, arguments.length > 1 ? arguments[1] : undefined);
+	    return $some(this, callbackfn, arguments.length > 1 ? arguments[1] : undefined);
 	  }
 	});
 
@@ -3452,7 +3412,7 @@ var Example = (function () {
 	  test$2.sort(null);
 	});
 	// Old WebKit
-	var STRICT_METHOD$8 = arrayMethodIsStrict$1('sort');
+	var STRICT_METHOD$8 = arrayMethodIsStrict('sort');
 
 	var FORCED$3 = FAILS_ON_UNDEFINED || !FAILS_ON_NULL || !STRICT_METHOD$8;
 
@@ -7829,7 +7789,7 @@ var Example = (function () {
 	  return arrayFill.apply(aTypedArray$3(this), arguments);
 	});
 
-	var $filter$1$1 = arrayIteration$1.filter;
+	var $filter$1 = arrayIteration$1.filter;
 
 
 	var aTypedArray$4 = arrayBufferViewCore.aTypedArray;
@@ -7839,7 +7799,7 @@ var Example = (function () {
 	// `%TypedArray%.prototype.filter` method
 	// https://tc39.github.io/ecma262/#sec-%typedarray%.prototype.filter
 	exportTypedArrayMethod$4('filter', function filter(callbackfn /* , thisArg */) {
-	  var list = $filter$1$1(aTypedArray$4(this), callbackfn, arguments.length > 1 ? arguments[1] : undefined);
+	  var list = $filter$1(aTypedArray$4(this), callbackfn, arguments.length > 1 ? arguments[1] : undefined);
 	  var C = speciesConstructor(this, this.constructor);
 	  var index = 0;
 	  var length = list.length;
@@ -8056,7 +8016,7 @@ var Example = (function () {
 	  return result;
 	}, FORCED$i);
 
-	var $some$1$1 = arrayIteration$1.some;
+	var $some$1 = arrayIteration$1.some;
 
 	var aTypedArray$j = arrayBufferViewCore.aTypedArray;
 	var exportTypedArrayMethod$j = arrayBufferViewCore.exportTypedArrayMethod;
@@ -8064,7 +8024,7 @@ var Example = (function () {
 	// `%TypedArray%.prototype.some` method
 	// https://tc39.github.io/ecma262/#sec-%typedarray%.prototype.some
 	exportTypedArrayMethod$j('some', function some(callbackfn /* , thisArg */) {
-	  return $some$1$1(aTypedArray$j(this), callbackfn, arguments.length > 1 ? arguments[1] : undefined);
+	  return $some$1(aTypedArray$j(this), callbackfn, arguments.length > 1 ? arguments[1] : undefined);
 	});
 
 	var aTypedArray$k = arrayBufferViewCore.aTypedArray;
@@ -10173,11 +10133,19 @@ var Example = (function () {
 	  }
 	});
 
+	var arrayMethodIsStrict$1 = function (METHOD_NAME, argument) {
+	  var method = [][METHOD_NAME];
+	  return !!method && fails(function () {
+	    // eslint-disable-next-line no-useless-call,no-throw-literal
+	    method.call(null, argument || function () { throw 1; }, 1);
+	  });
+	};
+
 	var $forEach$3 = arrayIteration.forEach;
 
 
 
-	var STRICT_METHOD$9 = arrayMethodIsStrict('forEach');
+	var STRICT_METHOD$9 = arrayMethodIsStrict$1('forEach');
 	var USES_TO_LENGTH$e = arrayMethodUsesToLength('forEach');
 
 	// `Array.prototype.forEach` method implementation
@@ -10232,7 +10200,7 @@ var Example = (function () {
 
 
 
-	var STRICT_METHOD$a = arrayMethodIsStrict('reduce');
+	var STRICT_METHOD$a = arrayMethodIsStrict$1('reduce');
 	var USES_TO_LENGTH$f = arrayMethodUsesToLength('reduce', { 1: 0 });
 
 	// `Array.prototype.reduce` method
@@ -10521,6 +10489,19 @@ var Example = (function () {
 	      this.dispatchEvent(event);
 	    }
 	  }, {
+	    key: "getLayers",
+	    value: function getLayers(filter) {
+	      return this._items.length > 0 ? this._items.reduce(function (a, item) {
+	        if (item instanceof Group) {
+	          return a.concat(item.getLayers(filter));
+	        } else if (typeof filter !== 'function' || filter(item)) {
+	          return a.concat(item);
+	        } else {
+	          return a;
+	        }
+	      }, []) : [];
+	    }
+	  }, {
 	    key: "enumerate",
 	    value: function enumerate(start, select) {
 	      return this._items.length > 0 ? this._items.reduce(function (a, item) {
@@ -10711,16 +10692,20 @@ var Example = (function () {
 	      container.appendChild(this._element);
 	    }
 	  }, {
+	    key: "temporal",
+	    get: function get() {
+	      for (var i = 0; i < this._items.length; ++i) {
+	        if (this._items[i].temporal) {
+	          return true;
+	        }
+	      }
+
+	      return false;
+	    }
+	  }, {
 	    key: "items",
 	    get: function get() {
 	      return this._items;
-	    }
-	  }, {
-	    key: "layers",
-	    get: function get() {
-	      return this._items.length > 0 ? this._items.reduce(function (a, item) {
-	        return a.concat(item instanceof Group ? item.layers : item);
-	      }, []) : [];
 	    }
 	  }, {
 	    key: "childrenVisibility",
@@ -10888,6 +10873,11 @@ var Example = (function () {
 	  }
 
 	  _createClass(Tree, [{
+	    key: "getLayers",
+	    value: function getLayers(filter) {
+	      return this._root.getLayers(filter);
+	    }
+	  }, {
 	    key: "redraw",
 	    value: function redraw(filter) {
 	      this._root.redraw(filter);
@@ -10925,9 +10915,7 @@ var Example = (function () {
 	  }, {
 	    key: "temporal",
 	    get: function get() {
-	      return this._root.layers.some(function (layer) {
-	        return layer.temporal;
-	      });
+	      return this._root.temporal;
 	    }
 	  }, {
 	    key: "vectorFirst",
@@ -10952,11 +10940,6 @@ var Example = (function () {
 
 	        this._root.redraw();
 	      }
-	    }
-	  }, {
-	    key: "layers",
-	    get: function get() {
-	      return this._root.layers;
 	    }
 	  }]);
 
@@ -30511,10 +30494,10 @@ var Example = (function () {
 	    return item.order;
 	  };
 
-	  console.log('vector:', this._root.layers.filter(vectors).map(ord), ', raster:', this._root.layers.filter(rasters).map(ord));
+	  console.log('vector:', this._root.getLayers(vectors).map(ord), ', raster:', this._root.getLayers(rasters).map(ord));
 	  console.log('change order');
 	  this._root.vectorFirst = true;
-	  console.log('vector:', this._root.layers.filter(vectors).map(ord), ', raster:', this._root.layers.filter(rasters).map(ord));
+	  console.log('vector:', this._root.getLayers(vectors).map(ord), ', raster:', this._root.getLayers(rasters).map(ord));
 	};
 
 	return Example;

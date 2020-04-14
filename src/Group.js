@@ -16,7 +16,29 @@ class Group extends EventTarget {
         event.initEvent(e.type, false, false);
         event.detail = e.detail;
         this.dispatchEvent(event);
-    }    
+    }
+    getLayers(filter) {
+        return this._items.length > 0 ?
+            this._items.reduce((a,item) => {
+                if (item instanceof Group) {
+                    return a.concat (item.getLayers(filter));
+                }
+                else if (typeof filter !== 'function' || filter(item)) {
+                    return a.concat(item);
+                }
+                else {
+                    return a;
+                }                                    
+            }, []) : [];
+    }
+    get temporal () {
+        for (let i = 0; i < this._items.length; ++i) {
+            if (this._items[i].temporal) {
+                return true;
+            }
+        }
+        return false;
+    }
     get items() {
         return this._items;
     }
@@ -43,13 +65,7 @@ class Group extends EventTarget {
         this.render(this._container);
         this._properties = properties;
         this._init(children);        
-    }
-    get layers () {
-        return this._items.length > 0 ?
-            this._items.reduce((a,item) => {
-                return a.concat(item instanceof Group ? item.layers : item);
-            }, []) : [];
-    }
+    }    
     _init(children) {        
         this._expanded = false;
         this._folder.classList.add('folder-filled');

@@ -21,10 +21,10 @@ class Example {
         const vectors = item => item.type === 'Vector';
         const rasters = item => item.type === 'Raster';
         const ord = item => item.order;
-        console.log('vector:', this._root.layers.filter(vectors).map(ord), ', raster:', this._root.layers.filter(rasters).map(ord));
+        console.log('vector:', this._root.getLayers(vectors).map(ord), ', raster:', this._root.getLayers(rasters).map(ord));
         console.log('change order');
         this._root.vectorFirst = true;
-        console.log('vector:', this._root.layers.filter(vectors).map(ord), ', raster:', this._root.layers.filter(rasters).map(ord));
+        console.log('vector:', this._root.getLayers(vectors).map(ord), ', raster:', this._root.getLayers(rasters).map(ord));
     }
 }
 
