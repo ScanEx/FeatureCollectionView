@@ -1,5 +1,5 @@
 import Tree from '../src/Tree.js';
-import {Result} from './moskva.json';
+import {Result} from './ais.json';
 
 class Example {
     constructor(container) {
@@ -8,11 +8,16 @@ class Example {
             const {detail: {title, visible, geometry, order}} = e;
             console.log('change:', {title, visible, geometry, order});
         });
-        // this._root.on('redraw', e => {
+        // this._root.on('node:redraw', e => {
         //     const {detail: {title, visible, geometry, order}} = e;
-        //     console.log('redraw:', {title, visible, geometry, order});
+        //     console.log('node:redraw:', {title, visible, geometry, order});
         // });
+        this._root.on('node:click', e => {
+            const {detail: {title, visible, geometry, order}} = e;
+            console.log('node:click', {title, visible, geometry, order});
+        });
         this._root.update(Result);
+        console.log('temporal:', this._root.temporal);
         const vectors = item => item.type === 'Vector';
         const rasters = item => item.type === 'Raster';
         const ord = item => item.order;

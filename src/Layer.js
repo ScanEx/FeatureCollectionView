@@ -15,10 +15,20 @@ class Layer extends EventTarget {
         this.render(this._container);
         this._properties = properties;
         this._geometry = geometry;     
-        this._init();        
-    }    
+        this._init();
+        this._type.addEventListener('click', e => {
+            e.stopPropagation();
+            let event = document.createEvent('Event');
+            event.initEvent('node:click', false, false);
+            event.detail = this;
+            this.dispatchEvent(event);
+        });
+    }
     get order () {
         return this._order;
+    }
+    get temporal () {
+        return !!this._properties.Temporal;
     }    
     enumerate (start) {
         this._order = start;
@@ -27,10 +37,10 @@ class Layer extends EventTarget {
     redraw() {
         if (this.visible) {
             let event = document.createEvent('Event');
-            event.initEvent('redraw', false, false);
+            event.initEvent('node:redraw', false, false);
             event.detail = this;
             this.dispatchEvent(event);
-        }     
+        }
     }
     _init() {        
         if (this._properties.visible) {
@@ -44,15 +54,25 @@ class Layer extends EventTarget {
 
         this._visibility.addEventListener('click', this._toggleVisibility.bind(this));
 
-        switch (this._properties.type) {
-            case 'Vector':                
-                this._type.classList.add('block');
+        switch (this._properties.type) {            
+            case 'Vector':
+                if (this.temporal) {
+                    this._type.classList.add('clock');
+                }
+                else {
+                    this._type.classList.add('block');
+                }
                 break;
             case 'Raster':
                 this._type.classList.add('picture');
                 break;
             case 'Virtual':
-                this._type.classList.add('cloud');
+                if (this.temporal) {
+                    this._type.classList.add('clock');
+                }
+                else {
+                    this._type.classList.add('cloud');
+                }                
                 break;
             default:
                 break;

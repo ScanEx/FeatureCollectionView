@@ -77,8 +77,9 @@ class Group extends EventTarget {
             }
             item.addEventListener('change:visible', this._onChangeVisible.bind(this));
             item.addEventListener('change:state', this._forwardEvent.bind(this));
-            item.addEventListener('redraw', this._forwardEvent.bind(this));
-            item.addEventListener('expanded', this._forwardEvent.bind(this));
+            item.addEventListener('node:redraw', this._forwardEvent.bind(this));
+            item.addEventListener('node:expanded', this._forwardEvent.bind(this));
+            item.addEventListener('node:click', this._forwardEvent.bind(this));
             return item;
         });
 
@@ -105,13 +106,13 @@ class Group extends EventTarget {
     }
     _onRedraw(e) {
         let event = document.createEvent('Event');
-        event.initEvent('redraw', false, false);
+        event.initEvent('node:redraw', false, false);
         event.detail = e.detail;
         this.dispatchEvent(event);
     }
     _onExpanded () {
         let event = document.createEvent('Event');
-        event.initEvent('expanded', false, false);        
+        event.initEvent('node:expanded', false, false);        
         this.dispatchEvent(event);
     }
     _onChangeVisible(e) {
