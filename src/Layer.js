@@ -15,10 +15,7 @@ class Layer extends EventTarget {
         this.render(this._container);
         this._properties = properties;
         this._geometry = geometry;     
-        this._init();
-        if (this.description) {
-            this._element.setAttribute('title', this.description);
-        }
+        this._init();        
         this._type.addEventListener('click', e => {
             e.stopPropagation();
             let event = document.createEvent('Event');

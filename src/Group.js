@@ -65,9 +65,6 @@ class Group extends EventTarget {
         this.render(this._container);
         this._properties = properties;
         this._init(children);
-        if (this.description) {
-            this._element.setAttribute('title', this.description);
-        }        
     }    
     _init(children) {        
         this._expanded = false;

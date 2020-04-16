@@ -10749,10 +10749,6 @@ var Example = (function () {
 
 	    _this._init();
 
-	    if (_this.description) {
-	      _this._element.setAttribute('title', _this.description);
-	    }
-
 	    _this._type.addEventListener('click', function (e) {
 	      e.stopPropagation();
 	      var event = document.createEvent('Event');
@@ -11003,10 +10999,6 @@ var Example = (function () {
 	      this._properties = properties;
 
 	      this._init(children);
-
-	      if (this.description) {
-	        this._element.setAttribute('title', this.description);
-	      }
 	    }
 	  }, {
 	    key: "_init",
