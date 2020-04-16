@@ -10079,6 +10079,469 @@ var Example = (function () {
 
 	var scanexEventTarget_cjs = EventTarget;
 
+	// `Object.keys` method
+	// https://tc39.github.io/ecma262/#sec-object.keys
+	var objectKeys$1 = Object.keys || function keys(O) {
+	  return objectKeysInternal(O, enumBugKeys);
+	};
+
+	// `Object.defineProperties` method
+	// https://tc39.github.io/ecma262/#sec-object.defineproperties
+	var objectDefineProperties$1 = descriptors ? Object.defineProperties : function defineProperties(O, Properties) {
+	  anObject(O);
+	  var keys = objectKeys$1(Properties);
+	  var length = keys.length;
+	  var index = 0;
+	  var key;
+	  while (length > index) objectDefineProperty.f(O, key = keys[index++], Properties[key]);
+	  return O;
+	};
+
+	var html$1 = getBuiltIn('document', 'documentElement');
+
+	var GT$1 = '>';
+	var LT$1 = '<';
+	var PROTOTYPE$3 = 'prototype';
+	var SCRIPT$1 = 'script';
+	var IE_PROTO$2 = sharedKey('IE_PROTO');
+
+	var EmptyConstructor$1 = function () { /* empty */ };
+
+	var scriptTag$1 = function (content) {
+	  return LT$1 + SCRIPT$1 + GT$1 + content + LT$1 + '/' + SCRIPT$1 + GT$1;
+	};
+
+	// Create object with fake `null` prototype: use ActiveX Object with cleared prototype
+	var NullProtoObjectViaActiveX$1 = function (activeXDocument) {
+	  activeXDocument.write(scriptTag$1(''));
+	  activeXDocument.close();
+	  var temp = activeXDocument.parentWindow.Object;
+	  activeXDocument = null; // avoid memory leak
+	  return temp;
+	};
+
+	// Create object with fake `null` prototype: use iframe Object with cleared prototype
+	var NullProtoObjectViaIFrame$1 = function () {
+	  // Thrash, waste and sodomy: IE GC bug
+	  var iframe = documentCreateElement('iframe');
+	  var JS = 'java' + SCRIPT$1 + ':';
+	  var iframeDocument;
+	  iframe.style.display = 'none';
+	  html$1.appendChild(iframe);
+	  // https://github.com/zloirock/core-js/issues/475
+	  iframe.src = String(JS);
+	  iframeDocument = iframe.contentWindow.document;
+	  iframeDocument.open();
+	  iframeDocument.write(scriptTag$1('document.F=Object'));
+	  iframeDocument.close();
+	  return iframeDocument.F;
+	};
+
+	// Check for document.domain and active x support
+	// No need to use active x approach when document.domain is not set
+	// see https://github.com/es-shims/es5-shim/issues/150
+	// variation of https://github.com/kitcambridge/es5-shim/commit/4f738ac066346
+	// avoid IE GC bug
+	var activeXDocument$1;
+	var NullProtoObject$1 = function () {
+	  try {
+	    /* global ActiveXObject */
+	    activeXDocument$1 = document.domain && new ActiveXObject('htmlfile');
+	  } catch (error) { /* ignore */ }
+	  NullProtoObject$1 = activeXDocument$1 ? NullProtoObjectViaActiveX$1(activeXDocument$1) : NullProtoObjectViaIFrame$1();
+	  var length = enumBugKeys.length;
+	  while (length--) delete NullProtoObject$1[PROTOTYPE$3][enumBugKeys[length]];
+	  return NullProtoObject$1();
+	};
+
+	hiddenKeys[IE_PROTO$2] = true;
+
+	// `Object.create` method
+	// https://tc39.github.io/ecma262/#sec-object.create
+	var objectCreate$1 = Object.create || function create(O, Properties) {
+	  var result;
+	  if (O !== null) {
+	    EmptyConstructor$1[PROTOTYPE$3] = anObject(O);
+	    result = new EmptyConstructor$1();
+	    EmptyConstructor$1[PROTOTYPE$3] = null;
+	    // add "__proto__" for Object.getPrototypeOf polyfill
+	    result[IE_PROTO$2] = O;
+	  } else result = NullProtoObject$1();
+	  return Properties === undefined ? result : objectDefineProperties$1(result, Properties);
+	};
+
+	var nativeGetOwnPropertyNames$3 = objectGetOwnPropertyNames.f;
+
+	var toString$2 = {}.toString;
+
+	var windowNames$1 = typeof window == 'object' && window && Object.getOwnPropertyNames
+	  ? Object.getOwnPropertyNames(window) : [];
+
+	var getWindowNames$1 = function (it) {
+	  try {
+	    return nativeGetOwnPropertyNames$3(it);
+	  } catch (error) {
+	    return windowNames$1.slice();
+	  }
+	};
+
+	// fallback for IE11 buggy Object.getOwnPropertyNames with iframe and window
+	var f$8 = function getOwnPropertyNames(it) {
+	  return windowNames$1 && toString$2.call(it) == '[object Window]'
+	    ? getWindowNames$1(it)
+	    : nativeGetOwnPropertyNames$3(toIndexedObject(it));
+	};
+
+	var objectGetOwnPropertyNamesExternal$1 = {
+		f: f$8
+	};
+
+	var f$9 = wellKnownSymbol;
+
+	var wellKnownSymbolWrapped$1 = {
+		f: f$9
+	};
+
+	var defineProperty$c = objectDefineProperty.f;
+
+	var defineWellKnownSymbol$1 = function (NAME) {
+	  var Symbol = path.Symbol || (path.Symbol = {});
+	  if (!has(Symbol, NAME)) defineProperty$c(Symbol, NAME, {
+	    value: wellKnownSymbolWrapped$1.f(NAME)
+	  });
+	};
+
+	var defineProperty$d = objectDefineProperty.f;
+
+
+
+	var TO_STRING_TAG$5 = wellKnownSymbol('toStringTag');
+
+	var setToStringTag$1 = function (it, TAG, STATIC) {
+	  if (it && !has(it = STATIC ? it : it.prototype, TO_STRING_TAG$5)) {
+	    defineProperty$d(it, TO_STRING_TAG$5, { configurable: true, value: TAG });
+	  }
+	};
+
+	var $forEach$3 = arrayIteration.forEach;
+
+	var HIDDEN$1 = sharedKey('hidden');
+	var SYMBOL$1 = 'Symbol';
+	var PROTOTYPE$4 = 'prototype';
+	var TO_PRIMITIVE$2 = wellKnownSymbol('toPrimitive');
+	var setInternalState$b = internalState.set;
+	var getInternalState$7 = internalState.getterFor(SYMBOL$1);
+	var ObjectPrototype$4 = Object[PROTOTYPE$4];
+	var $Symbol$1 = global_1.Symbol;
+	var $stringify$2 = getBuiltIn('JSON', 'stringify');
+	var nativeGetOwnPropertyDescriptor$3 = objectGetOwnPropertyDescriptor.f;
+	var nativeDefineProperty$2 = objectDefineProperty.f;
+	var nativeGetOwnPropertyNames$4 = objectGetOwnPropertyNamesExternal$1.f;
+	var nativePropertyIsEnumerable$2 = objectPropertyIsEnumerable.f;
+	var AllSymbols$1 = shared('symbols');
+	var ObjectPrototypeSymbols$1 = shared('op-symbols');
+	var StringToSymbolRegistry$1 = shared('string-to-symbol-registry');
+	var SymbolToStringRegistry$1 = shared('symbol-to-string-registry');
+	var WellKnownSymbolsStore$2 = shared('wks');
+	var QObject$1 = global_1.QObject;
+	// Don't use setters in Qt Script, https://github.com/zloirock/core-js/issues/173
+	var USE_SETTER$1 = !QObject$1 || !QObject$1[PROTOTYPE$4] || !QObject$1[PROTOTYPE$4].findChild;
+
+	// fallback for old Android, https://code.google.com/p/v8/issues/detail?id=687
+	var setSymbolDescriptor$1 = descriptors && fails(function () {
+	  return objectCreate$1(nativeDefineProperty$2({}, 'a', {
+	    get: function () { return nativeDefineProperty$2(this, 'a', { value: 7 }).a; }
+	  })).a != 7;
+	}) ? function (O, P, Attributes) {
+	  var ObjectPrototypeDescriptor = nativeGetOwnPropertyDescriptor$3(ObjectPrototype$4, P);
+	  if (ObjectPrototypeDescriptor) delete ObjectPrototype$4[P];
+	  nativeDefineProperty$2(O, P, Attributes);
+	  if (ObjectPrototypeDescriptor && O !== ObjectPrototype$4) {
+	    nativeDefineProperty$2(ObjectPrototype$4, P, ObjectPrototypeDescriptor);
+	  }
+	} : nativeDefineProperty$2;
+
+	var wrap$2 = function (tag, description) {
+	  var symbol = AllSymbols$1[tag] = objectCreate$1($Symbol$1[PROTOTYPE$4]);
+	  setInternalState$b(symbol, {
+	    type: SYMBOL$1,
+	    tag: tag,
+	    description: description
+	  });
+	  if (!descriptors) symbol.description = description;
+	  return symbol;
+	};
+
+	var isSymbol$1 = useSymbolAsUid ? function (it) {
+	  return typeof it == 'symbol';
+	} : function (it) {
+	  return Object(it) instanceof $Symbol$1;
+	};
+
+	var $defineProperty$1 = function defineProperty(O, P, Attributes) {
+	  if (O === ObjectPrototype$4) $defineProperty$1(ObjectPrototypeSymbols$1, P, Attributes);
+	  anObject(O);
+	  var key = toPrimitive(P, true);
+	  anObject(Attributes);
+	  if (has(AllSymbols$1, key)) {
+	    if (!Attributes.enumerable) {
+	      if (!has(O, HIDDEN$1)) nativeDefineProperty$2(O, HIDDEN$1, createPropertyDescriptor(1, {}));
+	      O[HIDDEN$1][key] = true;
+	    } else {
+	      if (has(O, HIDDEN$1) && O[HIDDEN$1][key]) O[HIDDEN$1][key] = false;
+	      Attributes = objectCreate$1(Attributes, { enumerable: createPropertyDescriptor(0, false) });
+	    } return setSymbolDescriptor$1(O, key, Attributes);
+	  } return nativeDefineProperty$2(O, key, Attributes);
+	};
+
+	var $defineProperties$1 = function defineProperties(O, Properties) {
+	  anObject(O);
+	  var properties = toIndexedObject(Properties);
+	  var keys = objectKeys$1(properties).concat($getOwnPropertySymbols$1(properties));
+	  $forEach$3(keys, function (key) {
+	    if (!descriptors || $propertyIsEnumerable$1.call(properties, key)) $defineProperty$1(O, key, properties[key]);
+	  });
+	  return O;
+	};
+
+	var $create$1 = function create(O, Properties) {
+	  return Properties === undefined ? objectCreate$1(O) : $defineProperties$1(objectCreate$1(O), Properties);
+	};
+
+	var $propertyIsEnumerable$1 = function propertyIsEnumerable(V) {
+	  var P = toPrimitive(V, true);
+	  var enumerable = nativePropertyIsEnumerable$2.call(this, P);
+	  if (this === ObjectPrototype$4 && has(AllSymbols$1, P) && !has(ObjectPrototypeSymbols$1, P)) return false;
+	  return enumerable || !has(this, P) || !has(AllSymbols$1, P) || has(this, HIDDEN$1) && this[HIDDEN$1][P] ? enumerable : true;
+	};
+
+	var $getOwnPropertyDescriptor$1 = function getOwnPropertyDescriptor(O, P) {
+	  var it = toIndexedObject(O);
+	  var key = toPrimitive(P, true);
+	  if (it === ObjectPrototype$4 && has(AllSymbols$1, key) && !has(ObjectPrototypeSymbols$1, key)) return;
+	  var descriptor = nativeGetOwnPropertyDescriptor$3(it, key);
+	  if (descriptor && has(AllSymbols$1, key) && !(has(it, HIDDEN$1) && it[HIDDEN$1][key])) {
+	    descriptor.enumerable = true;
+	  }
+	  return descriptor;
+	};
+
+	var $getOwnPropertyNames$1 = function getOwnPropertyNames(O) {
+	  var names = nativeGetOwnPropertyNames$4(toIndexedObject(O));
+	  var result = [];
+	  $forEach$3(names, function (key) {
+	    if (!has(AllSymbols$1, key) && !has(hiddenKeys, key)) result.push(key);
+	  });
+	  return result;
+	};
+
+	var $getOwnPropertySymbols$1 = function getOwnPropertySymbols(O) {
+	  var IS_OBJECT_PROTOTYPE = O === ObjectPrototype$4;
+	  var names = nativeGetOwnPropertyNames$4(IS_OBJECT_PROTOTYPE ? ObjectPrototypeSymbols$1 : toIndexedObject(O));
+	  var result = [];
+	  $forEach$3(names, function (key) {
+	    if (has(AllSymbols$1, key) && (!IS_OBJECT_PROTOTYPE || has(ObjectPrototype$4, key))) {
+	      result.push(AllSymbols$1[key]);
+	    }
+	  });
+	  return result;
+	};
+
+	// `Symbol` constructor
+	// https://tc39.github.io/ecma262/#sec-symbol-constructor
+	if (!nativeSymbol) {
+	  $Symbol$1 = function Symbol() {
+	    if (this instanceof $Symbol$1) throw TypeError('Symbol is not a constructor');
+	    var description = !arguments.length || arguments[0] === undefined ? undefined : String(arguments[0]);
+	    var tag = uid(description);
+	    var setter = function (value) {
+	      if (this === ObjectPrototype$4) setter.call(ObjectPrototypeSymbols$1, value);
+	      if (has(this, HIDDEN$1) && has(this[HIDDEN$1], tag)) this[HIDDEN$1][tag] = false;
+	      setSymbolDescriptor$1(this, tag, createPropertyDescriptor(1, value));
+	    };
+	    if (descriptors && USE_SETTER$1) setSymbolDescriptor$1(ObjectPrototype$4, tag, { configurable: true, set: setter });
+	    return wrap$2(tag, description);
+	  };
+
+	  redefine($Symbol$1[PROTOTYPE$4], 'toString', function toString() {
+	    return getInternalState$7(this).tag;
+	  });
+
+	  redefine($Symbol$1, 'withoutSetter', function (description) {
+	    return wrap$2(uid(description), description);
+	  });
+
+	  objectPropertyIsEnumerable.f = $propertyIsEnumerable$1;
+	  objectDefineProperty.f = $defineProperty$1;
+	  objectGetOwnPropertyDescriptor.f = $getOwnPropertyDescriptor$1;
+	  objectGetOwnPropertyNames.f = objectGetOwnPropertyNamesExternal$1.f = $getOwnPropertyNames$1;
+	  objectGetOwnPropertySymbols.f = $getOwnPropertySymbols$1;
+
+	  wellKnownSymbolWrapped$1.f = function (name) {
+	    return wrap$2(wellKnownSymbol(name), name);
+	  };
+
+	  if (descriptors) {
+	    // https://github.com/tc39/proposal-Symbol-description
+	    nativeDefineProperty$2($Symbol$1[PROTOTYPE$4], 'description', {
+	      configurable: true,
+	      get: function description() {
+	        return getInternalState$7(this).description;
+	      }
+	    });
+	    {
+	      redefine(ObjectPrototype$4, 'propertyIsEnumerable', $propertyIsEnumerable$1, { unsafe: true });
+	    }
+	  }
+	}
+
+	_export({ global: true, wrap: true, forced: !nativeSymbol, sham: !nativeSymbol }, {
+	  Symbol: $Symbol$1
+	});
+
+	$forEach$3(objectKeys$1(WellKnownSymbolsStore$2), function (name) {
+	  defineWellKnownSymbol$1(name);
+	});
+
+	_export({ target: SYMBOL$1, stat: true, forced: !nativeSymbol }, {
+	  // `Symbol.for` method
+	  // https://tc39.github.io/ecma262/#sec-symbol.for
+	  'for': function (key) {
+	    var string = String(key);
+	    if (has(StringToSymbolRegistry$1, string)) return StringToSymbolRegistry$1[string];
+	    var symbol = $Symbol$1(string);
+	    StringToSymbolRegistry$1[string] = symbol;
+	    SymbolToStringRegistry$1[symbol] = string;
+	    return symbol;
+	  },
+	  // `Symbol.keyFor` method
+	  // https://tc39.github.io/ecma262/#sec-symbol.keyfor
+	  keyFor: function keyFor(sym) {
+	    if (!isSymbol$1(sym)) throw TypeError(sym + ' is not a symbol');
+	    if (has(SymbolToStringRegistry$1, sym)) return SymbolToStringRegistry$1[sym];
+	  },
+	  useSetter: function () { USE_SETTER$1 = true; },
+	  useSimple: function () { USE_SETTER$1 = false; }
+	});
+
+	_export({ target: 'Object', stat: true, forced: !nativeSymbol, sham: !descriptors }, {
+	  // `Object.create` method
+	  // https://tc39.github.io/ecma262/#sec-object.create
+	  create: $create$1,
+	  // `Object.defineProperty` method
+	  // https://tc39.github.io/ecma262/#sec-object.defineproperty
+	  defineProperty: $defineProperty$1,
+	  // `Object.defineProperties` method
+	  // https://tc39.github.io/ecma262/#sec-object.defineproperties
+	  defineProperties: $defineProperties$1,
+	  // `Object.getOwnPropertyDescriptor` method
+	  // https://tc39.github.io/ecma262/#sec-object.getownpropertydescriptors
+	  getOwnPropertyDescriptor: $getOwnPropertyDescriptor$1
+	});
+
+	_export({ target: 'Object', stat: true, forced: !nativeSymbol }, {
+	  // `Object.getOwnPropertyNames` method
+	  // https://tc39.github.io/ecma262/#sec-object.getownpropertynames
+	  getOwnPropertyNames: $getOwnPropertyNames$1,
+	  // `Object.getOwnPropertySymbols` method
+	  // https://tc39.github.io/ecma262/#sec-object.getownpropertysymbols
+	  getOwnPropertySymbols: $getOwnPropertySymbols$1
+	});
+
+	// Chrome 38 and 39 `Object.getOwnPropertySymbols` fails on primitives
+	// https://bugs.chromium.org/p/v8/issues/detail?id=3443
+	_export({ target: 'Object', stat: true, forced: fails(function () { objectGetOwnPropertySymbols.f(1); }) }, {
+	  getOwnPropertySymbols: function getOwnPropertySymbols(it) {
+	    return objectGetOwnPropertySymbols.f(toObject(it));
+	  }
+	});
+
+	// `JSON.stringify` method behavior with symbols
+	// https://tc39.github.io/ecma262/#sec-json.stringify
+	if ($stringify$2) {
+	  var FORCED_JSON_STRINGIFY$1 = !nativeSymbol || fails(function () {
+	    var symbol = $Symbol$1();
+	    // MS Edge converts symbol values to JSON as {}
+	    return $stringify$2([symbol]) != '[null]'
+	      // WebKit converts symbol values to JSON as null
+	      || $stringify$2({ a: symbol }) != '{}'
+	      // V8 throws on boxed symbols
+	      || $stringify$2(Object(symbol)) != '{}';
+	  });
+
+	  _export({ target: 'JSON', stat: true, forced: FORCED_JSON_STRINGIFY$1 }, {
+	    // eslint-disable-next-line no-unused-vars
+	    stringify: function stringify(it, replacer, space) {
+	      var args = [it];
+	      var index = 1;
+	      var $replacer;
+	      while (arguments.length > index) args.push(arguments[index++]);
+	      $replacer = replacer;
+	      if (!isObject(replacer) && it === undefined || isSymbol$1(it)) return; // IE8 returns string on undefined
+	      if (!isArray(replacer)) replacer = function (key, value) {
+	        if (typeof $replacer == 'function') value = $replacer.call(this, key, value);
+	        if (!isSymbol$1(value)) return value;
+	      };
+	      args[1] = replacer;
+	      return $stringify$2.apply(null, args);
+	    }
+	  });
+	}
+
+	// `Symbol.prototype[@@toPrimitive]` method
+	// https://tc39.github.io/ecma262/#sec-symbol.prototype-@@toprimitive
+	if (!$Symbol$1[PROTOTYPE$4][TO_PRIMITIVE$2]) {
+	  createNonEnumerableProperty($Symbol$1[PROTOTYPE$4], TO_PRIMITIVE$2, $Symbol$1[PROTOTYPE$4].valueOf);
+	}
+	// `Symbol.prototype[@@toStringTag]` property
+	// https://tc39.github.io/ecma262/#sec-symbol.prototype-@@tostringtag
+	setToStringTag$1($Symbol$1, SYMBOL$1);
+
+	hiddenKeys[HIDDEN$1] = true;
+
+	var defineProperty$e = objectDefineProperty.f;
+
+
+	var NativeSymbol$1 = global_1.Symbol;
+
+	if (descriptors && typeof NativeSymbol$1 == 'function' && (!('description' in NativeSymbol$1.prototype) ||
+	  // Safari 12 bug
+	  NativeSymbol$1().description !== undefined
+	)) {
+	  var EmptyStringDescriptionStore$1 = {};
+	  // wrap Symbol constructor for correct work with undefined description
+	  var SymbolWrapper$1 = function Symbol() {
+	    var description = arguments.length < 1 || arguments[0] === undefined ? undefined : String(arguments[0]);
+	    var result = this instanceof SymbolWrapper$1
+	      ? new NativeSymbol$1(description)
+	      // in Edge 13, String(Symbol(undefined)) === 'Symbol(undefined)'
+	      : description === undefined ? NativeSymbol$1() : NativeSymbol$1(description);
+	    if (description === '') EmptyStringDescriptionStore$1[result] = true;
+	    return result;
+	  };
+	  copyConstructorProperties(SymbolWrapper$1, NativeSymbol$1);
+	  var symbolPrototype$1 = SymbolWrapper$1.prototype = NativeSymbol$1.prototype;
+	  symbolPrototype$1.constructor = SymbolWrapper$1;
+
+	  var symbolToString$1 = symbolPrototype$1.toString;
+	  var native$1 = String(NativeSymbol$1('test')) == 'Symbol(test)';
+	  var regexp$1 = /^Symbol\((.*)\)[^)]+$/;
+	  defineProperty$e(symbolPrototype$1, 'description', {
+	    configurable: true,
+	    get: function description() {
+	      var symbol = isObject(this) ? this.valueOf() : this;
+	      var string = symbolToString$1.call(symbol);
+	      if (has(EmptyStringDescriptionStore$1, symbol)) return '';
+	      var desc = native$1 ? string.slice(7, -1) : string.replace(regexp$1, '$1');
+	      return desc === '' ? undefined : desc;
+	    }
+	  });
+
+	  _export({ global: true, forced: true }, {
+	    Symbol: SymbolWrapper$1
+	  });
+	}
+
 	var createProperty$1 = function (object, key, value) {
 	  var propertyKey = toPrimitive(key);
 	  if (propertyKey in object) objectDefineProperty.f(object, propertyKey, createPropertyDescriptor(0, value));
@@ -10141,7 +10604,7 @@ var Example = (function () {
 	  });
 	};
 
-	var $forEach$3 = arrayIteration.forEach;
+	var $forEach$4 = arrayIteration.forEach;
 
 
 
@@ -10151,7 +10614,7 @@ var Example = (function () {
 	// `Array.prototype.forEach` method implementation
 	// https://tc39.github.io/ecma262/#sec-array.prototype.foreach
 	var arrayForEach$1 = (!STRICT_METHOD$9 || !USES_TO_LENGTH$e) ? function forEach(callbackfn /* , thisArg */) {
-	  return $forEach$3(this, callbackfn, arguments.length > 1 ? arguments[1] : undefined);
+	  return $forEach$4(this, callbackfn, arguments.length > 1 ? arguments[1] : undefined);
 	} : [].forEach;
 
 	// `Array.prototype.forEach` method
@@ -10369,6 +10832,10 @@ var Example = (function () {
 
 	      this._element.classList.add('scanex-layer-tree-layer');
 
+	      if (this.description) {
+	        this._element.setAttribute('title', this.description);
+	      }
+
 	      this._header = document.createElement('div');
 
 	      this._header.classList.add('scanex-layer-tree-header');
@@ -10423,6 +10890,11 @@ var Example = (function () {
 	    key: "title",
 	    get: function get() {
 	      return this._properties.title;
+	    }
+	  }, {
+	    key: "description",
+	    get: function get() {
+	      return this._properties.description;
 	    }
 	  }, {
 	    key: "visible",
@@ -10655,6 +11127,10 @@ var Example = (function () {
 
 	      this._element.classList.add('scanex-layer-tree-group');
 
+	      if (this.description) {
+	        this._element.setAttribute('title', this.description);
+	      }
+
 	      this._header = document.createElement('div');
 
 	      this._header.classList.add('scanex-layer-tree-header');
@@ -10773,6 +11249,11 @@ var Example = (function () {
 	    key: "title",
 	    get: function get() {
 	      return this._properties.title;
+	    }
+	  }, {
+	    key: "description",
+	    get: function get() {
+	      return this._properties.description;
 	    }
 	  }, {
 	    key: "visible",

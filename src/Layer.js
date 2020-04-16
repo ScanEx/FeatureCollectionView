@@ -93,6 +93,9 @@ class Layer extends EventTarget {
     get title () {
         return this._properties.title;
     }
+    get description() {
+        return this._properties.description;
+    }
     get visible () {
         return typeof this._properties.visible === 'boolean' ? this._properties.visible : false;
     }
@@ -124,6 +127,9 @@ class Layer extends EventTarget {
     render (container) {
         this._element = document.createElement('div');
         this._element.classList.add('scanex-layer-tree-layer');
+        if (this.description) {
+            this._element.setAttribute('title', this.description);
+        }
 
         this._header = document.createElement('div');
         this._header.classList.add('scanex-layer-tree-header');
