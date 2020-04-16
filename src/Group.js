@@ -64,7 +64,10 @@ class Group extends EventTarget {
         this.destroy();
         this.render(this._container);
         this._properties = properties;
-        this._init(children);        
+        this._init(children);
+        if (this.description) {
+            this._element.setAttribute('title', this.description);
+        }        
     }    
     _init(children) {        
         this._expanded = false;
@@ -248,10 +251,7 @@ class Group extends EventTarget {
     }  
     render (container) {
         this._element = document.createElement('div');
-        this._element.classList.add('scanex-layer-tree-group');
-        if (this.description) {
-            this._element.setAttribute('title', this.description);
-        }
+        this._element.classList.add('scanex-layer-tree-group');        
 
         this._header = document.createElement('div');
         this._header.classList.add('scanex-layer-tree-header');

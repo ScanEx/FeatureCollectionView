@@ -11003,6 +11003,10 @@ var Example = (function () {
 	      this._properties = properties;
 
 	      this._init(children);
+
+	      if (this.description) {
+	        this._element.setAttribute('title', this.description);
+	      }
 	    }
 	  }, {
 	    key: "_init",
@@ -11126,10 +11130,6 @@ var Example = (function () {
 	      this._element = document.createElement('div');
 
 	      this._element.classList.add('scanex-layer-tree-group');
-
-	      if (this.description) {
-	        this._element.setAttribute('title', this.description);
-	      }
 
 	      this._header = document.createElement('div');
 
