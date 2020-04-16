@@ -10748,6 +10748,10 @@ var Layer = /*#__PURE__*/function (_EventTarget) {
 
     _this._init();
 
+    if (_this.description) {
+      _this._element.setAttribute('title', _this.description);
+    }
+
     _this._type.addEventListener('click', function (e) {
       e.stopPropagation();
       var event = document.createEvent('Event');
@@ -10830,10 +10834,6 @@ var Layer = /*#__PURE__*/function (_EventTarget) {
       this._element = document.createElement('div');
 
       this._element.classList.add('scanex-layer-tree-layer');
-
-      if (this.description) {
-        this._element.setAttribute('title', this.description);
-      }
 
       this._header = document.createElement('div');
 

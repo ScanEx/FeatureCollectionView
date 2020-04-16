@@ -16,6 +16,9 @@ class Layer extends EventTarget {
         this._properties = properties;
         this._geometry = geometry;     
         this._init();
+        if (this.description) {
+            this._element.setAttribute('title', this.description);
+        }
         this._type.addEventListener('click', e => {
             e.stopPropagation();
             let event = document.createEvent('Event');
@@ -126,10 +129,7 @@ class Layer extends EventTarget {
     }    
     render (container) {
         this._element = document.createElement('div');
-        this._element.classList.add('scanex-layer-tree-layer');
-        if (this.description) {
-            this._element.setAttribute('title', this.description);
-        }
+        this._element.classList.add('scanex-layer-tree-layer');        
 
         this._header = document.createElement('div');
         this._header.classList.add('scanex-layer-tree-header');
