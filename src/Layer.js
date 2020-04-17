@@ -43,11 +43,7 @@ class Layer extends EventTarget {
             event.detail = this;
             this.dispatchEvent(event);
         }
-    }
-    update(properties) {
-        this._properties = properties;
-        this._title.innerText = this._properties.title;
-    }
+    }    
     _init() {        
         if (this._properties.visible) {
             this._visibility.classList.remove('square');
@@ -96,11 +92,22 @@ class Layer extends EventTarget {
     get properties () {
         return this._properties;
     }
+    set properties (properties) {
+        this._properties = properties;
+        this._title.innerText = this._properties.title;
+    }
     get title () {
         return this._properties.title;
     }
+    set title (title) {
+        this._properties.title = title;
+        this._title.innerText = this._properties.title;
+    }
     get description() {
         return this._properties.description;
+    }
+    set description(description) {
+        this._properties.description = description;
     }
     get visible () {
         return typeof this._properties.visible === 'boolean' ? this._properties.visible : false;

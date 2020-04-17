@@ -10781,12 +10781,6 @@ var Layer = /*#__PURE__*/function (_EventTarget) {
       }
     }
   }, {
-    key: "update",
-    value: function update(properties) {
-      this._properties = properties;
-      this._title.innerText = this._properties.title;
-    }
-  }, {
     key: "_init",
     value: function _init() {
       if (this._properties.visible) {
@@ -10890,16 +10884,27 @@ var Layer = /*#__PURE__*/function (_EventTarget) {
     key: "properties",
     get: function get() {
       return this._properties;
+    },
+    set: function set(properties) {
+      this._properties = properties;
+      this._title.innerText = this._properties.title;
     }
   }, {
     key: "title",
     get: function get() {
       return this._properties.title;
+    },
+    set: function set(title) {
+      this._properties.title = title;
+      this._title.innerText = this._properties.title;
     }
   }, {
     key: "description",
     get: function get() {
       return this._properties.description;
+    },
+    set: function set(description) {
+      this._properties.description = description;
     }
   }, {
     key: "visible",
