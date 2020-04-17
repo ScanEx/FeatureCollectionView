@@ -44,6 +44,10 @@ class Layer extends EventTarget {
             this.dispatchEvent(event);
         }
     }
+    update(properties) {
+        this._properties = properties;
+        this._title.innerText = this._properties.title;
+    }
     _init() {        
         if (this._properties.visible) {
             this._visibility.classList.remove('square');

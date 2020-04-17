@@ -10781,6 +10781,12 @@ var Layer = /*#__PURE__*/function (_EventTarget) {
       }
     }
   }, {
+    key: "update",
+    value: function update(properties) {
+      this._properties = properties;
+      this._title.innerText = this._properties.title;
+    }
+  }, {
     key: "_init",
     value: function _init() {
       if (this._properties.visible) {
