@@ -16,13 +16,15 @@ class Layer extends EventTarget {
         this._properties = properties;
         this._geometry = geometry;     
         this._init();        
-        this._type.addEventListener('click', e => {
-            e.stopPropagation();
-            let event = document.createEvent('Event');
-            event.initEvent('node:click', false, false);
-            event.detail = this;
-            this.dispatchEvent(event);
-        });
+        this._type.addEventListener('click', this._onClick.bind(this));
+        this._title.addEventListener('click', this._onClick.bind(this));
+    }
+    _onClick(e) {
+        e.stopPropagation();
+        let event = document.createEvent('Event');
+        event.initEvent('node:click', false, false);
+        event.detail = this;
+        this.dispatchEvent(event);
     }
     get order () {
         return this._order;

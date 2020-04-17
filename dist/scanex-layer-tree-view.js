@@ -10748,19 +10748,23 @@ var Layer = /*#__PURE__*/function (_EventTarget) {
 
     _this._init();
 
-    _this._type.addEventListener('click', function (e) {
-      e.stopPropagation();
-      var event = document.createEvent('Event');
-      event.initEvent('node:click', false, false);
-      event.detail = _assertThisInitialized(_this);
+    _this._type.addEventListener('click', _this._onClick.bind(_assertThisInitialized(_this)));
 
-      _this.dispatchEvent(event);
-    });
+    _this._title.addEventListener('click', _this._onClick.bind(_assertThisInitialized(_this)));
 
     return _this;
   }
 
   _createClass(Layer, [{
+    key: "_onClick",
+    value: function _onClick(e) {
+      e.stopPropagation();
+      var event = document.createEvent('Event');
+      event.initEvent('node:click', false, false);
+      event.detail = this;
+      this.dispatchEvent(event);
+    }
+  }, {
     key: "enumerate",
     value: function enumerate(start) {
       this._order = start;
