@@ -1,4 +1,4 @@
-import EventTarget from 'scanex-event-target';
+import EventTarget from '@scanex/event-target';
 import Group from './Group.js';
 
 class Tree extends EventTarget {

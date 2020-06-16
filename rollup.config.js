@@ -8,17 +8,22 @@ import css from 'rollup-plugin-css-porter';
 export default [
     {
         input: 'example/App.js',
-        output: { 
-            file: pkg.browser,
+        output: {
+            file: 'public/main.js',
             format: 'iife',
             sourcemap: true,
-            name: 'Example'
+            name: 'Example',
         },
-        plugins: [                        
+        plugins: [
             json(),
-            resolve(),            
+            resolve({
+                dedupe: [
+                    '@scanex/event-target',
+                    'core-js',
+                ]
+            }),
             commonjs(),
-            css({dest: 'public/main.css', minified: false}),            
+            css({dest: 'public/main.css', minified: false}),
             babel({                
                 extensions: ['.js', '.mjs'],
                 exclude: ['node_modules/@babel/**', 'node_modules/core-js/**'],
@@ -27,15 +32,20 @@ export default [
         ],
     },
     {
-        input: 'src/Tree.js',
+        input: pkg.module,
         output: { 
             file: pkg.main,
             format: 'cjs',
-            sourcemap: true
+            sourcemap: true,
         },
-        plugins: [        
+        plugins: [
 	        json(),
-            resolve(),
+            resolve({
+                dedupe: [
+                    '@scanex/event-target',
+                    'core-js',
+                ]
+            }),
             commonjs(),
             css({dest: 'dist/scanex-layer-tree-view.css', minified: false}),
             babel({                

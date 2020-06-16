@@ -3,7 +3,7 @@ const presets = [
         "@babel/env", {    
             "useBuiltIns": "usage",
             "corejs": {
-                "version": "3.6.4",
+                "version": "3.6.5",
                 "proposals": false
             },
             "targets": "> 0.25%, not dead"

@@ -1,7 +1,7 @@
 import './Group.css';
 import './icons.css';
 import Layer from './Layer.js';
-import EventTarget from 'scanex-event-target';
+import EventTarget from '@scanex/event-target';
 
 class Group extends EventTarget {
     constructor(container, expand) {

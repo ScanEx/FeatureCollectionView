@@ -1,4 +1,4 @@
-import EventTarget from 'scanex-event-target';
+import EventTarget from '@scanex/event-target';
 
 // function uuid () {
 //     var guid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
