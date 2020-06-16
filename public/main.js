@@ -840,53 +840,139 @@ var Example = (function () {
 	  };
 	}
 
-	class EventTarget {    
-	    constructor() {
-	        this.listeners = {};
+	var createProperty = function (object, key, value) {
+	  var propertyKey = toPrimitive(key);
+	  if (propertyKey in object) objectDefineProperty.f(object, propertyKey, createPropertyDescriptor(0, value));
+	  else object[propertyKey] = value;
+	};
+
+	var HAS_SPECIES_SUPPORT$1 = arrayMethodHasSpeciesSupport('splice');
+	var USES_TO_LENGTH$1 = arrayMethodUsesToLength('splice', { ACCESSORS: true, 0: 0, 1: 2 });
+
+	var max$1 = Math.max;
+	var min$2 = Math.min;
+	var MAX_SAFE_INTEGER = 0x1FFFFFFFFFFFFF;
+	var MAXIMUM_ALLOWED_LENGTH_EXCEEDED = 'Maximum allowed length exceeded';
+
+	// `Array.prototype.splice` method
+	// https://tc39.github.io/ecma262/#sec-array.prototype.splice
+	// with adding support of @@species
+	_export({ target: 'Array', proto: true, forced: !HAS_SPECIES_SUPPORT$1 || !USES_TO_LENGTH$1 }, {
+	  splice: function splice(start, deleteCount /* , ...items */) {
+	    var O = toObject(this);
+	    var len = toLength(O.length);
+	    var actualStart = toAbsoluteIndex(start, len);
+	    var argumentsLength = arguments.length;
+	    var insertCount, actualDeleteCount, A, k, from, to;
+	    if (argumentsLength === 0) {
+	      insertCount = actualDeleteCount = 0;
+	    } else if (argumentsLength === 1) {
+	      insertCount = 0;
+	      actualDeleteCount = len - actualStart;
+	    } else {
+	      insertCount = argumentsLength - 2;
+	      actualDeleteCount = min$2(max$1(toInteger(deleteCount), 0), len - actualStart);
 	    }
-	    addEventListener(type, callback) {
-	        if(!(type in this.listeners)) {
-	            this.listeners[type] = [];
+	    if (len + insertCount - actualDeleteCount > MAX_SAFE_INTEGER) {
+	      throw TypeError(MAXIMUM_ALLOWED_LENGTH_EXCEEDED);
+	    }
+	    A = arraySpeciesCreate(O, actualDeleteCount);
+	    for (k = 0; k < actualDeleteCount; k++) {
+	      from = actualStart + k;
+	      if (from in O) createProperty(A, k, O[from]);
+	    }
+	    A.length = actualDeleteCount;
+	    if (insertCount < actualDeleteCount) {
+	      for (k = actualStart; k < len - actualDeleteCount; k++) {
+	        from = k + actualDeleteCount;
+	        to = k + insertCount;
+	        if (from in O) O[to] = O[from];
+	        else delete O[to];
+	      }
+	      for (k = len; k > len - actualDeleteCount + insertCount; k--) delete O[k - 1];
+	    } else if (insertCount > actualDeleteCount) {
+	      for (k = len - actualDeleteCount; k > actualStart; k--) {
+	        from = k + actualDeleteCount - 1;
+	        to = k + insertCount - 1;
+	        if (from in O) O[to] = O[from];
+	        else delete O[to];
+	      }
+	    }
+	    for (k = 0; k < insertCount; k++) {
+	      O[k + actualStart] = arguments[k + 2];
+	    }
+	    O.length = len - actualDeleteCount + insertCount;
+	    return A;
+	  }
+	});
+
+	var EventTarget = /*#__PURE__*/function () {
+	  function EventTarget() {
+	    _classCallCheck(this, EventTarget);
+
+	    this.listeners = {};
+	  }
+
+	  _createClass(EventTarget, [{
+	    key: "addEventListener",
+	    value: function addEventListener(type, callback) {
+	      if (!(type in this.listeners)) {
+	        this.listeners[type] = [];
+	      }
+
+	      this.listeners[type].push(callback);
+	    }
+	  }, {
+	    key: "on",
+	    value: function on(type, callback) {
+	      this.addEventListener(type, callback);
+	      return this;
+	    }
+	  }, {
+	    key: "removeEventListener",
+	    value: function removeEventListener(type, callback) {
+	      if (!(type in this.listeners)) {
+	        return;
+	      }
+
+	      var stack = this.listeners[type];
+
+	      for (var i = 0, l = stack.length; i < l; i++) {
+	        if (stack[i] === callback) {
+	          stack.splice(i, 1);
+	          return this.removeEventListener(type, callback);
 	        }
-	        this.listeners[type].push(callback);
+	      }
 	    }
-	    on(type, callback) {
-	        this.addEventListener(type, callback);
-	        return this;
+	  }, {
+	    key: "off",
+	    value: function off(type, callback) {
+	      this.removeEventListener(type, callback);
+	      return this;
 	    }
-	    removeEventListener (type, callback) {
-	        if(!(type in this.listeners)) {
-	            return;
-	        }
-	        let stack = this.listeners[type];
-	        for(let i = 0, l = stack.length; i < l; i++) {
-	            if(stack[i] === callback){
-	                stack.splice(i, 1);
-	                return this.removeEventListener(type, callback);
-	            }
-	        }
+	  }, {
+	    key: "dispatchEvent",
+	    value: function dispatchEvent(event) {
+	      if (!(event.type in this.listeners)) {
+	        return;
+	      }
+
+	      var stack = this.listeners[event.type];
+	      Object.defineProperty(event, 'target', {
+	        enumerable: false,
+	        configurable: false,
+	        writable: false,
+	        value: this
+	      });
+
+	      for (var i = 0, l = stack.length; i < l; i++) {
+	        stack[i].call(this, event);
+	      }
 	    }
-	    off(type, callback) {
-	        this.removeEventListener(type, callback);
-	        return this;
-	    }
-	    dispatchEvent(event) {
-	        if(!(event.type in this.listeners)) {
-	            return;
-	        }
-	        let stack = this.listeners[event.type];
-		    Object.defineProperty(event, 'target', {
-	            enumerable: false,
-	            configurable: false,
-	            writable: false,
-	            value: this
-	        });
-	        for(let i = 0, l = stack.length; i < l; i++) {
-	            stack[i].call(this, event);
-	        }
-	    }
-	    
-	}
+	  }]);
+
+	  return EventTarget;
+	}();
 
 	// `Object.keys` method
 	// https://tc39.github.io/ecma262/#sec-object.keys
@@ -1351,14 +1437,8 @@ var Example = (function () {
 	  });
 	}
 
-	var createProperty = function (object, key, value) {
-	  var propertyKey = toPrimitive(key);
-	  if (propertyKey in object) objectDefineProperty.f(object, propertyKey, createPropertyDescriptor(0, value));
-	  else object[propertyKey] = value;
-	};
-
 	var IS_CONCAT_SPREADABLE = wellKnownSymbol('isConcatSpreadable');
-	var MAX_SAFE_INTEGER = 0x1FFFFFFFFFFFFF;
+	var MAX_SAFE_INTEGER$1 = 0x1FFFFFFFFFFFFF;
 	var MAXIMUM_ALLOWED_INDEX_EXCEEDED = 'Maximum allowed index exceeded';
 
 	// We can't use this feature detection in V8 since it causes
@@ -1393,10 +1473,10 @@ var Example = (function () {
 	      E = i === -1 ? O : arguments[i];
 	      if (isConcatSpreadable(E)) {
 	        len = toLength(E.length);
-	        if (n + len > MAX_SAFE_INTEGER) throw TypeError(MAXIMUM_ALLOWED_INDEX_EXCEEDED);
+	        if (n + len > MAX_SAFE_INTEGER$1) throw TypeError(MAXIMUM_ALLOWED_INDEX_EXCEEDED);
 	        for (k = 0; k < len; k++, n++) if (k in E) createProperty(A, n, E[k]);
 	      } else {
-	        if (n >= MAX_SAFE_INTEGER) throw TypeError(MAXIMUM_ALLOWED_INDEX_EXCEEDED);
+	        if (n >= MAX_SAFE_INTEGER$1) throw TypeError(MAXIMUM_ALLOWED_INDEX_EXCEEDED);
 	        createProperty(A, n++, E);
 	      }
 	    }
@@ -1418,11 +1498,11 @@ var Example = (function () {
 
 
 	var STRICT_METHOD = arrayMethodIsStrict('forEach');
-	var USES_TO_LENGTH$1 = arrayMethodUsesToLength('forEach');
+	var USES_TO_LENGTH$2 = arrayMethodUsesToLength('forEach');
 
 	// `Array.prototype.forEach` method implementation
 	// https://tc39.github.io/ecma262/#sec-array.prototype.foreach
-	var arrayForEach = (!STRICT_METHOD || !USES_TO_LENGTH$1) ? function forEach(callbackfn /* , thisArg */) {
+	var arrayForEach = (!STRICT_METHOD || !USES_TO_LENGTH$2) ? function forEach(callbackfn /* , thisArg */) {
 	  return $forEach$1(this, callbackfn, arguments.length > 1 ? arguments[1] : undefined);
 	} : [].forEach;
 
@@ -1473,11 +1553,11 @@ var Example = (function () {
 
 
 	var STRICT_METHOD$1 = arrayMethodIsStrict('reduce');
-	var USES_TO_LENGTH$2 = arrayMethodUsesToLength('reduce', { 1: 0 });
+	var USES_TO_LENGTH$3 = arrayMethodUsesToLength('reduce', { 1: 0 });
 
 	// `Array.prototype.reduce` method
 	// https://tc39.github.io/ecma262/#sec-array.prototype.reduce
-	_export({ target: 'Array', proto: true, forced: !STRICT_METHOD$1 || !USES_TO_LENGTH$2 }, {
+	_export({ target: 'Array', proto: true, forced: !STRICT_METHOD$1 || !USES_TO_LENGTH$3 }, {
 	  reduce: function reduce(callbackfn /* , initialValue */) {
 	    return $reduce(this, callbackfn, arguments.length, arguments.length > 1 ? arguments[1] : undefined);
 	  }

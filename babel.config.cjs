@@ -6,7 +6,7 @@ const presets = [
                 "version": "3.6.5",
                 "proposals": false
             },
-            "targets": "> 0.25%, not dead"
+            "targets": "ie 10"
         }
     ]
 ];

@@ -101,54 +101,6 @@ function _createSuper(Derived) {
   };
 }
 
-class EventTarget {    
-    constructor() {
-        this.listeners = {};
-    }
-    addEventListener(type, callback) {
-        if(!(type in this.listeners)) {
-            this.listeners[type] = [];
-        }
-        this.listeners[type].push(callback);
-    }
-    on(type, callback) {
-        this.addEventListener(type, callback);
-        return this;
-    }
-    removeEventListener (type, callback) {
-        if(!(type in this.listeners)) {
-            return;
-        }
-        let stack = this.listeners[type];
-        for(let i = 0, l = stack.length; i < l; i++) {
-            if(stack[i] === callback){
-                stack.splice(i, 1);
-                return this.removeEventListener(type, callback);
-            }
-        }
-    }
-    off(type, callback) {
-        this.removeEventListener(type, callback);
-        return this;
-    }
-    dispatchEvent(event) {
-        if(!(event.type in this.listeners)) {
-            return;
-        }
-        let stack = this.listeners[event.type];
-	    Object.defineProperty(event, 'target', {
-            enumerable: false,
-            configurable: false,
-            writable: false,
-            value: this
-        });
-        for(let i = 0, l = stack.length; i < l; i++) {
-            stack[i].call(this, event);
-        }
-    }
-    
-}
-
 var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
 function createCommonjsModule(fn, module) {
@@ -669,6 +621,18 @@ var _export = function (options, source) {
   }
 };
 
+// `ToObject` abstract operation
+// https://tc39.github.io/ecma262/#sec-toobject
+var toObject = function (argument) {
+  return Object(requireObjectCoercible(argument));
+};
+
+// `IsArray` abstract operation
+// https://tc39.github.io/ecma262/#sec-isarray
+var isArray = Array.isArray || function isArray(arg) {
+  return classofRaw(arg) == 'Array';
+};
+
 var nativeSymbol = !!Object.getOwnPropertySymbols && !fails(function () {
   // Chrome 38 Symbol has incorrect toString conversion
   // eslint-disable-next-line no-undef
@@ -681,17 +645,227 @@ var useSymbolAsUid = nativeSymbol
   // eslint-disable-next-line no-undef
   && typeof Symbol.iterator == 'symbol';
 
-// `IsArray` abstract operation
-// https://tc39.github.io/ecma262/#sec-isarray
-var isArray = Array.isArray || function isArray(arg) {
-  return classofRaw(arg) == 'Array';
+var WellKnownSymbolsStore = shared('wks');
+var Symbol$1 = global_1.Symbol;
+var createWellKnownSymbol = useSymbolAsUid ? Symbol$1 : Symbol$1 && Symbol$1.withoutSetter || uid;
+
+var wellKnownSymbol = function (name) {
+  if (!has(WellKnownSymbolsStore, name)) {
+    if (nativeSymbol && has(Symbol$1, name)) WellKnownSymbolsStore[name] = Symbol$1[name];
+    else WellKnownSymbolsStore[name] = createWellKnownSymbol('Symbol.' + name);
+  } return WellKnownSymbolsStore[name];
 };
 
-// `ToObject` abstract operation
-// https://tc39.github.io/ecma262/#sec-toobject
-var toObject = function (argument) {
-  return Object(requireObjectCoercible(argument));
+var SPECIES = wellKnownSymbol('species');
+
+// `ArraySpeciesCreate` abstract operation
+// https://tc39.github.io/ecma262/#sec-arrayspeciescreate
+var arraySpeciesCreate = function (originalArray, length) {
+  var C;
+  if (isArray(originalArray)) {
+    C = originalArray.constructor;
+    // cross-realm fallback
+    if (typeof C == 'function' && (C === Array || isArray(C.prototype))) C = undefined;
+    else if (isObject(C)) {
+      C = C[SPECIES];
+      if (C === null) C = undefined;
+    }
+  } return new (C === undefined ? Array : C)(length === 0 ? 0 : length);
 };
+
+var createProperty = function (object, key, value) {
+  var propertyKey = toPrimitive(key);
+  if (propertyKey in object) objectDefineProperty.f(object, propertyKey, createPropertyDescriptor(0, value));
+  else object[propertyKey] = value;
+};
+
+var engineUserAgent = getBuiltIn('navigator', 'userAgent') || '';
+
+var process = global_1.process;
+var versions = process && process.versions;
+var v8 = versions && versions.v8;
+var match, version;
+
+if (v8) {
+  match = v8.split('.');
+  version = match[0] + match[1];
+} else if (engineUserAgent) {
+  match = engineUserAgent.match(/Edge\/(\d+)/);
+  if (!match || match[1] >= 74) {
+    match = engineUserAgent.match(/Chrome\/(\d+)/);
+    if (match) version = match[1];
+  }
+}
+
+var engineV8Version = version && +version;
+
+var SPECIES$1 = wellKnownSymbol('species');
+
+var arrayMethodHasSpeciesSupport = function (METHOD_NAME) {
+  // We can't use this feature detection in V8 since it causes
+  // deoptimization and serious performance degradation
+  // https://github.com/zloirock/core-js/issues/677
+  return engineV8Version >= 51 || !fails(function () {
+    var array = [];
+    var constructor = array.constructor = {};
+    constructor[SPECIES$1] = function () {
+      return { foo: 1 };
+    };
+    return array[METHOD_NAME](Boolean).foo !== 1;
+  });
+};
+
+var defineProperty = Object.defineProperty;
+var cache = {};
+
+var thrower = function (it) { throw it; };
+
+var arrayMethodUsesToLength = function (METHOD_NAME, options) {
+  if (has(cache, METHOD_NAME)) return cache[METHOD_NAME];
+  if (!options) options = {};
+  var method = [][METHOD_NAME];
+  var ACCESSORS = has(options, 'ACCESSORS') ? options.ACCESSORS : false;
+  var argument0 = has(options, 0) ? options[0] : thrower;
+  var argument1 = has(options, 1) ? options[1] : undefined;
+
+  return cache[METHOD_NAME] = !!method && !fails(function () {
+    if (ACCESSORS && !descriptors) return true;
+    var O = { length: -1 };
+
+    if (ACCESSORS) defineProperty(O, 1, { enumerable: true, get: thrower });
+    else O[1] = 1;
+
+    method.call(O, argument0, argument1);
+  });
+};
+
+var HAS_SPECIES_SUPPORT = arrayMethodHasSpeciesSupport('splice');
+var USES_TO_LENGTH = arrayMethodUsesToLength('splice', { ACCESSORS: true, 0: 0, 1: 2 });
+
+var max$1 = Math.max;
+var min$2 = Math.min;
+var MAX_SAFE_INTEGER = 0x1FFFFFFFFFFFFF;
+var MAXIMUM_ALLOWED_LENGTH_EXCEEDED = 'Maximum allowed length exceeded';
+
+// `Array.prototype.splice` method
+// https://tc39.github.io/ecma262/#sec-array.prototype.splice
+// with adding support of @@species
+_export({ target: 'Array', proto: true, forced: !HAS_SPECIES_SUPPORT || !USES_TO_LENGTH }, {
+  splice: function splice(start, deleteCount /* , ...items */) {
+    var O = toObject(this);
+    var len = toLength(O.length);
+    var actualStart = toAbsoluteIndex(start, len);
+    var argumentsLength = arguments.length;
+    var insertCount, actualDeleteCount, A, k, from, to;
+    if (argumentsLength === 0) {
+      insertCount = actualDeleteCount = 0;
+    } else if (argumentsLength === 1) {
+      insertCount = 0;
+      actualDeleteCount = len - actualStart;
+    } else {
+      insertCount = argumentsLength - 2;
+      actualDeleteCount = min$2(max$1(toInteger(deleteCount), 0), len - actualStart);
+    }
+    if (len + insertCount - actualDeleteCount > MAX_SAFE_INTEGER) {
+      throw TypeError(MAXIMUM_ALLOWED_LENGTH_EXCEEDED);
+    }
+    A = arraySpeciesCreate(O, actualDeleteCount);
+    for (k = 0; k < actualDeleteCount; k++) {
+      from = actualStart + k;
+      if (from in O) createProperty(A, k, O[from]);
+    }
+    A.length = actualDeleteCount;
+    if (insertCount < actualDeleteCount) {
+      for (k = actualStart; k < len - actualDeleteCount; k++) {
+        from = k + actualDeleteCount;
+        to = k + insertCount;
+        if (from in O) O[to] = O[from];
+        else delete O[to];
+      }
+      for (k = len; k > len - actualDeleteCount + insertCount; k--) delete O[k - 1];
+    } else if (insertCount > actualDeleteCount) {
+      for (k = len - actualDeleteCount; k > actualStart; k--) {
+        from = k + actualDeleteCount - 1;
+        to = k + insertCount - 1;
+        if (from in O) O[to] = O[from];
+        else delete O[to];
+      }
+    }
+    for (k = 0; k < insertCount; k++) {
+      O[k + actualStart] = arguments[k + 2];
+    }
+    O.length = len - actualDeleteCount + insertCount;
+    return A;
+  }
+});
+
+var EventTarget = /*#__PURE__*/function () {
+  function EventTarget() {
+    _classCallCheck(this, EventTarget);
+
+    this.listeners = {};
+  }
+
+  _createClass(EventTarget, [{
+    key: "addEventListener",
+    value: function addEventListener(type, callback) {
+      if (!(type in this.listeners)) {
+        this.listeners[type] = [];
+      }
+
+      this.listeners[type].push(callback);
+    }
+  }, {
+    key: "on",
+    value: function on(type, callback) {
+      this.addEventListener(type, callback);
+      return this;
+    }
+  }, {
+    key: "removeEventListener",
+    value: function removeEventListener(type, callback) {
+      if (!(type in this.listeners)) {
+        return;
+      }
+
+      var stack = this.listeners[type];
+
+      for (var i = 0, l = stack.length; i < l; i++) {
+        if (stack[i] === callback) {
+          stack.splice(i, 1);
+          return this.removeEventListener(type, callback);
+        }
+      }
+    }
+  }, {
+    key: "off",
+    value: function off(type, callback) {
+      this.removeEventListener(type, callback);
+      return this;
+    }
+  }, {
+    key: "dispatchEvent",
+    value: function dispatchEvent(event) {
+      if (!(event.type in this.listeners)) {
+        return;
+      }
+
+      var stack = this.listeners[event.type];
+      Object.defineProperty(event, 'target', {
+        enumerable: false,
+        configurable: false,
+        writable: false,
+        value: this
+      });
+
+      for (var i = 0, l = stack.length; i < l; i++) {
+        stack[i].call(this, event);
+      }
+    }
+  }]);
+
+  return EventTarget;
+}();
 
 // `Object.keys` method
 // https://tc39.github.io/ecma262/#sec-object.keys
@@ -810,33 +984,22 @@ var objectGetOwnPropertyNamesExternal = {
 	f: f$5
 };
 
-var WellKnownSymbolsStore = shared('wks');
-var Symbol$1 = global_1.Symbol;
-var createWellKnownSymbol = useSymbolAsUid ? Symbol$1 : Symbol$1 && Symbol$1.withoutSetter || uid;
-
-var wellKnownSymbol = function (name) {
-  if (!has(WellKnownSymbolsStore, name)) {
-    if (nativeSymbol && has(Symbol$1, name)) WellKnownSymbolsStore[name] = Symbol$1[name];
-    else WellKnownSymbolsStore[name] = createWellKnownSymbol('Symbol.' + name);
-  } return WellKnownSymbolsStore[name];
-};
-
 var f$6 = wellKnownSymbol;
 
 var wellKnownSymbolWrapped = {
 	f: f$6
 };
 
-var defineProperty = objectDefineProperty.f;
+var defineProperty$1 = objectDefineProperty.f;
 
 var defineWellKnownSymbol = function (NAME) {
   var Symbol = path.Symbol || (path.Symbol = {});
-  if (!has(Symbol, NAME)) defineProperty(Symbol, NAME, {
+  if (!has(Symbol, NAME)) defineProperty$1(Symbol, NAME, {
     value: wellKnownSymbolWrapped.f(NAME)
   });
 };
 
-var defineProperty$1 = objectDefineProperty.f;
+var defineProperty$2 = objectDefineProperty.f;
 
 
 
@@ -844,7 +1007,7 @@ var TO_STRING_TAG = wellKnownSymbol('toStringTag');
 
 var setToStringTag = function (it, TAG, STATIC) {
   if (it && !has(it = STATIC ? it : it.prototype, TO_STRING_TAG)) {
-    defineProperty$1(it, TO_STRING_TAG, { configurable: true, value: TAG });
+    defineProperty$2(it, TO_STRING_TAG, { configurable: true, value: TAG });
   }
 };
 
@@ -875,23 +1038,6 @@ var functionBindContext = function (fn, that, length) {
   return function (/* ...args */) {
     return fn.apply(that, arguments);
   };
-};
-
-var SPECIES = wellKnownSymbol('species');
-
-// `ArraySpeciesCreate` abstract operation
-// https://tc39.github.io/ecma262/#sec-arrayspeciescreate
-var arraySpeciesCreate = function (originalArray, length) {
-  var C;
-  if (isArray(originalArray)) {
-    C = originalArray.constructor;
-    // cross-realm fallback
-    if (typeof C == 'function' && (C === Array || isArray(C.prototype))) C = undefined;
-    else if (isObject(C)) {
-      C = C[SPECIES];
-      if (C === null) C = undefined;
-    }
-  } return new (C === undefined ? Array : C)(length === 0 ? 0 : length);
 };
 
 var push = [].push;
@@ -1230,7 +1376,7 @@ setToStringTag($Symbol, SYMBOL);
 
 hiddenKeys[HIDDEN] = true;
 
-var defineProperty$2 = objectDefineProperty.f;
+var defineProperty$3 = objectDefineProperty.f;
 
 
 var NativeSymbol = global_1.Symbol;
@@ -1257,7 +1403,7 @@ if (descriptors && typeof NativeSymbol == 'function' && (!('description' in Nati
   var symbolToString = symbolPrototype.toString;
   var native = String(NativeSymbol('test')) == 'Symbol(test)';
   var regexp = /^Symbol\((.*)\)[^)]+$/;
-  defineProperty$2(symbolPrototype, 'description', {
+  defineProperty$3(symbolPrototype, 'description', {
     configurable: true,
     get: function description() {
       var symbol = isObject(this) ? this.valueOf() : this;
@@ -1273,50 +1419,8 @@ if (descriptors && typeof NativeSymbol == 'function' && (!('description' in Nati
   });
 }
 
-var createProperty = function (object, key, value) {
-  var propertyKey = toPrimitive(key);
-  if (propertyKey in object) objectDefineProperty.f(object, propertyKey, createPropertyDescriptor(0, value));
-  else object[propertyKey] = value;
-};
-
-var engineUserAgent = getBuiltIn('navigator', 'userAgent') || '';
-
-var process = global_1.process;
-var versions = process && process.versions;
-var v8 = versions && versions.v8;
-var match, version;
-
-if (v8) {
-  match = v8.split('.');
-  version = match[0] + match[1];
-} else if (engineUserAgent) {
-  match = engineUserAgent.match(/Edge\/(\d+)/);
-  if (!match || match[1] >= 74) {
-    match = engineUserAgent.match(/Chrome\/(\d+)/);
-    if (match) version = match[1];
-  }
-}
-
-var engineV8Version = version && +version;
-
-var SPECIES$1 = wellKnownSymbol('species');
-
-var arrayMethodHasSpeciesSupport = function (METHOD_NAME) {
-  // We can't use this feature detection in V8 since it causes
-  // deoptimization and serious performance degradation
-  // https://github.com/zloirock/core-js/issues/677
-  return engineV8Version >= 51 || !fails(function () {
-    var array = [];
-    var constructor = array.constructor = {};
-    constructor[SPECIES$1] = function () {
-      return { foo: 1 };
-    };
-    return array[METHOD_NAME](Boolean).foo !== 1;
-  });
-};
-
 var IS_CONCAT_SPREADABLE = wellKnownSymbol('isConcatSpreadable');
-var MAX_SAFE_INTEGER = 0x1FFFFFFFFFFFFF;
+var MAX_SAFE_INTEGER$1 = 0x1FFFFFFFFFFFFF;
 var MAXIMUM_ALLOWED_INDEX_EXCEEDED = 'Maximum allowed index exceeded';
 
 // We can't use this feature detection in V8 since it causes
@@ -1351,10 +1455,10 @@ _export({ target: 'Array', proto: true, forced: FORCED }, {
       E = i === -1 ? O : arguments[i];
       if (isConcatSpreadable(E)) {
         len = toLength(E.length);
-        if (n + len > MAX_SAFE_INTEGER) throw TypeError(MAXIMUM_ALLOWED_INDEX_EXCEEDED);
+        if (n + len > MAX_SAFE_INTEGER$1) throw TypeError(MAXIMUM_ALLOWED_INDEX_EXCEEDED);
         for (k = 0; k < len; k++, n++) if (k in E) createProperty(A, n, E[k]);
       } else {
-        if (n >= MAX_SAFE_INTEGER) throw TypeError(MAXIMUM_ALLOWED_INDEX_EXCEEDED);
+        if (n >= MAX_SAFE_INTEGER$1) throw TypeError(MAXIMUM_ALLOWED_INDEX_EXCEEDED);
         createProperty(A, n++, E);
       }
     }
@@ -1371,40 +1475,16 @@ var arrayMethodIsStrict = function (METHOD_NAME, argument) {
   });
 };
 
-var defineProperty$3 = Object.defineProperty;
-var cache = {};
-
-var thrower = function (it) { throw it; };
-
-var arrayMethodUsesToLength = function (METHOD_NAME, options) {
-  if (has(cache, METHOD_NAME)) return cache[METHOD_NAME];
-  if (!options) options = {};
-  var method = [][METHOD_NAME];
-  var ACCESSORS = has(options, 'ACCESSORS') ? options.ACCESSORS : false;
-  var argument0 = has(options, 0) ? options[0] : thrower;
-  var argument1 = has(options, 1) ? options[1] : undefined;
-
-  return cache[METHOD_NAME] = !!method && !fails(function () {
-    if (ACCESSORS && !descriptors) return true;
-    var O = { length: -1 };
-
-    if (ACCESSORS) defineProperty$3(O, 1, { enumerable: true, get: thrower });
-    else O[1] = 1;
-
-    method.call(O, argument0, argument1);
-  });
-};
-
 var $forEach$1 = arrayIteration.forEach;
 
 
 
 var STRICT_METHOD = arrayMethodIsStrict('forEach');
-var USES_TO_LENGTH = arrayMethodUsesToLength('forEach');
+var USES_TO_LENGTH$1 = arrayMethodUsesToLength('forEach');
 
 // `Array.prototype.forEach` method implementation
 // https://tc39.github.io/ecma262/#sec-array.prototype.foreach
-var arrayForEach = (!STRICT_METHOD || !USES_TO_LENGTH) ? function forEach(callbackfn /* , thisArg */) {
+var arrayForEach = (!STRICT_METHOD || !USES_TO_LENGTH$1) ? function forEach(callbackfn /* , thisArg */) {
   return $forEach$1(this, callbackfn, arguments.length > 1 ? arguments[1] : undefined);
 } : [].forEach;
 
@@ -1418,14 +1498,14 @@ var $map = arrayIteration.map;
 
 
 
-var HAS_SPECIES_SUPPORT = arrayMethodHasSpeciesSupport('map');
+var HAS_SPECIES_SUPPORT$1 = arrayMethodHasSpeciesSupport('map');
 // FF49- issue
-var USES_TO_LENGTH$1 = arrayMethodUsesToLength('map');
+var USES_TO_LENGTH$2 = arrayMethodUsesToLength('map');
 
 // `Array.prototype.map` method
 // https://tc39.github.io/ecma262/#sec-array.prototype.map
 // with adding support of @@species
-_export({ target: 'Array', proto: true, forced: !HAS_SPECIES_SUPPORT || !USES_TO_LENGTH$1 }, {
+_export({ target: 'Array', proto: true, forced: !HAS_SPECIES_SUPPORT$1 || !USES_TO_LENGTH$2 }, {
   map: function map(callbackfn /* , thisArg */) {
     return $map(this, callbackfn, arguments.length > 1 ? arguments[1] : undefined);
   }
@@ -1472,11 +1552,11 @@ var $reduce = arrayReduce.left;
 
 
 var STRICT_METHOD$1 = arrayMethodIsStrict('reduce');
-var USES_TO_LENGTH$2 = arrayMethodUsesToLength('reduce', { 1: 0 });
+var USES_TO_LENGTH$3 = arrayMethodUsesToLength('reduce', { 1: 0 });
 
 // `Array.prototype.reduce` method
 // https://tc39.github.io/ecma262/#sec-array.prototype.reduce
-_export({ target: 'Array', proto: true, forced: !STRICT_METHOD$1 || !USES_TO_LENGTH$2 }, {
+_export({ target: 'Array', proto: true, forced: !STRICT_METHOD$1 || !USES_TO_LENGTH$3 }, {
   reduce: function reduce(callbackfn /* , initialValue */) {
     return $reduce(this, callbackfn, arguments.length, arguments.length > 1 ? arguments[1] : undefined);
   }
